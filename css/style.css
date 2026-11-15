@@ -534,3 +534,161 @@ button:disabled {
   border-radius: 8px;
   color: #aaa18e;
 }
+
+
+/* Карточки магазина: учёт заказов и массовое получение */
+.collect-all-button {
+  border-color: #91a36b;
+  background: #465438;
+}
+
+/* Визуальное дерево навыков с соединёнными узлами */
+.skill-tree {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(235px, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+.skill-branch {
+  position: relative;
+  min-width: 0;
+  padding: 14px;
+  border: 1px solid #5d563f;
+  border-radius: 13px;
+  background:
+    radial-gradient(circle at 50% 0%, #a58c5618, transparent 55%),
+    #171a16;
+  overflow: hidden;
+}
+.skill-branch h3 {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 8px 5px 13px;
+  margin: 0 0 10px;
+  color: #d9c18b;
+  border-bottom: 1px solid #756747;
+}
+.skill-path {
+  position: relative;
+  display: grid;
+  gap: 16px;
+  padding: 5px 0 5px 14px;
+}
+.skill-path::before {
+  content: "";
+  position: absolute;
+  top: 22px;
+  bottom: 35px;
+  left: 31px;
+  width: 2px;
+  background: linear-gradient(#e7e2d4, #887d61 75%, #393d36);
+  box-shadow: 0 0 8px #d8d1b4a0;
+}
+.skill-card.skill-node {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  min-width: 0;
+  margin: 0;
+  padding: 10px;
+  border: 1px solid #54594e;
+  border-radius: 11px;
+  background: #292e29;
+}
+.skill-node-orb {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 2px solid #bdb8a8;
+  border-radius: 50%;
+  color: #20231e;
+  background: #dedbcc;
+  box-shadow: 0 0 10px #d8d1b488, 0 0 22px #d8d1b433;
+  font-weight: bold;
+}
+.skill-node.unlocked .skill-node-orb {
+  border-color: #c6e19a;
+  background: #9dbb73;
+  box-shadow: 0 0 12px #a9d47b;
+}
+.skill-node.locked .skill-node-orb {
+  color: #9a9a91;
+  border-color: #646b70;
+  background: #30363b;
+  box-shadow: 0 0 8px #82909a55;
+}
+.skill-node-content { min-width: 0; }
+.skill-node-content h4 {
+  margin: 1px 0 5px;
+  color: #e5d5ad;
+}
+.skill-node-content p {
+  margin: 4px 0 8px;
+  color: #c0b9a8;
+  font-size: .88rem;
+}
+.skill-node-content small { color: #b8a77d; }
+.skill-node-content button { margin-top: 8px; }
+
+/* Технологические ступени оборудования и автоматики */
+.equipment-summary {
+  margin: 12px 0 22px;
+  padding: 13px 16px;
+  border: 1px solid #8c754a;
+  border-radius: 10px;
+  color: #e4d1a2;
+  background: linear-gradient(110deg, #46402d, #252820);
+}
+.tech-track {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin: 12px 0 26px;
+}
+.tech-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 10px;
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid #4c5147;
+  border-radius: 11px;
+  background: #20251f;
+}
+.tech-card.current {
+  border-color: #c4a66a;
+  background: #373426;
+  box-shadow: 0 0 16px #bda16b33;
+}
+.tech-card.completed { border-color: #718b5c; }
+.tech-marker {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 2px solid #9a9b8c;
+  border-radius: 50%;
+  color: #23251e;
+  background: #cfcbb9;
+  font-weight: bold;
+}
+.tech-card.completed .tech-marker {
+  background: #91ad6d;
+  border-color: #c5dfa0;
+}
+.tech-body { min-width: 0; }
+.tech-body h4 { margin: 2px 0 7px; color: #e0ca98; }
+.tech-body p { color: #c1baa8; font-size: .9rem; overflow-wrap: anywhere; }
+.tech-cost { color: #e4c27c !important; font-weight: bold; }
+.tech-requirements { font-size: .82rem !important; }
+.tech-status { color: #b8d58b; font-size: .82rem; }
+.tech-locked { color: #8f9289; }
+@media (max-width: 560px) {
+  .skill-tree, .tech-track { grid-template-columns: 1fr; }
+}
