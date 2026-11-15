@@ -477,3 +477,60 @@ button:disabled {
   .dev-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .dev-field { font-size: .9rem; }
 }
+
+
+/* Строительство и магазин комплектующих */
+.economy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin: 12px 0 24px;
+}
+.economy-card {
+  min-width: 0;
+  padding: 15px;
+  border: 1px solid #5a543e;
+  border-radius: 10px;
+  background: #303328;
+}
+.economy-card h3 {
+  margin: 0 0 8px;
+  color: #dfc58e;
+}
+.economy-card p {
+  color: #c5bca9;
+  overflow-wrap: anywhere;
+}
+.economy-card .economy-detail {
+  margin: 6px 0;
+  font-size: .92rem;
+}
+.economy-card button {
+  width: 100%;
+  margin: 10px 0 0;
+}
+.parts-stock {
+  display: grid;
+  gap: 7px;
+  margin: 10px 0 22px;
+}
+.parts-stock-row, .delivery-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #514b39;
+  border-radius: 8px;
+  background: #20231c;
+}
+.parts-stock-row b, .delivery-row b {
+  color: #dfc58e;
+}
+.economy-empty {
+  padding: 12px;
+  border: 1px dashed #65583c;
+  border-radius: 8px;
+  color: #aaa18e;
+}
