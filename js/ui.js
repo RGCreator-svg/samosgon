@@ -157,61 +157,80 @@ export function renderMarket(state) {
 export function renderSkills(state) {
   const tree = $("#skillTree");
   if (!tree) return;
-
   setText("#skillPoints", state.skillPoints);
-  tree.innerHTML = "";
+  tree.replaceChildren();
 
+  const width = 1120;
+  const height = 760;
+  const cx = 560;
+  const cy = 380;
+  const angles = [-155, -90, -25, 35, 145];
+  const colors = ["#b7d7a2", "#d6bd83", "#a9c8dc", "#d7a3a3", "#c2b0dc"];
+  const icons = ["🌱", "🫙", "⚙️", "🪙", "🔥"];
+  const svgNS = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(svgNS, "svg");
+  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  svg.setAttribute("class", "skill-map-lines");
+  svg.setAttribute("aria-hidden", "true");
+
+  const hub = document.createElementNS(svgNS, "circle");
+  hub.setAttribute("cx", cx); hub.setAttribute("cy", cy); hub.setAttribute("r", "58");
+  hub.setAttribute("class", "skill-hub-ring");
+  svg.append(hub);
+
+  const layer = document.createElement("div");
+  layer.className = "skill-map-nodes";
   const allSkills = SKILL_BRANCHES.flatMap(branch => branch.skills);
+
   SKILL_BRANCHES.forEach((branch, branchIndex) => {
-    const column = document.createElement("div");
-    column.className = "skill-branch";
-    column.dataset.branch = branch.id;
-
-    const heading = document.createElement("h3");
-    heading.textContent = branch.name;
-    column.appendChild(heading);
-
-    const path = document.createElement("div");
-    path.className = "skill-path";
-
+    const angle = angles[branchIndex] * Math.PI / 180;
+    const branchColor = colors[branchIndex];
+    let previous = { x: cx, y: cy };
     branch.skills.forEach((skill, index) => {
+      const radius = 145 + index * 112;
+      const x = cx + Math.cos(angle) * radius;
+      const y = cy + Math.sin(angle) * radius;
+      const path = document.createElementNS(svgNS, "path");
+      const mx = (previous.x + x) / 2;
+      const my = (previous.y + y) / 2;
+      path.setAttribute("d", `M ${previous.x} ${previous.y} Q ${mx + (branchIndex - 2) * 12} ${my - 12} ${x} ${y}`);
+      path.setAttribute("class", "skill-link");
+      path.setAttribute("stroke", branchColor);
+      svg.append(path);
+
+      const ring = document.createElementNS(svgNS, "circle");
+      ring.setAttribute("cx", x); ring.setAttribute("cy", y);
+      ring.setAttribute("r", "48"); ring.setAttribute("class", "skill-node-halo");
+      svg.append(ring);
+
       const unlocked = state.skills.includes(skill.id);
-      const requirementMet = !skill.requires || state.skills.includes(skill.requires);
+      const available = !skill.requires || state.skills.includes(skill.requires);
       const requiredSkill = allSkills.find(item => item.id === skill.requires);
-      const card = document.createElement("article");
-      card.className = `skill-card skill-node${unlocked ? " unlocked" : ""}${!requirementMet ? " locked" : ""}`;
-      card.dataset.skillNode = skill.id;
-
-      const node = document.createElement("div");
-      node.className = "skill-node-orb";
-      node.textContent = unlocked ? "✓" : String(index + 1);
-
-      const content = document.createElement("div");
-      content.className = "skill-node-content";
-      const title = document.createElement("h4");
-      title.textContent = skill.name;
-      const description = document.createElement("p");
-      description.textContent = skill.description;
-      const requirement = document.createElement("small");
-      requirement.textContent = unlocked
-        ? "Навык открыт"
-        : skill.requires && !requirementMet
-          ? `Требуется: ${requiredSkill?.name || skill.requires}`
-          : `Стоимость: ${skill.cost} очк.`;
-
-      const button = document.createElement("button");
-      button.textContent = unlocked ? "Изучено" : "Открыть узел";
-      button.dataset.skill = skill.id;
-      button.disabled = unlocked || !requirementMet || state.skillPoints < skill.cost;
-
-      content.append(title, description, requirement, button);
-      card.append(node, content);
-      path.appendChild(card);
+      const node = document.createElement("button");
+      node.type = "button";
+      node.className = `skill-orbit-node${unlocked ? " unlocked" : ""}${!available ? " locked" : ""}`;
+      node.dataset.skill = skill.id;
+      node.disabled = unlocked || !available || state.skillPoints < skill.cost;
+      node.style.left = `${x / width * 100}%`;
+      node.style.top = `${y / height * 100}%`;
+      node.style.setProperty("--branch-color", branchColor);
+      node.title = `${skill.name}. ${skill.description} ${unlocked ? "Изучено" : skill.requires && !available ? "Требуется: " + (requiredSkill?.name || skill.requires) : "Стоимость: " + skill.cost + " очков"}`;
+      node.innerHTML = `<span class="skill-orbit-icon">${unlocked ? "✓" : icons[branchIndex]}</span><span class="skill-orbit-label"></span>`;
+      node.querySelector(".skill-orbit-label").textContent = skill.name;
+      layer.append(node);
+      previous = { x, y };
     });
 
-    column.appendChild(path);
-    tree.appendChild(column);
+    const label = document.createElement("div");
+    label.className = "skill-branch-label";
+    label.textContent = branch.name;
+    label.style.left = `${(cx + Math.cos(angle) * 365) / width * 100}%`;
+    label.style.top = `${(cy + Math.sin(angle) * 365) / height * 100}%`;
+    label.style.setProperty("--branch-color", branchColor);
+    layer.append(label);
   });
+
+  tree.append(svg, layer);
 }
 
 export function renderWorld(state) {
