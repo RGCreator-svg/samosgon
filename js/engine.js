@@ -32,6 +32,10 @@ export function createInitialState() {
     deliveries: [],
     equipmentTier: 0,
     automationTier: 0,
+    advancedProduction: { lines: [], queue: [], nextId: 1 },
+    maintenance: 100,
+    story: { unlocked: [] },
+    advancedContracts: { offer: null, completed: 0 },
 
     production: {
       active: false,
@@ -65,7 +69,18 @@ export function loadGame() {
       parts: { ...initial.parts, ...(parsed.parts || {}) },
       deliveries: Array.isArray(parsed.deliveries) ? parsed.deliveries : [],
       equipmentTier: Math.max(0, Number(parsed.equipmentTier) || 0),
-      automationTier: Math.max(0, Number(parsed.automationTier) || 0)
+      automationTier: Math.max(0, Number(parsed.automationTier) || 0),
+      advancedProduction: {
+        lines: Array.isArray(parsed.advancedProduction?.lines) ? parsed.advancedProduction.lines : [],
+        queue: Array.isArray(parsed.advancedProduction?.queue) ? parsed.advancedProduction.queue : [],
+        nextId: Math.max(1, Number(parsed.advancedProduction?.nextId) || 1)
+      },
+      maintenance: Math.max(0, Math.min(100, Number(parsed.maintenance ?? 100))),
+      story: { unlocked: Array.isArray(parsed.story?.unlocked) ? parsed.story.unlocked : [] },
+      advancedContracts: {
+        offer: parsed.advancedContracts?.offer || null,
+        completed: Math.max(0, Number(parsed.advancedContracts?.completed) || 0)
+      }
     };
   } catch (error) {
     console.error("Не удалось загрузить сохранение:", error);
