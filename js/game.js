@@ -395,7 +395,7 @@ $("#skillTree")?.addEventListener("click", (event) => {
   if (!skill) return;
 
   if (state.skills.includes(skillId)) {
-    notify("Этот навык уже изучен.");
+    notify("Этот навык уже изучен. ");
     return;
   }
 
