@@ -870,3 +870,149 @@ button:disabled {
   .skill-orbit-label { font-size: .57rem; max-width: 63px; }
   .skill-branch-label { font-size: .75rem; }
 }
+
+
+/* Полноэкранная сцена дерева умений с советчиком */
+#skillTree { overflow: visible; min-height: 0; padding: 0; border: 0; background: transparent; }
+.skill-screen {
+  display: grid;
+  grid-template-columns: minmax(170px, 230px) minmax(0, 1fr) minmax(170px, 230px);
+  gap: 12px;
+  align-items: stretch;
+  padding: 14px;
+  border: 1px solid #555345;
+  border-radius: 18px;
+  background:
+    radial-gradient(ellipse at 50% 46%, #343b32 0, #1a201b 48%, #101411 100%);
+  box-shadow: inset 0 0 50px #0008, 0 12px 35px #0006;
+}
+.skill-advisor {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 13px;
+  border: 1px solid #776744;
+  border-radius: 14px;
+  background: linear-gradient(160deg, #343629ee, #1c211cee);
+  box-shadow: 0 8px 25px #0007;
+}
+.skill-advisor h3 { margin: 2px 0 8px; color: #e5c987; font-size: 1.1rem; }
+.advisor-kicker {
+  color: #b6a27a;
+  font-size: .68rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+}
+.grishka-art {
+  display: block;
+  width: 100%;
+  max-height: 300px;
+  margin: 0 auto 8px;
+  filter: drop-shadow(0 8px 9px #0009);
+}
+.grishka-quote {
+  position: relative;
+  margin: auto 0 9px;
+  padding: 12px;
+  border: 1px solid #8d7951;
+  border-radius: 12px;
+  color: #f1dfb8;
+  background: #111711;
+  font-style: italic;
+  font-size: .91rem;
+}
+.grishka-quote::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  left: 22px;
+  width: 12px;
+  height: 12px;
+  transform: rotate(45deg);
+  background: #111711;
+  border-left: 1px solid #8d7951;
+  border-top: 1px solid #8d7951;
+}
+.skill-advisor small { color: #aaa18e; line-height: 1.4; }
+.skill-map-stage {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  min-height: 650px;
+  overflow: auto;
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 50% 50%, #5a624522 0, transparent 43%),
+    repeating-radial-gradient(circle at 50% 50%, transparent 0 90px, #c9c1a00b 91px 92px);
+}
+.skill-map-stage .skill-map-lines,
+.skill-map-stage .skill-map-nodes {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1120px;
+  height: 760px;
+  transform: translate(-50%, -50%);
+}
+.skill-map-stage .skill-map-lines { overflow: visible; }
+.skill-map-stage .skill-link {
+  stroke-width: 3.5;
+  opacity: .9;
+  filter: drop-shadow(0 0 5px currentColor);
+}
+.skill-map-stage .skill-orbit-node {
+  width: 78px;
+  height: 78px;
+  border-width: 2px;
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.skill-map-stage .skill-orbit-node:not(:disabled) { cursor: pointer; }
+.skill-map-stage .skill-orbit-node:hover:not(:disabled),
+.skill-map-stage .skill-orbit-node:focus-visible {
+  z-index: 5;
+  outline: 2px solid #f3d99a;
+  outline-offset: 4px;
+  transform: translate(-50%, -50%) scale(1.16);
+  box-shadow: 0 0 20px #fff2b9, 0 0 38px #fff2b977;
+}
+.skill-map-stage .skill-orbit-node.locked { opacity: .68; }
+.skill-map-stage .skill-branch-label {
+  padding: 5px 9px;
+  border: 1px solid currentColor;
+  border-radius: 20px;
+  background: #111711dd;
+  font-size: .82rem;
+}
+.grishka-rule {
+  padding: 10px 0;
+  border-bottom: 1px solid #62583f;
+}
+.grishka-rule b { color: #e4d0a1; font-size: .9rem; }
+.grishka-rule p { margin: 5px 0 0; color: #c1baa8; font-size: .82rem; }
+.grishka-signoff {
+  margin-top: auto;
+  padding-top: 12px;
+  color: #bca77c;
+  font-size: .86rem;
+  font-style: italic;
+}
+@media (max-width: 1050px) {
+  .skill-screen { grid-template-columns: 170px minmax(0, 1fr); }
+  .skill-advisor-right { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .skill-advisor-right .advisor-kicker,
+  .skill-advisor-right h3,
+  .skill-advisor-right .grishka-signoff { grid-column: 1 / -1; }
+  .skill-map-stage { min-height: 610px; }
+}
+@media (max-width: 650px) {
+  .skill-screen { grid-template-columns: minmax(0, 1fr); padding: 8px; }
+  .skill-advisor-left { display: grid; grid-template-columns: 100px minmax(0, 1fr); gap: 6px 10px; }
+  .skill-advisor-left .advisor-kicker,
+  .skill-advisor-left h3 { grid-column: 1 / -1; }
+  .skill-advisor-left .grishka-art { grid-row: span 2; max-height: 155px; }
+  .skill-advisor-left .grishka-quote { margin: 0; }
+  .skill-advisor-right { display: flex; }
+  .skill-map-stage { min-height: 560px; }
+}
