@@ -55,6 +55,19 @@ export const PARTS = [
 
 const $ = (selector) => document.querySelector(selector);
 
+export function getStorageCapacity(state) {
+  const level = Math.max(0, Math.min(3, Number(state.buildings?.warehouse) || 0));
+  return [30, 80, 180, 350][level];
+}
+
+export function addInventory(state, itemId, amount) {
+  const currentTotal = Object.values(state.inventory || {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
+  const free = Math.max(0, getStorageCapacity(state) - currentTotal);
+  const accepted = Math.max(0, Math.min(Math.floor(amount), free));
+  state.inventory[itemId] = (Number(state.inventory[itemId]) || 0) + accepted;
+  return accepted;
+}
+
 function ensureState(state) {
   state.buildings ??= {};
   for (const building of BUILDINGS) state.buildings[building.id] ??= 0;
@@ -100,7 +113,7 @@ export function renderEconomy(state) {
     if (next) {
       lines.push(`Стоимость: ${next.cost} монет`);
       lines.push("Детали: " + Object.entries(next.parts).map(([id, qty]) => `${PARTS.find(p => p.id === id)?.name || id} × ${qty}`).join(", "));
-      if (next.capacity) lines.push(`Вместимость склада после улучшения: ${next.capacity} единиц`);
+      if (next.capacity) lines.push(`Вместимость после улучшения: ${next.capacity} единиц (сейчас: ${getStorageCapacity(state)})`);
       if (next.slots) lines.push(`Производственные места: ${next.slots}`);
     } else {
       lines.push("Максимальный уровень достигнут.");
