@@ -7,6 +7,7 @@ import { initDevTools } from "./dev.js";
 import { startNewDay } from "./events.js";
 import { initEconomy, renderEconomy, advanceDeliveries, addInventory } from "./economy.js";
 import { initEquipment, renderEquipment } from "./equipment.js";
+import { initExpansion, renderExpansion, advanceExpansionDay } from "./expansion.js";
 
 let state = loadGame();
 
@@ -50,6 +51,7 @@ function render() {
   renderAll(state);
   renderEconomy(state);
   renderEquipment(state);
+  renderExpansion(state);
   save();
 }
 
@@ -114,6 +116,7 @@ initOrders(state, {
 initDevTools(state, { render, notify });
 initEconomy(state, { render, notify });
 initEquipment(state, { render, notify });
+initExpansion(state, { render, notify, earnExperience });
 
 // Продажа товаров — кнопки создаются в ui.js
 $("#marketItems")?.addEventListener("click", (event) => {
@@ -358,6 +361,7 @@ $("#sleepButton")?.addEventListener("click", () => {
   state.day += 1;
     advanceOrdersDay(state, notify);
   advanceDeliveries(state, notify);
+  advanceExpansionDay(state, notify);
 
   const hungerLoss = state.skills.includes("country_life") ? 5 : 10;
   const warmthLoss = state.skills.includes("country_life") ? 2 : 5;
