@@ -5,7 +5,7 @@ import { renderAll } from "./ui.js";
 import { initOrders, advanceOrdersDay } from "./orders.js";
 import { initDevTools } from "./dev.js";
 import { startNewDay } from "./events.js";
-import { initEconomy, renderEconomy, advanceDeliveries } from "./economy.js";
+import { initEconomy, renderEconomy, advanceDeliveries, addInventory } from "./economy.js";
 
 let state = loadGame();
 
@@ -156,14 +156,14 @@ $("#harvestVegetables")?.addEventListener("click", () => {
   const bonus = state.skills.includes("green_thumb") ? 2 : 0;
   const harvestBonus = state.skills.includes("big_harvest") ? 2 : 0;
 
-  state.inventory.potato += 2 + bonus + harvestBonus;
-  state.inventory.carrot += 1 + (bonus ? 1 : 0);
-  state.inventory.cabbage += 1;
+  const harvested = addInventory(state, "potato", 2 + bonus + harvestBonus)
+    + addInventory(state, "carrot", 1 + (bonus ? 1 : 0))
+    + addInventory(state, "cabbage", 1);
 
   state.energy -= 5;
   earnExperience(10);
 
-  notify("Урожай собран! Земля пока не требует долю.");
+  notify(harvested > 0 ? `Урожай собран: ${harvested} единиц. Земля пока не требует долю.` : "Склад забит под завязку. Сначала продайте или используйте запасы.");
   render();
 });
 
@@ -221,13 +221,13 @@ $("#harvestFruit")?.addEventListener("click", () => {
 
   const bonus = state.skills.includes("big_harvest") ? 2 : 0;
 
-  state.inventory.apple += state.trees + bonus;
-  state.inventory.pear += Math.max(1, Math.floor(state.trees / 2)) + bonus;
+  const fruitHarvested = addInventory(state, "apple", state.trees + bonus)
+    + addInventory(state, "pear", Math.max(1, Math.floor(state.trees / 2)) + bonus);
 
   state.energy -= 5;
   earnExperience(12);
 
-  notify("Фрукты собраны. Одно яблоко вы съели по дороге. Для контроля качества.");
+  notify(fruitHarvested > 0 ? `Собрано фруктов: ${fruitHarvested}. Одно яблоко вы съели по дороге — для контроля качества.` : "Склад забит. Фрукты пока придётся оставить на деревьях.");
   render();
 });
 
@@ -340,13 +340,13 @@ $("#collectBatch")?.addEventListener("click", () => {
 
   const quantity = state.skills.includes("clean_barrel") ? 5 : 3;
 
-  state.inventory.braga += quantity;
+  const collected = addInventory(state, "braga", quantity);
   state.production.active = false;
   state.production.ready = false;
   state.production.daysLeft = 0;
 
   earnExperience(15);
-  notify(`Получено ${quantity} единицы браги. Бабушка бы одобрила. Наверное.`);
+  notify(`На склад помещено ${collected} из ${quantity} единиц браги. Бабушка бы одобрила. Наверное.`);
   render();
 });
 
