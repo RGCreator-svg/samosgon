@@ -1,5 +1,6 @@
 
 import { ITEMS, SKILL_BRANCHES } from "./data.js";
+import { getStorageCapacity } from "./economy.js";
 
 const $ = (selector) => document.querySelector(selector);
 
@@ -76,7 +77,7 @@ export function renderWarehouse(state) {
     warehouse.appendChild(card);
   });
 
-  setText("#warehouseTotal", total);
+  setText("#warehouseTotal", `${total} / ${getStorageCapacity(state)}`);
 }
 
 export function renderProduction(state) {
