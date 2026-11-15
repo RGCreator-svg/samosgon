@@ -692,3 +692,180 @@ button:disabled {
 @media (max-width: 560px) {
   .skill-tree, .tech-track { grid-template-columns: 1fr; }
 }
+
+
+/* Дерево умений: радиальная карта навыков */
+#skillTree {
+  position: relative;
+  width: 100%;
+  min-height: 620px;
+  overflow: auto;
+  border: 1px solid #484b45;
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 50% 50%, #29332d 0, #171c19 42%, #101310 100%);
+}
+.skill-map-lines, .skill-map-nodes {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.skill-map-lines { overflow: visible; }
+.skill-link {
+  fill: none;
+  stroke-width: 3;
+  opacity: .78;
+  filter: drop-shadow(0 0 5px currentColor);
+}
+.skill-hub-ring {
+  fill: #242b27;
+  stroke: #e0d8c4;
+  stroke-width: 3;
+  filter: drop-shadow(0 0 15px #e5dfcc99);
+}
+.skill-node-halo {
+  fill: none;
+  stroke: #ded9c9;
+  stroke-width: 1.4;
+  opacity: .28;
+}
+.skill-map-nodes { pointer-events: none; }
+.skill-orbit-node {
+  pointer-events: auto;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 4px;
+  width: 86px;
+  height: 86px;
+  margin: 0;
+  padding: 6px;
+  border-radius: 50%;
+  border: 2px solid #e5e0d2;
+  color: #161a17;
+  background: radial-gradient(circle, #fffdf1, #c9c8bb 75%);
+  box-shadow: 0 0 12px #e7e3d6bb, 0 0 28px #d6d2c455;
+  text-align: center;
+  line-height: 1.05;
+}
+.skill-orbit-node:hover:not(:disabled) {
+  transform: translate(-50%, -50%) scale(1.1);
+  background: #fff8d9;
+}
+.skill-orbit-node:disabled { opacity: 1; }
+.skill-orbit-node.locked {
+  color: #c2c7c3;
+  background: #27302f;
+  border-color: #697878;
+  box-shadow: 0 0 12px #8da0a055;
+}
+.skill-orbit-node.unlocked {
+  color: #172018;
+  background: radial-gradient(circle, #e7f6cf, #88ad72);
+  border-color: #d6f0b7;
+  box-shadow: 0 0 16px #a8d985;
+}
+.skill-orbit-icon { font-size: 1.25rem; font-weight: 900; }
+.skill-orbit-label {
+  max-width: 75px;
+  font-size: .64rem;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+.skill-branch-label {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  max-width: 150px;
+  color: var(--branch-color);
+  font-weight: 800;
+  text-align: center;
+  text-shadow: 0 2px 8px #000;
+  white-space: nowrap;
+}
+.delivery-summary {
+  display: grid;
+  gap: 3px;
+  min-width: 170px;
+}
+.delivery-summary span { color: #e0d2b3; }
+.delivery-summary small { color: #a9a18f; }
+
+/* Большое обновление производства, обслуживания и сюжета */
+.expansion-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 12px;
+  margin: 12px 0 22px;
+}
+.expansion-card {
+  padding: 14px;
+  border: 1px solid #5b5948;
+  border-radius: 12px;
+  background: #20251f;
+}
+.expansion-card h3 { margin: 0 0 8px; color: #dfc58e; }
+.expansion-card p { color: #c4bcaa; }
+.production-line {
+  padding: 12px;
+  margin: 8px 0;
+  border: 1px solid #60583f;
+  border-radius: 9px;
+  background: #2d3128;
+}
+.production-line.ready { border-color: #91b66c; box-shadow: 0 0 12px #91b66c33; }
+.production-line h4 { margin: 0 0 5px; color: #e4d0a1; }
+.production-queue { display: grid; gap: 7px; }
+.production-queue-item, .story-entry, .contract-card {
+  padding: 11px 13px;
+  border: 1px solid #514b39;
+  border-radius: 8px;
+  background: #292e27;
+}
+.production-progress {
+  height: 9px;
+  margin: 8px 0;
+  overflow: hidden;
+  border-radius: 9px;
+  background: #11140f;
+}
+.production-progress span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, #8b713d, #d8c17d);
+}
+.contract-card h4, .story-entry h4 { margin: 0 0 5px; color: #e0ca98; }
+.contract-card p, .story-entry p { margin: 5px 0; color: #c1baa8; }
+.story-entry.locked { opacity: .48; filter: grayscale(.7); }
+.barn-visual {
+  display: grid;
+  place-items: center;
+  min-height: 150px;
+  margin: 12px 0;
+  border: 1px solid #6a5c3f;
+  border-radius: 13px;
+  background:
+    radial-gradient(ellipse at 50% 100%, #9b754333, transparent 60%),
+    linear-gradient(145deg, #363a2c, #171b17);
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  text-shadow: 0 0 24px #e3c17b55;
+}
+.barn-visual[data-tier="0"] { filter: sepia(.35); }
+.barn-visual[data-tier="3"], .barn-visual[data-tier="4"] {
+  background: radial-gradient(ellipse at 50% 100%, #79a6a733, transparent 60%), linear-gradient(145deg, #303e3b, #141a19);
+}
+.maintenance-meter {
+  height: 12px;
+  border-radius: 9px;
+  overflow: hidden;
+  background: #11140f;
+}
+.maintenance-meter span { display: block; height: 100%; background: #9eaa69; }
+@media (max-width: 680px) {
+  #skillTree { min-height: 590px; }
+  .skill-orbit-node { width: 72px; height: 72px; }
+  .skill-orbit-label { font-size: .57rem; max-width: 63px; }
+  .skill-branch-label { font-size: .75rem; }
+}
