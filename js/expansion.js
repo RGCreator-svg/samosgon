@@ -241,12 +241,17 @@ export function initExpansion(state, { render, notify, earnExperience }) {
       const index = state.advancedProduction.lines.findIndex(line => String(line.id) === collectButton.dataset.collectLine);
       const line = state.advancedProduction.lines[index];
       if (!line?.ready) return;
-      const received = addInventory(state, "braga", line.output);
-      if (received < line.output) notify(`На склад помещено ${received} из ${line.output}. Остаток партии потерян: склад переполнен.`);
-      else notify(`Партия собрана: ${received} ед. продукции.`);
-      state.advancedProduction.lines.splice(index, 1);
-      startQueued(state);
-      earnExperience(12);
+      const expected = line.output;
+      const received = addInventory(state, "braga", expected);
+      if (received < expected) {
+        line.output = expected - received;
+        notify(`На склад помещено ${received}. Остаток партии (${line.output}) ждёт свободного места.`);
+      } else {
+        state.advancedProduction.lines.splice(index, 1);
+        notify(`Партия собрана: ${received} ед. продукции.`);
+        startQueued(state);
+        earnExperience(12);
+      }
       render(); return;
     }
 
@@ -296,10 +301,14 @@ export function advanceExpansionDay(state, notify) {
     for (let index = state.advancedProduction.lines.length - 1; index >= 0; index -= 1) {
       const line = state.advancedProduction.lines[index];
       if (!line.ready) continue;
-      const received = addInventory(state, "braga", line.output);
-      if (received === line.output) {
+      const expected = line.output;
+      const received = addInventory(state, "braga", expected);
+      if (received === expected) {
         state.advancedProduction.lines.splice(index, 1);
         notify(`Автоматика собрала партию: ${received} ед. продукции.`);
+      } else if (received > 0) {
+        line.output = expected - received;
+        notify(`Автоматика перенесла на склад ${received}; остаток ждёт свободного места.`);
       }
     }
   }
