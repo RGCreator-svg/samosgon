@@ -30,6 +30,8 @@ export function createInitialState() {
     buildings: { warehouse: 0, workshop: 0, production: 0, laboratory: 0 },
     parts: { timber: 0, metal: 0, fasteners: 0, tools: 0, pump: 0, controller: 0 },
     deliveries: [],
+    equipmentTier: 0,
+    automationTier: 0,
 
     production: {
       active: false,
@@ -61,7 +63,9 @@ export function loadGame() {
       skills: Array.isArray(parsed.skills) ? parsed.skills : [],
       buildings: { ...initial.buildings, ...(parsed.buildings || {}) },
       parts: { ...initial.parts, ...(parsed.parts || {}) },
-      deliveries: Array.isArray(parsed.deliveries) ? parsed.deliveries : []
+      deliveries: Array.isArray(parsed.deliveries) ? parsed.deliveries : [],
+      equipmentTier: Math.max(0, Number(parsed.equipmentTier) || 0),
+      automationTier: Math.max(0, Number(parsed.automationTier) || 0)
     };
   } catch (error) {
     console.error("Не удалось загрузить сохранение:", error);
