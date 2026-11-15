@@ -293,15 +293,20 @@ export function advanceExpansionDay(state, notify) {
   });
 
   if (state.automationTier >= 1) {
-    state.advancedProduction.lines.forEach((line, index) => {
-      if (!line.ready) return;
+    for (let index = state.advancedProduction.lines.length - 1; index >= 0; index -= 1) {
+      const line = state.advancedProduction.lines[index];
+      if (!line.ready) continue;
       const received = addInventory(state, "braga", line.output);
       if (received === line.output) {
         state.advancedProduction.lines.splice(index, 1);
         notify(`Автоматика собрала партию: ${received} ед. продукции.`);
       }
-    });
+    }
   }
+
+  startQueued(state);
+  const stored = Object.values(state.inventory || {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
+  if (stored >= getStorageCapacity(state) * 0.9) notify("Склад почти заполнен. Контроль запасов рекомендует освободить место.");
 
   if (state.automationTier >= 2 && state.maintenance < 75 && (state.parts.tools || 0) > 0) {
     state.parts.tools -= 1;
