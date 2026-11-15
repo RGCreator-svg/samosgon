@@ -110,9 +110,57 @@ export const SKILL_BRANCHES = [
       {
         id: "old_still",
         name: "Вторая жизнь аппарата",
-        description: "Оборудование работает эффективнее.",
+        description: "Открывает восстановление старого оборудования.",
         cost: 1,
         requires: "handyman"
+      },
+      {
+        id: "precision_assembly",
+        name: "Точная сборка",
+        description: "Открывает следующий технологический класс аппарата.",
+        cost: 2,
+        requires: "old_still"
+      },
+      {
+        id: "modular_systems",
+        name: "Модульные системы",
+        description: "Разрешает устанавливать продвинутые игровые модули.",
+        cost: 2,
+        requires: "precision_assembly"
+      },
+      {
+        id: "column_master",
+        name: "Инженер-технолог",
+        description: "Открывает финальную ступень технологического дерева.",
+        cost: 3,
+        requires: "modular_systems"
+      }
+    ]
+  },
+  {
+    id: "automation",
+    name: "🤖 Автоматизация",
+    skills: [
+      {
+        id: "automation_basics",
+        name: "Основы автоматики",
+        description: "Открывает установку простых автоматических модулей.",
+        cost: 1,
+        requires: "precision_assembly"
+      },
+      {
+        id: "auto_control",
+        name: "Автоматический контроль",
+        description: "Разрешает улучшенные системы управления хозяйством.",
+        cost: 2,
+        requires: "automation_basics"
+      },
+      {
+        id: "full_automation",
+        name: "Умное хозяйство",
+        description: "Открывает максимальный уровень автоматизации.",
+        cost: 3,
+        requires: "auto_control"
       }
     ]
   },
