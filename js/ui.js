@@ -164,9 +164,9 @@ export function renderSkills(state) {
   const height = 760;
   const cx = 560;
   const cy = 380;
-  const angles = [-155, -90, -25, 35, 145];
-  const colors = ["#b7d7a2", "#d6bd83", "#a9c8dc", "#d7a3a3", "#c2b0dc"];
-  const icons = ["🌱", "🫙", "⚙️", "🪙", "🔥"];
+  const angles = [-155, -105, -55, 15, 75, 145];
+  const colors = ["#b7d7a2", "#d6bd83", "#a9c8dc", "#d7a3a3", "#c2b0dc", "#d2a879"];
+  const icons = ["🌱", "🫙", "⚙️", "🤖", "🪙", "🔥"];
   const svgNS = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(svgNS, "svg");
   svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
