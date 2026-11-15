@@ -121,7 +121,7 @@ export function renderEconomy(state) {
     addCard(buildingsRoot, `${building.emoji} ${building.name}`, building.description, lines,
       next ? "Построить / улучшить" : "Максимальный уровень",
       `build:${building.id}`,
-      !next || state.money < next.cost || (state.buildings.workshop || 0) < (building.id === "warehouse" ? 0 : 0) ||
+      !next || state.money < next.cost ||
       Object.entries(next.parts).some(([id, qty]) => (state.parts[id] || 0) < qty)
     );
   });
