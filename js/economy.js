@@ -162,14 +162,45 @@ export function renderEconomy(state) {
   if (!state.deliveries.length) {
     deliveriesRoot.append(element("p", "economy-empty", "Посылок пока нет. Почтальон отдыхает, как и положено."));
   } else {
+    const grouped = new Map();
     state.deliveries.forEach(delivery => {
+      const group = grouped.get(delivery.partId) || {
+        partId: delivery.partId,
+        name: delivery.name,
+        quantity: 0,
+        arrived: 0,
+        pending: 0,
+        nextArrival: Infinity
+      };
+      const quantity = Math.max(0, Number(delivery.quantity) || 0);
+      group.quantity += quantity;
+      if (delivery.arrivalDay <= state.day) group.arrived += quantity;
+      else {
+        group.pending += quantity;
+        group.nextArrival = Math.min(group.nextArrival, delivery.arrivalDay);
+      }
+      grouped.set(delivery.partId, group);
+    });
+
+    grouped.forEach(group => {
       const row = element("div", "delivery-row");
-      const left = element("span", "", `${delivery.name} × ${delivery.quantity}`);
-      const days = delivery.arrivalDay - state.day;
-      row.append(left, element("b", "", days > 0 ? `Через ${days} дн.` : "Прибыло"));
-      if (days <= 0) {
-        const button = element("button", "", "Получить");
-        button.dataset.economyAction = `collect:${delivery.id}`;
+      const left = element("div", "delivery-summary");
+      left.append(
+        element("b", "", group.name),
+        element("span", "", `Всего в заказе: ${group.quantity} шт.`),
+        element("small", "", group.pending
+          ? `Доставлено: ${group.arrived} · В пути: ${group.pending}`
+          : "Весь заказ прибыл")
+      );
+      row.append(left);
+      if (group.pending) {
+        row.append(element("b", "", `Следующая доставка: день ${group.nextArrival}`));
+      } else {
+        row.append(element("b", "", "Прибыло"));
+      }
+      if (group.arrived > 0) {
+        const button = element("button", "collect-all-button", `Забрать всё (${group.arrived})`);
+        button.dataset.economyAction = `collectAll:${group.partId}`;
         row.append(button);
       }
       deliveriesRoot.append(row);
