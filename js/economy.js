@@ -127,9 +127,30 @@ export function renderEconomy(state) {
   });
 
   PARTS.forEach(part => {
-    addCard(partsRoot, `${part.emoji} ${part.name}`, part.description,
-      [`Цена: ${part.price} монет за единицу`, `Доставка: ${part.delivery} игровых дня`],
-      "Заказать 1 шт.", `order:${part.id}`, state.money < part.price);
+    const related = state.deliveries.filter(item => item.partId === part.id);
+    const ordered = related.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+    const arrived = related
+      .filter(item => item.arrivalDay <= state.day)
+      .reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+    const lines = [
+      `Цена: ${part.price} монет за единицу`,
+      `Доставка: ${part.delivery} игровых дня`,
+      `Заказано: ${ordered} шт.`,
+      `Уже доставлено: ${arrived} шт.`
+    ];
+    const card = element("article", "economy-card");
+    card.append(element("h3", "", `${part.emoji} ${part.name}`), element("p", "", part.description));
+    lines.forEach(line => card.append(element("p", "economy-detail", line)));
+    const orderButton = element("button", "", "Заказать 1 шт.");
+    orderButton.dataset.economyAction = `order:${part.id}`;
+    orderButton.disabled = state.money < part.price;
+    card.append(orderButton);
+    if (arrived > 0) {
+      const collectButton = element("button", "collect-all-button", `Забрать всё доставленное (${arrived})`);
+      collectButton.dataset.economyAction = `collectAll:${part.id}`;
+      card.append(collectButton);
+    }
+    partsRoot.append(card);
   });
 
   PARTS.forEach(part => {
@@ -220,6 +241,16 @@ export function initEconomy(state, { render, notify }) {
       Object.entries(upgrade.parts).forEach(([partId, qty]) => state.parts[partId] -= qty);
       state.buildings[id] = level + 1;
       notify(`${building.name} улучшен до уровня ${level + 1}! Соседи уже считают, что вы олигарх.`);
+    }
+
+    if (action === "collectAll") {
+      const ready = state.deliveries.filter(item => item.partId === id && item.arrivalDay <= state.day);
+      if (!ready.length) return;
+      const quantity = ready.reduce((sum, item) => sum + (Number(item.quantity) || 0), 0);
+      state.parts[id] = (state.parts[id] || 0) + quantity;
+      state.deliveries = state.deliveries.filter(item => !(item.partId === id && item.arrivalDay <= state.day));
+      const part = PARTS.find(item => item.id === id);
+      notify(`Получено всё доставленное: ${part?.name || id} × ${quantity}.`);
     }
 
     if (action === "collect") {
