@@ -27,6 +27,9 @@ export function createInitialState() {
     trees: 0,
 
     inventory: { ...GAME_CONFIG.startingInventory },
+    buildings: { warehouse: 0, workshop: 0, production: 0, laboratory: 0 },
+    parts: { timber: 0, metal: 0, fasteners: 0, tools: 0, pump: 0, controller: 0 },
+    deliveries: [],
 
     production: {
       active: false,
@@ -55,7 +58,10 @@ export function loadGame() {
         ...initial.production,
         ...(parsed.production || {})
       },
-      skills: Array.isArray(parsed.skills) ? parsed.skills : []
+      skills: Array.isArray(parsed.skills) ? parsed.skills : [],
+      buildings: { ...initial.buildings, ...(parsed.buildings || {}) },
+      parts: { ...initial.parts, ...(parsed.parts || {}) },
+      deliveries: Array.isArray(parsed.deliveries) ? parsed.deliveries : []
     };
   } catch (error) {
     console.error("Не удалось загрузить сохранение:", error);
