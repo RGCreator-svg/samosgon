@@ -154,16 +154,75 @@ export function renderMarket(state) {
     .join("  |  ");
 }
 
+const GRISHKA_TIPS = [
+  "Не хватает очков навыков? Продай табуретку. Всё равно на ней никто не сидит!",
+  "Автоматизация — это когда железо работает, а ты делаешь вид, что так и задумано.",
+  "Улучшай мастерскую! Если задымилось — значит, прогресс пошёл. Наверное.",
+  "Секрет урожая? Разговаривай с картошкой. Но деньги ей не одалживай.",
+  "Вложись в механику. Молоток — это не универсальный инструмент. Это образ жизни.",
+  "Торговля проста: сначала назови цену, потом перестань смеяться.",
+  "Изучи выживание. Особенно навык «не есть семена на посадку».",
+  "Бабушка говорила: если деталь осталась лишней — значит, ты собрал что-то новое."
+];
+
+function createGrishkaPortrait() {
+  return `
+  <svg class="grishka-art" viewBox="0 0 260 330" role="img" aria-label="Дядька Гришка — хитрый деревенский советчик">
+    <defs>
+      <linearGradient id="grishka-coat" x2="1" y2="1"><stop stop-color="#71804c"/><stop offset="1" stop-color="#293a28"/></linearGradient>
+      <radialGradient id="grishka-face"><stop stop-color="#f3c99a"/><stop offset="1" stop-color="#b97855"/></radialGradient>
+      <filter id="grishka-glow"><feGaussianBlur stdDeviation="5"/></filter>
+    </defs>
+    <ellipse cx="130" cy="304" rx="91" ry="13" fill="#000" opacity=".35"/>
+    <path d="M58 295 Q62 210 88 181 L174 181 Q205 224 207 295Z" fill="url(#grishka-coat)" stroke="#a18b5b" stroke-width="3"/>
+    <path d="M93 190 L126 225 L111 288 L78 285Z" fill="#d0c2a0"/>
+    <path d="M164 190 L133 225 L151 288 L185 285Z" fill="#d0c2a0"/>
+    <path d="M92 194 L64 282 M174 194 L198 280" stroke="#b29a65" stroke-width="13" stroke-linecap="round"/>
+    <path d="M84 82 Q75 28 130 24 Q190 29 182 95 L169 159 Q132 192 93 154Z" fill="#eee0c5"/>
+    <path d="M88 94 Q75 48 113 37 Q146 16 177 58 L173 112 Q160 83 148 80 Q125 105 88 94Z" fill="#f1e6d1"/>
+    <ellipse cx="130" cy="105" rx="48" ry="58" fill="url(#grishka-face)" stroke="#6b4939" stroke-width="2"/>
+    <path d="M91 87 Q108 69 122 87 M140 87 Q158 68 171 89" stroke="#6b4939" stroke-width="9" stroke-linecap="round"/>
+    <ellipse cx="112" cy="103" rx="8" ry="11" fill="#fff"/><ellipse cx="151" cy="103" rx="8" ry="11" fill="#fff"/>
+    <circle cx="114" cy="105" r="4" fill="#29251d"/><circle cx="151" cy="105" r="4" fill="#29251d"/>
+    <path d="M128 104 Q111 131 132 132 Q145 132 142 122" fill="#c88661" stroke="#7e4d3a" stroke-width="2"/>
+    <path d="M105 143 Q130 170 159 140 Q146 180 119 166Z" fill="#57352d"/>
+    <path d="M104 145 Q130 156 157 142" stroke="#fff1d8" stroke-width="5"/>
+    <path d="M76 61 Q95 8 158 15 Q205 18 215 57 Q162 43 76 61Z" fill="#8c7545" stroke="#d2b56e" stroke-width="4"/>
+    <path d="M113 21 Q126 -2 146 17" stroke="#e1c879" stroke-width="8" fill="none"/>
+    <circle cx="169" cy="31" r="13" fill="#e7bd49"/><circle cx="169" cy="31" r="5" fill="#754a24"/>
+    <path d="M191 154 Q216 130 224 91" stroke="#b2a17a" stroke-width="8" fill="none" stroke-linecap="round"/>
+    <path d="M218 92 Q236 48 247 86 Q235 112 218 92Z" fill="#e58d32" stroke="#7a4b26" stroke-width="2"/>
+    <path d="M225 65 Q231 49 240 58 M230 67 Q245 49 250 55" stroke="#77934e" stroke-width="5" fill="none"/>
+    <path d="M61 285 L38 311 L91 311 L104 289 M167 289 L183 311 L231 311 L202 283" fill="#514233" stroke="#b39b70" stroke-width="4"/>
+    <path d="M98 200 L115 218 L101 238 L85 218Z M163 202 L147 221 L165 241 L181 219Z" fill="#a56b45" stroke="#d2a66a" stroke-width="2"/>
+  </svg>`;
+}
+
 export function renderSkills(state) {
   const tree = $("#skillTree");
   if (!tree) return;
   setText("#skillPoints", state.skillPoints);
   tree.replaceChildren();
 
-  const width = 1120;
-  const height = 760;
-  const cx = 560;
-  const cy = 380;
+  const screen = document.createElement("div");
+  screen.className = "skill-screen";
+
+  const left = document.createElement("aside");
+  left.className = "skill-advisor skill-advisor-left";
+  left.innerHTML = '<div class="advisor-kicker">Сомнительный эксперт</div><h3>Дядька Гришка</h3>';
+  left.insertAdjacentHTML("beforeend", createGrishkaPortrait());
+  const tip = GRISHKA_TIPS[(Math.max(1, Number(state.day) || 1) + Math.max(0, Number(state.skillPoints) || 0)) % GRISHKA_TIPS.length];
+  const bubble = document.createElement("blockquote");
+  bubble.className = "grishka-quote";
+  bubble.textContent = "«" + tip + "»";
+  left.append(bubble);
+  const subtitle = document.createElement("small");
+  subtitle.textContent = "Совет бесплатный. Последствия — за ваш счёт.";
+  left.append(subtitle);
+
+  const map = document.createElement("div");
+  map.className = "skill-map-stage";
+  const width = 1120, height = 760, cx = 560, cy = 380;
   const angles = [-155, -105, -55, 15, 75, 145];
   const colors = ["#b7d7a2", "#d6bd83", "#a9c8dc", "#d7a3a3", "#c2b0dc", "#d2a879"];
   const icons = ["🌱", "🫙", "⚙️", "🤖", "🪙", "🔥"];
@@ -172,12 +231,9 @@ export function renderSkills(state) {
   svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
   svg.setAttribute("class", "skill-map-lines");
   svg.setAttribute("aria-hidden", "true");
-
   const hub = document.createElementNS(svgNS, "circle");
   hub.setAttribute("cx", cx); hub.setAttribute("cy", cy); hub.setAttribute("r", "58");
-  hub.setAttribute("class", "skill-hub-ring");
-  svg.append(hub);
-
+  hub.setAttribute("class", "skill-hub-ring"); svg.append(hub);
   const layer = document.createElement("div");
   layer.className = "skill-map-nodes";
   const allSkills = SKILL_BRANCHES.flatMap(branch => branch.skills);
@@ -187,21 +243,17 @@ export function renderSkills(state) {
     const branchColor = colors[branchIndex];
     let previous = { x: cx, y: cy };
     branch.skills.forEach((skill, index) => {
-      const radius = 145 + index * 112;
+      const radius = 145 + index * Math.min(94, 300 / Math.max(1, branch.skills.length - 1));
       const x = cx + Math.cos(angle) * radius;
       const y = cy + Math.sin(angle) * radius;
       const path = document.createElementNS(svgNS, "path");
-      const mx = (previous.x + x) / 2;
-      const my = (previous.y + y) / 2;
+      const mx = (previous.x + x) / 2, my = (previous.y + y) / 2;
       path.setAttribute("d", `M ${previous.x} ${previous.y} Q ${mx + (branchIndex - 2) * 12} ${my - 12} ${x} ${y}`);
       path.setAttribute("class", "skill-link");
-      path.setAttribute("stroke", branchColor);
-      svg.append(path);
-
+      path.setAttribute("stroke", branchColor); svg.append(path);
       const ring = document.createElementNS(svgNS, "circle");
-      ring.setAttribute("cx", x); ring.setAttribute("cy", y);
-      ring.setAttribute("r", "48"); ring.setAttribute("class", "skill-node-halo");
-      svg.append(ring);
+      ring.setAttribute("cx", x); ring.setAttribute("cy", y); ring.setAttribute("r", "48");
+      ring.setAttribute("class", "skill-node-halo"); svg.append(ring);
 
       const unlocked = state.skills.includes(skill.id);
       const available = !skill.requires || state.skills.includes(skill.requires);
@@ -211,26 +263,42 @@ export function renderSkills(state) {
       node.className = `skill-orbit-node${unlocked ? " unlocked" : ""}${!available ? " locked" : ""}`;
       node.dataset.skill = skill.id;
       node.disabled = unlocked || !available || state.skillPoints < skill.cost;
-      node.style.left = `${x / width * 100}%`;
-      node.style.top = `${y / height * 100}%`;
+      node.style.left = `${x / width * 100}%`; node.style.top = `${y / height * 100}%`;
       node.style.setProperty("--branch-color", branchColor);
       node.title = `${skill.name}. ${skill.description} ${unlocked ? "Изучено" : skill.requires && !available ? "Требуется: " + (requiredSkill?.name || skill.requires) : "Стоимость: " + skill.cost + " очков"}`;
-      node.innerHTML = `<span class="skill-orbit-icon">${unlocked ? "✓" : icons[branchIndex]}</span><span class="skill-orbit-label"></span>`;
-      node.querySelector(".skill-orbit-label").textContent = skill.name;
-      layer.append(node);
+      const icon = document.createElement("span"); icon.className = "skill-orbit-icon"; icon.textContent = unlocked ? "✓" : icons[branchIndex];
+      const label = document.createElement("span"); label.className = "skill-orbit-label"; label.textContent = skill.name;
+      node.append(icon, label); layer.append(node);
       previous = { x, y };
     });
-
     const label = document.createElement("div");
-    label.className = "skill-branch-label";
-    label.textContent = branch.name;
+    label.className = "skill-branch-label"; label.textContent = branch.name;
     label.style.left = `${(cx + Math.cos(angle) * 365) / width * 100}%`;
     label.style.top = `${(cy + Math.sin(angle) * 365) / height * 100}%`;
-    label.style.setProperty("--branch-color", branchColor);
-    layer.append(label);
+    label.style.setProperty("--branch-color", branchColor); layer.append(label);
   });
+  map.append(svg, layer);
 
-  tree.append(svg, layer);
+  const right = document.createElement("aside");
+  right.className = "skill-advisor skill-advisor-right";
+  right.innerHTML = '<div class="advisor-kicker">Мудрость с огорода</div><h3>Правила Гришки</h3>';
+  const rules = [
+    ["🌱", "Сначала фундамент", "Открывай следующие узлы по цепочке — без базовых знаний далеко не уйдёшь."],
+    ["⚙️", "Не гонись за блеском", "Мощное оборудование без мастерской — дорогая куча металла."],
+    ["🪙", "Думай о доходе", "Торговля помогает быстрее накопить на серьёзные улучшения."]
+  ];
+  rules.forEach(([icon, title, text]) => {
+    const item = document.createElement("div"); item.className = "grishka-rule";
+    const heading = document.createElement("b"); heading.textContent = icon + " " + title;
+    const body = document.createElement("p"); body.textContent = text;
+    item.append(heading, body); right.append(item);
+  });
+  const footer = document.createElement("p"); footer.className = "grishka-signoff";
+  footer.textContent = "«А если не сработает — скажешь, что так и было задумано».";
+  right.append(footer);
+
+  screen.append(left, map, right);
+  tree.append(screen);
 }
 
 export function renderWorld(state) {
