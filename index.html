@@ -1,0 +1,159 @@
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Самогон 2.0 — Новая жизнь</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <section id="intro" class="intro">
+    <div class="intro-card">
+      <p class="eyebrow">История одного сомнительного бизнес-плана</p>
+      <h1>САМОГОН 2.0</h1>
+      <p>
+        После череды неудач вы получили наследство:
+        старый дом, сарай, заброшенный сад и оборудование,
+        которое видело ещё царя Гороха.
+      </p>
+      <p>
+        Денег почти нет. Зато есть картошка, яблоки и
+        удивительная способность не сдаваться.
+      </p>
+      <p class="quote">«Ну что, внучок, теперь это твои проблемы». — бабушка</p>
+      <button id="startGame" class="primary-button">
+        Переехать в деревню
+      </button>
+    </div>
+  </section>
+
+  <main id="game" class="hidden">
+    <header class="topbar">
+      <div>
+        <h1>Самогон 2.0</h1>
+        <p>Хозяйство имени последней надежды</p>
+      </div>
+      <div class="stats">
+        <span>📅 День <b id="day">1</b></span>
+        <span>💰 <b id="money">80</b> монет</span>
+        <span>⭐ Уровень <b id="level">1</b></span>
+      </div>
+    </header>
+
+    <nav class="navigation">
+      <button data-tab="home" class="active">🏚 Дом</button>
+      <button data-tab="farm">🥕 Огород</button>
+      <button data-tab="orchard">🍎 Сад</button>
+      <button data-tab="barn">🛠 Сарай</button>
+      <button data-tab="market">🧺 Рынок</button>
+      <button data-tab="skills">🌳 Умения</button>
+      <button data-tab="notebook">📖 Записки</button>
+    </nav>
+
+    <section class="needs panel">
+      <h2>Состояние героя</h2>
+      <div class="need">
+        <span>🍲 Сытость</span>
+        <div class="bar"><div id="hungerBar"></div></div>
+        <b id="hungerValue">70</b>
+      </div>
+      <div class="need">
+        <span>⚡ Энергия</span>
+        <div class="bar"><div id="energyBar"></div></div>
+        <b id="energyValue">80</b>
+      </div>
+      <div class="need">
+        <span>🔥 Тепло</span>
+        <div class="bar"><div id="warmthBar"></div></div>
+        <b id="warmthValue">70</b>
+      </div>
+      <button id="sleepButton">🌙 Лечь спать</button>
+    </section>
+
+    <section id="home" class="tab-content panel">
+      <h2>🏚 Бабушкин дом</h2>
+      <p id="homeDescription"></p>
+      <p>Состояние дома: <b id="houseValue"></b>%</p>
+      <button id="repairHouse">Починить дом — 30 монет</button>
+    </section>
+
+    <section id="farm" class="tab-content panel hidden">
+      <h2>🥕 Огород</h2>
+      <p>
+        Земля плодородная. Сорняки тоже. Кажется, они здесь
+        прописаны и платят налоги.
+      </p>
+      <p>Состояние огорода: <b id="gardenValue"></b>%</p>
+      <button id="harvestVegetables">Собрать овощи</button>
+      <button id="repairGarden">Расчистить грядки — 20 монет</button>
+    </section>
+
+    <section id="orchard" class="tab-content panel hidden">
+      <h2>🍎 Заброшенный сад</h2>
+      <p id="orchardDescription"></p>
+      <p>Состояние сада: <b id="orchardValue"></b>%</p>
+      <p>Деревья: <b id="treeCount"></b></p>
+      <button id="restoreOrchard">Расчистить сад — 40 монет</button>
+      <button id="harvestFruit">Собрать фрукты</button>
+    </section>
+
+    <section id="barn" class="tab-content panel hidden">
+      <h2>🛠 Старый сарай</h2>
+      <p id="barnDescription"></p>
+      <p>Состояние сарая: <b id="barnValue"></b>%</p>
+      <p>Самогонный аппарат: <b id="stillValue"></b>%</p>
+      <button id="repairBarn">Починить сарай — 30 монет</button>
+      <button id="repairStill">Починить аппарат — 50 монет</button>
+
+      <div class="production">
+        <h3>Брожение</h3>
+        <p id="productionStatus">Пока ничего не бродит.</p>
+        <button id="startBatch">Поставить брагу — 10 монет</button>
+        <button id="collectBatch">Забрать готовую брагу</button>
+      </div>
+    </section>
+
+    <section id="market" class="tab-content panel hidden">
+      <h2>🧺 Рынок</h2>
+      <p>
+        Местные покупатели торгуются так, будто каждая морковка
+        входит в их семейное наследство.
+      </p>
+      <div id="marketItems" class="market-grid"></div>
+      <p class="inventory-title">Ваши запасы</p>
+      <div id="inventory"></div>
+    </section>
+
+    <section id="skills" class="tab-content panel hidden">
+      <h2>🌳 Дерево умений</h2>
+      <p>Очки навыков: <b id="skillPoints">1</b></p>
+      <p>
+        Опыт: <b id="xpValue">0</b> /
+        <b id="xpNext">100</b>
+      </p>
+      <div id="skillTree" class="skill-tree"></div>
+    </section>
+
+    <section id="notebook" class="tab-content panel hidden">
+      <h2>📖 Бабушкины записки</h2>
+      <p>
+        «Если дело не идёт — проверь бочку. Если бочка пуста —
+        проверь соседа. Если сосед улыбается — проверь бочку ещё раз».
+      </p>
+      <p>
+        Между рецептами и списками покупок попадаются странные
+        заметки. Возможно, бабушка знала о деревне больше,
+        чем рассказывала.
+      </p>
+    </section>
+
+    <section class="panel">
+      <h2>📜 Последние события</h2>
+      <div id="notifications"></div>
+    </section>
+  </main>
+
+  <script type="module" src="js/game.js"></script>
+</body>
+</html>
