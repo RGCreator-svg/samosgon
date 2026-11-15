@@ -34,11 +34,21 @@
         <h1>Самогон 2.0</h1>
         <p>Хозяйство имени последней надежды</p>
       </div>
-      <div class="stats">
-        <span>📅 День <b id="day">1</b></span>
-        <span>💰 <b id="money">80</b> монет</span>
-        <span>⭐ Уровень <b id="level">1</b></span>
-      </div>
+<div class="stats">
+  <span>📅 День <b id="day">1</b></span>
+  <span>💰 <b id="money">80</b> монет</span>
+  <span>⭐ Уровень <b id="level">1</b></span>
+</div>
+
+<div class="xp-panel">
+  <div class="xp-heading">
+    <span>⭐ Опыт до следующего уровня</span>
+    <b><span id="xpValue">0</span> / <span id="xpNext">100</span> XP</b>
+  </div>
+  <div class="xp-track">
+    <div id="xpBar"></div>
+  </div>
+</div>
     </header>
 
     <nav class="navigation">
@@ -70,6 +80,16 @@
       </div>
       <button id="sleepButton">🌙 Лечь спать</button>
     </section>
+<section class="panel warehouse-panel">
+  <h2>📦 Склад хозяйства</h2>
+  <p>Все запасы под рукой. Главное — не забыть, куда положили.</p>
+
+  <div id="warehouseItems" class="warehouse-grid"></div>
+
+  <p class="warehouse-total">
+    Всего на складе: <b id="warehouseTotal">0</b> шт.
+  </p>
+</section>
 
     <section id="home" class="tab-content panel">
       <h2>🏚 Бабушкин дом</h2>

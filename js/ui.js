@@ -10,7 +10,9 @@ function setText(selector, value) {
 
 function setBar(selector, value) {
   const element = $(selector);
-  if (element) element.style.width = `${Math.max(0, Math.min(100, value))}%`;
+  if (element) {
+    element.style.width = `${Math.max(0, Math.min(100, value))}%`;
+  }
 }
 
 export function renderHUD(state) {
@@ -29,12 +31,61 @@ export function renderNeeds(state) {
   setBar("#warmthBar", state.warmth);
 }
 
+export function renderXP(state) {
+  const xpNeeded = 100;
+  const currentXP = Math.max(0, Number(state.xp) || 0);
+  const progress = (currentXP / xpNeeded) * 100;
+
+  setText("#xpValue", currentXP);
+  setText("#xpNext", xpNeeded);
+  setBar("#xpBar", progress);
+}
+
+export function renderWarehouse(state) {
+  const warehouse = $("#warehouseItems");
+  if (!warehouse) return;
+
+  warehouse.innerHTML = "";
+
+  let total = 0;
+
+  ITEMS.forEach((item) => {
+    const quantity = Math.max(
+      0,
+      Number(state.inventory?.[item.id]) || 0
+    );
+
+    total += quantity;
+
+    const card = document.createElement("div");
+    card.className = "warehouse-item";
+
+    const icon = document.createElement("span");
+    icon.className = "warehouse-icon";
+    icon.textContent = item.emoji;
+
+    const name = document.createElement("span");
+    name.className = "warehouse-name";
+    name.textContent = item.name;
+
+    const count = document.createElement("b");
+    count.className = "warehouse-count";
+    count.textContent = `${quantity} шт.`;
+
+    card.append(icon, name, count);
+    warehouse.appendChild(card);
+  });
+
+  setText("#warehouseTotal", total);
+}
+
 export function renderProduction(state) {
   const status = $("#productionStatus");
 
   if (status) {
     if (state.production.ready) {
-      status.textContent = "Брага готова! Бочка подозрительно булькает.";
+      status.textContent =
+        "Брага готова! Бочка подозрительно булькает.";
     } else if (state.production.active) {
       status.textContent =
         `Идёт брожение. Осталось дней: ${state.production.daysLeft}.`;
@@ -55,7 +106,9 @@ export function renderProduction(state) {
       state.energy < 10;
   }
 
-  if (collect) collect.disabled = !state.production.ready;
+  if (collect) {
+    collect.disabled = !state.production.ready;
+  }
 }
 
 export function renderMarket(state) {
@@ -68,6 +121,7 @@ export function renderMarket(state) {
 
   ITEMS.forEach((item) => {
     const quantity = state.inventory[item.id] || 0;
+
     const card = document.createElement("div");
     card.className = "market-item";
 
@@ -104,8 +158,6 @@ export function renderSkills(state) {
   if (!tree) return;
 
   setText("#skillPoints", state.skillPoints);
-  setText("#xpValue", state.xp);
-  setText("#xpNext", 100);
 
   tree.innerHTML = "";
 
@@ -132,10 +184,12 @@ export function renderSkills(state) {
       description.textContent = skill.description;
 
       const requirement = document.createElement("p");
+
       if (skill.requires && !requirementMet) {
         const requiredSkill = SKILL_BRANCHES
           .flatMap(item => item.skills)
           .find(item => item.id === skill.requires);
+
         requirement.textContent =
           `Сначала изучите: ${requiredSkill?.name || skill.requires}`;
       } else {
@@ -190,6 +244,7 @@ export function renderWorld(state) {
   );
 
   const restore = $("#restoreOrchard");
+
   if (restore) {
     restore.disabled = state.orchardRestored || state.money < 40;
     restore.textContent = state.orchardRestored
@@ -198,19 +253,25 @@ export function renderWorld(state) {
   }
 
   const harvestFruit = $("#harvestFruit");
+
   if (harvestFruit) {
-    harvestFruit.disabled = !state.orchardRestored || state.energy < 5;
+    harvestFruit.disabled =
+      !state.orchardRestored || state.energy < 5;
   }
 
   const harvestVegetables = $("#harvestVegetables");
+
   if (harvestVegetables) {
-    harvestVegetables.disabled = state.energy < 5 || state.garden < 20;
+    harvestVegetables.disabled =
+      state.energy < 5 || state.garden < 20;
   }
 }
 
 export function renderAll(state) {
   renderHUD(state);
   renderNeeds(state);
+  renderXP(state);
+  renderWarehouse(state);
   renderProduction(state);
   renderMarket(state);
   renderSkills(state);

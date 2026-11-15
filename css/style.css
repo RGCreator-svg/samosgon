@@ -265,3 +265,96 @@ button:disabled {
     flex: 1 1 28%;
   }
 }
+
+/* Полоса опыта */
+.xp-panel {
+  width: 100%;
+  margin: 8px 0 15px;
+  padding: 12px 15px;
+  background: #252820;
+  border: 1px solid #65583c;
+  border-radius: 10px;
+}
+
+.xp-heading {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+  color: #d9c18b;
+}
+
+.xp-track {
+  height: 14px;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #11140f;
+  border: 1px solid #494735;
+}
+
+.xp-track div {
+  width: 0;
+  height: 100%;
+  background: linear-gradient(90deg, #8b713d, #e0bd69);
+  border-radius: 10px;
+  transition: width 0.35s ease;
+}
+
+/* Склад */
+.warehouse-panel h2 {
+  margin-bottom: 5px;
+}
+
+.warehouse-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 9px;
+  margin-top: 15px;
+}
+
+.warehouse-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px;
+  background: #303328;
+  border: 1px solid #5a543e;
+  border-radius: 9px;
+}
+
+.warehouse-icon {
+  font-size: 1.5rem;
+}
+
+.warehouse-name {
+  flex: 1;
+}
+
+.warehouse-count {
+  color: #d9c18b;
+  white-space: nowrap;
+}
+
+.warehouse-total {
+  margin-top: 15px;
+  padding-top: 10px;
+  border-top: 1px solid #514b39;
+  color: #d9c18b;
+  font-weight: bold;
+}
+
+@media (max-width: 600px) {
+  .xp-heading {
+    font-size: 0.9rem;
+  }
+
+  .warehouse-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .warehouse-item {
+    padding: 9px;
+    font-size: 0.9rem;
+  }
+}

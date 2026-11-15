@@ -2,8 +2,24 @@
 import { loadGame, saveGame, addXP } from "./engine.js";
 import { ITEMS, SKILL_BRANCHES } from "./data.js";
 import { renderAll } from "./ui.js";
+import { initOrders, advanceOrdersDay } from "./orders.js";
 
 let state = loadGame();
+
+// Миграция сохранений: старые партии не теряют прогресс.
+state.reputation ??= 0;
+
+state.orders ??= {
+  offers: [],
+  active: [],
+  completed: 0,
+  failed: 0
+};
+
+state.orders.offers ??= [];
+state.orders.active ??= [];
+state.orders.completed ??= 0;
+state.orders.failed ??= 0;
 
 const $ = (selector) => document.querySelector(selector);
 const $$ = (selector) => document.querySelectorAll(selector);
@@ -81,6 +97,13 @@ function earnExperience(amount) {
     notify(`Новый уровень: ${state.level}! Вы стали опытнее. Почти специалист.`);
   }
 }
+
+// Подключение доски заказов.
+initOrders(state, {
+  notify,
+  render,
+  earnExperience
+});
 
 // Продажа товаров — кнопки создаются в ui.js
 $("#marketItems")?.addEventListener("click", (event) => {
@@ -323,6 +346,7 @@ $("#collectBatch")?.addEventListener("click", () => {
 // Сон и переход к следующему дню
 $("#sleepButton")?.addEventListener("click", () => {
   state.day += 1;
+    advanceOrdersDay(state, notify);
 
   const hungerLoss = state.skills.includes("country_life") ? 5 : 10;
   const warmthLoss = state.skills.includes("country_life") ? 2 : 5;
