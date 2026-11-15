@@ -698,7 +698,7 @@ button:disabled {
 #skillTree {
   position: relative;
   width: 100%;
-  min-height: 620px;
+  min-height: 760px;
   overflow: auto;
   border: 1px solid #484b45;
   border-radius: 16px;
@@ -707,9 +707,10 @@ button:disabled {
 }
 .skill-map-lines, .skill-map-nodes {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  top: 0;
+  left: 0;
+  width: 1120px;
+  height: 760px;
 }
 .skill-map-lines { overflow: visible; }
 .skill-link {
@@ -864,7 +865,7 @@ button:disabled {
 }
 .maintenance-meter span { display: block; height: 100%; background: #9eaa69; }
 @media (max-width: 680px) {
-  #skillTree { min-height: 590px; }
+  #skillTree { min-height: 760px; }
   .skill-orbit-node { width: 72px; height: 72px; }
   .skill-orbit-label { font-size: .57rem; max-width: 63px; }
   .skill-branch-label { font-size: .75rem; }
