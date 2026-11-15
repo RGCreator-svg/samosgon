@@ -3,6 +3,8 @@ import { loadGame, saveGame, addXP } from "./engine.js";
 import { ITEMS, SKILL_BRANCHES } from "./data.js";
 import { renderAll } from "./ui.js";
 import { initOrders, advanceOrdersDay } from "./orders.js";
+import { initDevTools } from "./dev.js";
+import { startNewDay } from "./events.js";
 
 let state = loadGame();
 
@@ -104,6 +106,8 @@ initOrders(state, {
   render,
   earnExperience
 });
+
+initDevTools(state, { render, notify });
 
 // Продажа товаров — кнопки создаются в ui.js
 $("#marketItems")?.addEventListener("click", (event) => {
@@ -378,7 +382,7 @@ $("#sleepButton")?.addEventListener("click", () => {
 
   earnExperience(5);
 
-  notify(`Наступил день ${state.day}. Петух снова орёт. Он здесь главный.`);
+  startNewDay(state, notify);
   render();
 });
 
