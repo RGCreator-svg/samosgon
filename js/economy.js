@@ -239,6 +239,9 @@ export function initEconomy(state, { render, notify }) {
 
 export function advanceDeliveries(state, notify) {
   ensureState(state);
-  const arrived = state.deliveries.filter(item => item.arrivalDay <= state.day);
-  if (arrived.length) notify(`Почтальон привёз ${arrived.length} посылок. Сегодня даже почта не подвела.`);
+  const arrived = state.deliveries.filter(item => item.arrivalDay <= state.day && !item.notified);
+  if (arrived.length) {
+    arrived.forEach(item => { item.notified = true; });
+    notify(`Почтальон привёз ${arrived.length} посылок. Сегодня даже почта не подвела.`);
+  }
 }
