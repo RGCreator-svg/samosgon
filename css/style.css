@@ -412,7 +412,7 @@ button:disabled {
   font-weight: 800;
   letter-spacing: 1px;
 }
-.dev-toggle:hover:not(:disabled { background: #69402f; }
+.dev-toggle:hover:not(:disabled) { background: #69402f; }
 
 .dev-overlay {
   position: fixed;
