@@ -159,58 +159,57 @@ export function renderSkills(state) {
   if (!tree) return;
 
   setText("#skillPoints", state.skillPoints);
-
   tree.innerHTML = "";
 
-  SKILL_BRANCHES.forEach((branch) => {
+  const allSkills = SKILL_BRANCHES.flatMap(branch => branch.skills);
+  SKILL_BRANCHES.forEach((branch, branchIndex) => {
     const column = document.createElement("div");
     column.className = "skill-branch";
+    column.dataset.branch = branch.id;
 
     const heading = document.createElement("h3");
     heading.textContent = branch.name;
     column.appendChild(heading);
 
-    branch.skills.forEach((skill) => {
+    const path = document.createElement("div");
+    path.className = "skill-path";
+
+    branch.skills.forEach((skill, index) => {
       const unlocked = state.skills.includes(skill.id);
-      const requirementMet =
-        !skill.requires || state.skills.includes(skill.requires);
+      const requirementMet = !skill.requires || state.skills.includes(skill.requires);
+      const requiredSkill = allSkills.find(item => item.id === skill.requires);
+      const card = document.createElement("article");
+      card.className = `skill-card skill-node${unlocked ? " unlocked" : ""}${!requirementMet ? " locked" : ""}`;
+      card.dataset.skillNode = skill.id;
 
-      const card = document.createElement("div");
-      card.className = `skill-card${unlocked ? " unlocked" : ""}`;
+      const node = document.createElement("div");
+      node.className = "skill-node-orb";
+      node.textContent = unlocked ? "✓" : String(index + 1);
 
-      const title = document.createElement("h3");
-      title.textContent = `${unlocked ? "✓ " : ""}${skill.name}`;
-
+      const content = document.createElement("div");
+      content.className = "skill-node-content";
+      const title = document.createElement("h4");
+      title.textContent = skill.name;
       const description = document.createElement("p");
       description.textContent = skill.description;
-
-      const requirement = document.createElement("p");
-
-      if (skill.requires && !requirementMet) {
-        const requiredSkill = SKILL_BRANCHES
-          .flatMap(item => item.skills)
-          .find(item => item.id === skill.requires);
-
-        requirement.textContent =
-          `Сначала изучите: ${requiredSkill?.name || skill.requires}`;
-      } else {
-        requirement.textContent = unlocked
-          ? "Навык изучен"
-          : `Стоимость: ${skill.cost} очко`;
-      }
+      const requirement = document.createElement("small");
+      requirement.textContent = unlocked
+        ? "Навык открыт"
+        : skill.requires && !requirementMet
+          ? `Требуется: ${requiredSkill?.name || skill.requires}`
+          : `Стоимость: ${skill.cost} очк.`;
 
       const button = document.createElement("button");
-      button.textContent = unlocked ? "Изучено" : "Изучить";
+      button.textContent = unlocked ? "Изучено" : "Открыть узел";
       button.dataset.skill = skill.id;
-      button.disabled =
-        unlocked ||
-        !requirementMet ||
-        state.skillPoints < skill.cost;
+      button.disabled = unlocked || !requirementMet || state.skillPoints < skill.cost;
 
-      card.append(title, description, requirement, button);
-      column.appendChild(card);
+      content.append(title, description, requirement, button);
+      card.append(node, content);
+      path.appendChild(card);
     });
 
+    column.appendChild(path);
     tree.appendChild(column);
   });
 }
