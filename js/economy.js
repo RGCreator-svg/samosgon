@@ -81,7 +81,7 @@ function addCard(parent, title, description, details, buttonText, action, disabl
   parent.append(card);
 }
 
-function renderEconomy(state) {
+export function renderEconomy(state) {
   const buildingsRoot = $("#buildingCards");
   const partsRoot = $("#partsCatalog");
   const stockRoot = $("#partsStock");
