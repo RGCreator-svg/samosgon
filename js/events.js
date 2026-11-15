@@ -1,4 +1,5 @@
 import { addXP } from "./engine.js";
+import { addInventory } from "./economy.js";
 
 const DAY_LINES = [
   "Петух прокукарекал так, будто ему задолжали. Доброе утро.",
@@ -17,7 +18,7 @@ const EVENTS = [
     title: "Соседская помощь",
     text: "Петрович заглянул одолжить инструмент. Вернул его вместе с парой картофелин.",
     chance: 0.14,
-    apply(state) { state.inventory.potato = (state.inventory.potato || 0) + 2; }
+    apply(state) { addInventory(state, "potato", 2); }
   },
   {
     title: "Неожиданная находка",
@@ -47,7 +48,7 @@ const EVENTS = [
     title: "Посылка без адреса",
     text: "У калитки коробка с полезными мелочами. Отправитель подписался: «Доброжелатель».",
     chance: 0.08,
-    apply(state) { state.inventory.carrot = (state.inventory.carrot || 0) + 2; state.inventory.cabbage = (state.inventory.cabbage || 0) + 1; }
+    apply(state) { addInventory(state, "carrot", 2); addInventory(state, "cabbage", 1); }
   },
   {
     title: "Бабушкина подсказка",
