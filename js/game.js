@@ -6,6 +6,7 @@ import { initOrders, advanceOrdersDay } from "./orders.js";
 import { initDevTools } from "./dev.js";
 import { startNewDay } from "./events.js";
 import { initEconomy, renderEconomy, advanceDeliveries, addInventory } from "./economy.js";
+import { initEquipment, renderEquipment } from "./equipment.js";
 
 let state = loadGame();
 
@@ -48,6 +49,7 @@ function notify(message) {
 function render() {
   renderAll(state);
   renderEconomy(state);
+  renderEquipment(state);
   save();
 }
 
@@ -111,6 +113,7 @@ initOrders(state, {
 
 initDevTools(state, { render, notify });
 initEconomy(state, { render, notify });
+initEquipment(state, { render, notify });
 
 // Продажа товаров — кнопки создаются в ui.js
 $("#marketItems")?.addEventListener("click", (event) => {
