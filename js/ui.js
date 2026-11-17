@@ -204,22 +204,6 @@ export function renderSkills(state) {
   setText("#skillPoints", state.skillPoints);
   tree.replaceChildren();
 
-  const screen = document.createElement("div");
-  screen.className = "skill-screen";
-
-  const left = document.createElement("aside");
-  left.className = "skill-advisor skill-advisor-left";
-  left.innerHTML = '<div class="advisor-kicker">Сомнительный эксперт</div><h3>Дядька Гришка</h3>';
-  left.insertAdjacentHTML("beforeend", createGrishkaPortrait());
-  const tip = GRISHKA_TIPS[(Math.max(1, Number(state.day) || 1) + Math.max(0, Number(state.skillPoints) || 0)) % GRISHKA_TIPS.length];
-  const bubble = document.createElement("blockquote");
-  bubble.className = "grishka-quote";
-  bubble.textContent = "«" + tip + "»";
-  left.append(bubble);
-  const subtitle = document.createElement("small");
-  subtitle.textContent = "Совет бесплатный. Последствия — за ваш счёт.";
-  left.append(subtitle);
-
   const map = document.createElement("div");
   map.className = "skill-map-stage";
   const width = 1120, height = 760, cx = 560, cy = 380;
@@ -279,26 +263,7 @@ export function renderSkills(state) {
   });
   map.append(svg, layer);
 
-  const right = document.createElement("aside");
-  right.className = "skill-advisor skill-advisor-right";
-  right.innerHTML = '<div class="advisor-kicker">Мудрость с огорода</div><h3>Правила Гришки</h3>';
-  const rules = [
-    ["🌱", "Сначала фундамент", "Открывай следующие узлы по цепочке — без базовых знаний далеко не уйдёшь."],
-    ["⚙️", "Не гонись за блеском", "Мощное оборудование без мастерской — дорогая куча металла."],
-    ["🪙", "Думай о доходе", "Торговля помогает быстрее накопить на серьёзные улучшения."]
-  ];
-  rules.forEach(([icon, title, text]) => {
-    const item = document.createElement("div"); item.className = "grishka-rule";
-    const heading = document.createElement("b"); heading.textContent = icon + " " + title;
-    const body = document.createElement("p"); body.textContent = text;
-    item.append(heading, body); right.append(item);
-  });
-  const footer = document.createElement("p"); footer.className = "grishka-signoff";
-  footer.textContent = "«А если не сработает — скажешь, что так и было задумано».";
-  right.append(footer);
-
-  screen.append(left, map, right);
-  tree.append(screen);
+  tree.append(map);
 }
 
 export function renderWorld(state) {
