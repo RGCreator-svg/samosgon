@@ -1,0 +1,45 @@
+.whales-track {
+  display: flex;
+  align-items: stretch;
+  max-width: 860px;
+  margin: 4px auto 10px;
+}
+.whale-card {
+  flex: 1;
+  position: relative;
+  background: #fdf8ee;
+  border: 2px solid #d9cfb8;
+  border-radius: 10px;
+  padding: 12px 14px 14px;
+  text-align: center;
+  transition: border-color 0.4s, box-shadow 0.4s, opacity 0.4s, filter 0.4s;
+}
+.whale-card.locked { opacity: 0.55; filter: grayscale(0.8); }
+.whale-card.active { border-color: #e8a13a; animation: whalePulse 1.8s ease-in-out infinite; }
+.whale-card.done   { border-color: #4caf50; background: #eef7ee; }
+@keyframes whalePulse {
+  0%, 100% { box-shadow: 0 0 6px rgba(232, 161, 58, 0.25); }
+  50%      { box-shadow: 0 0 22px rgba(232, 161, 58, 0.65); }
+}
+.wc-badge {
+  position: absolute; top: -12px; right: 12px;
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; background: #c9c0aa; color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.25);
+}
+.whale-card.done .wc-badge   { background: #4caf50; }
+.whale-card.active .wc-badge { background: #e8a13a; }
+.wc-title {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 20px; font-weight: 700; color: #2e7d32;
+}
+.whale-card.locked .wc-title { color: #8a8a7d; }
+.wc-status {
+  font-family: Georgia, serif;
+  font-size: 15px; color: #5a5348; margin-top: 6px; white-space: nowrap;
+}
+.whale-arrow {
+  align-self: center; font-size: 28px; font-weight: 700;
+  color: #e07b2a; padding: 0 10px; user-select: none;
+}
