@@ -8,6 +8,7 @@ import { startNewDay } from "./events.js";
 import { initEconomy, renderEconomy, advanceDeliveries, addInventory } from "./economy.js";
 import { initEquipment, renderEquipment } from "./equipment.js";
 import { initExpansion, renderExpansion, advanceExpansionDay } from "./expansion.js";
+import { initFeaturePack, renderFeaturePack, advanceFeaturePackDay, getMarketMultiplier } from "./featurepack.js";
 
 let state = loadGame();
 
@@ -53,6 +54,7 @@ function render() {
   renderEconomy(state);
   renderEquipment(state);
   renderExpansion(state);
+  renderFeaturePack(state);
   renderAdvisor(state);
   save();
 }
@@ -119,6 +121,7 @@ initDevTools(state, { render, notify });
 initEconomy(state, { render, notify });
 initEquipment(state, { render, notify });
 initExpansion(state, { render, notify, earnExperience });
+initFeaturePack(state, { render, notify, earnExperience });
 
 // Продажа товаров — кнопки создаются в ui.js
 $("#marketItems")?.addEventListener("click", (event) => {
@@ -137,7 +140,7 @@ $("#marketItems")?.addEventListener("click", (event) => {
     return;
   }
 
-  const multiplier = state.skills.includes("bargain") ? 1.2 : 1;
+  const multiplier = (state.skills.includes("bargain") ? 1.2 : 1) * getMarketMultiplier(state);
   const price = Math.round(item.price * multiplier);
 
   state.inventory[itemId] -= 1;
@@ -364,6 +367,7 @@ $("#sleepButton")?.addEventListener("click", () => {
     advanceOrdersDay(state, notify);
   advanceDeliveries(state, notify);
   advanceExpansionDay(state, notify);
+  advanceFeaturePackDay(state, notify);
 
   const hungerLoss = state.skills.includes("country_life") ? 5 : 10;
   const warmthLoss = state.skills.includes("country_life") ? 2 : 5;
