@@ -156,7 +156,7 @@ export function renderAdvisor(state) {
     advisor.classList.remove("mood-worried", "mood-happy", "mood-thinking", "mood-neutral");
 
     const worried = ["low-energy", "low-hunger", "cold", "poor", "repair-still", "repair-barn", "repair-house", "garden", "full-warehouse"];
-    const happy = ["orchard-restored", "automation", "equipment", "skills"];
+    const happy = ["orchard-restored", "automation", "equipment", "first-skills"];
     const thinking = ["ready-braga", "fermenting", "unspent-points", "orchard"];
 
     const mood = worried.includes(adviceId)
