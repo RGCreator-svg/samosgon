@@ -15,7 +15,11 @@ const GOALS = [
   {id:"four_seasons",title:"Круглый год в деревне",icon:"🗓️",desc:"Познакомься со всеми четырьмя сезонами.",test:s=>(s.world?.seasonsSeen||[]).length>=4,reward:{money:180,xp:65}},
   {id:"weather_watcher",title:"Смотритель погоды",icon:"🌦️",desc:"Наблюдай не менее шести видов погоды.",test:s=>(s.world?.weatherSeen||[]).length>=6,reward:{money:130,xp:55}},
   {id:"farm_network",title:"Большое хозяйство",icon:"🏡",desc:"Построй теплицу, полив и пасеку.",test:s=>(s.farmUpgrades||[]).length>=3,reward:{money:200,xp:75}},
-  {id:"first_winter",title:"Мороз нипочём",icon:"🧣",desc:"Доживи до зимнего сезона.",test:s=>(s.world?.seasonsSeen||[]).includes("winter"),reward:{money:100,xp:40}}
+  {id:"first_winter",title:"Мороз нипочём",icon:"🧣",desc:"Доживи до зимнего сезона.",test:s=>(s.world?.seasonsSeen||[]).includes("winter"),reward:{money:100,xp:40}},
+  {id:"first_wine",title:"Первый урожай винодела",icon:"🍷",desc:"Получи первую партию вина.",test:s=>(s.inventory?.wine||0)>0,reward:{money:120,xp:50}},
+  {id:"first_mead",title:"Медовое ремесло",icon:"🍯",desc:"Получи первую медовуху.",test:s=>(s.inventory?.mead||0)>0,reward:{money:120,xp:50}},
+  {id:"honey_spirit",title:"Золотая капля",icon:"🥃",desc:"Получи медовый дистиллят.",test:s=>(s.inventory?.honey_spirit||0)>0,reward:{money:160,xp:65}},
+  {id:"vineyard",title:"Свои лозы",icon:"🍇",desc:"Построй виноградник.",test:s=>(s.viticulture?.buildings||[]).includes("vineyard"),reward:{money:100,xp:40}}
 ];
 function ensure(s){s.milestones??={claimed:[]};s.milestones.claimed=Array.isArray(s.milestones.claimed)?s.milestones.claimed:[];}
 function make(tag,cls,txt){const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;}
