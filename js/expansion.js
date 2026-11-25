@@ -1,5 +1,4 @@
-import { queuePurchase, registerCartHandler } from "./economy.js";
-import { addInventory, getStorageCapacity } from "./economy.js";
+import { queuePurchase, registerCartHandler, addInventory, getStorageCapacity } from "./economy.js";
 import { getEquipmentProfile } from "./equipment.js";
 
 const RECIPES = [
