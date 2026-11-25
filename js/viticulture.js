@@ -123,7 +123,7 @@ export function initViticulture(s,{render:renderGame,notify}) {
     const supply=event.target.closest("[data-viti-supply]");
     if(supply){
       const item=SUPPLIES.find(x=>x.id===supply.dataset.vitiSupply);if(!item)return;
-      queuePurchase(s,{key:"viti-supply:"+item.id,kind:"viticultureSupply",name:item.name,cost:item.price,payload:{id:item.id},quantity:1});
+      queuePurchase(s,{key:"viti-supply:"+item.id,kind:"viticultureSupply",name:item.name,cost:item.price,payload:{id:item.id},quantity:1,stackable:true});
       notify(item.name+" добавлено в общую корзину.");renderGame();return;
     }
     const batch=event.target.closest("[data-viti-batch]");
@@ -154,7 +154,6 @@ export function advanceViticultureDay(s,notify){
     const amount=season==="summer"?4:season==="autumn"?3:season==="spring"?1:0;
     if(amount)addInventory(s,"grapes",amount);
   }
-  if(s.farmUpgrades?.includes("apiary"))addInventory(s,"honey",2);
   s.viticulture.batches.forEach(job=>{
     if(job.ready)return;
     job.remaining--;
