@@ -383,7 +383,8 @@ export function initEconomy(state, { render, notify }) {
   $("#economy")?.addEventListener("click", event => {
     const button = event.target.closest("[data-economy-action]");
     if (!button) return;
-    const [action, id] = button.dataset.economyAction.split(":");
+    const [action, ...idParts] = button.dataset.economyAction.split(":");
+    const id = idParts.join(":");
 
     if (action === "cartOrder") {
       const part = PARTS.find(item => item.id === id);
