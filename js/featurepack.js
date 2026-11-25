@@ -75,12 +75,13 @@ function renderMarket(s,root) {
   } else c.append(el("p","","Особых предложений сейчас нет. Следующее событие может появиться при смене дня."));
 }
 function renderAging(s,root) {
-  const c=card(root,"🪵 Выдержка в бочках","Положи игровой спирт-сырец на выдержку. Через несколько дней получишь товар с повышенной ценой. Это условная игровая механика.");
-  const raw=s.inventory.spirit||0;
-  c.append(el("p","feature-meta",`Спирт-сырец: ${raw} · Бочек на выдержке: ${s.barrelAging.length}/3`));
-  c.append(btn("Добавить выдержку в общую корзину (20 монет)","age-start","yes",raw<2 || s.barrelAging.length>=3));
+  const c=card(root,"🪵 Выдержка в бочках","Обычный и медовый дистиллят можно выдерживать отдельно. Это игровая абстракция созревания продукта.");
+  const raw=s.inventory.spirit||0, honey=s.inventory.honey_spirit||0;
+  c.append(el("p","feature-meta",`Спирт-сырец: ${raw} · Медовый дистиллят: ${honey} · Бочек на выдержке: ${s.barrelAging.length}/3`));
+  c.append(btn("Заложить 2 ед. спирта на выдержку (20 монет)","age-start","spirit",raw<2||s.barrelAging.length>=3));
+  c.append(btn("Заложить 2 ед. медового дистиллята (20 монет)","age-start","honey",honey<2||s.barrelAging.length>=3));
   if(!s.barrelAging.length)c.append(el("p","", "Бочки пока пусты."));
-  s.barrelAging.forEach((b,i)=>{const line=el("div","aging-row",`Бочка ${i+1}: ${b.remaining} дн. · качество ${b.quality}/100 · ${b.ready?"готова":"созревает"}`); if(b.ready)line.append(btn("Забрать выдержанный продукт","age-collect",String(i))); c.append(line);});
+  s.barrelAging.forEach((b,i)=>{const line=el("div","aging-row",`Бочка ${i+1}: ${b.remaining} дн. · качество ${b.quality}/100 · ${b.ready?"готова":"созревает"}`);if(b.ready)line.append(btn("Забрать выдержанный продукт","age-collect",String(i)));c.append(line);});
 }
 function renderFarms(s,root) {
   const c=card(root,"🌱 Расширение хозяйства","Постройки дают регулярный урожай при переходе дня. Их можно развивать независимо от основного огорода.");
@@ -101,7 +102,7 @@ export function initFeaturePack(s,{render,notify,earnExperience}) {
   }
   nav.addEventListener("click",e=>{if(!e.target.closest('[data-tab="featurePack"]'))return;document.querySelectorAll(".tab-content").forEach(x=>x.classList.toggle("hidden",x.id!=="featurePack"));nav.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x.dataset.tab==="featurePack"));});
   registerCartHandler("farmUpgrade",(current,item)=>{const farm=FARMS.find(x=>x.id===item.payload?.id);if(farm&&!current.farmUpgrades.includes(farm.id)){current.farmUpgrades.push(farm.id);earnExperience(20);}});
-  registerCartHandler("barrelAging",(current,item)=>{if((current.barrelAging||[]).length<3)current.barrelAging.push({remaining:3,quality:Math.max(45,Number(current.distillation.quality)||65),ready:false});});
+  registerCartHandler("barrelAging",(current,item)=>{if((current.barrelAging||[]).length<3){const input=item.payload?.inputItem||"spirit";current.barrelAging.push({remaining:3,quality:Math.max(45,Number(current.distillation.quality)||65),ready:false,inputItem:input,outputItem:input==="honey_spirit"?"aged_honey_spirit":"aged_spirit"});}});
   $("#featurePack").addEventListener("click",e=>{
     const b=e.target.closest("button");if(!b)return;
     if(b.dataset.mashType){s.mashType=b.dataset.mashType;}
@@ -110,8 +111,8 @@ export function initFeaturePack(s,{render,notify,earnExperience}) {
     if(b.dataset.distillCollect){const n=s.distillation.result;const got=addInventory(s,s.distillation.resultItem||"spirit",n);if(got===n)s.distillation.result=0;else s.distillation.result-=got;if(got)notify(`На склад помещено ${got} ед. спирта-сырца.`);}
     if(b.dataset.specialize){if(s.specialization||(s.skillPoints||0)<3)return;s.skillPoints-=3;s.specialization=b.dataset.specialize;notify(`Выбрана специализация: ${SPECIALIZATIONS.find(x=>x.id===s.specialization).name}.`);}
     if(b.dataset.eventChoice!==undefined){const event=EVENTS.find(x=>x.id===s.featureEvent?.id);const choice=event?.choices[Number(b.dataset.eventChoice)];if(!choice || ((choice.money||0)<0 && s.money<Math.abs(choice.money)))return;s.money=Math.max(0,s.money+(choice.money||0));s.reputation=Math.max(0,Math.min(100,(s.reputation||0)+(choice.reputation||0)));s.market.multiplier=Math.max(.75,Math.min(1.35,s.market.multiplier+(choice.market||0)));s.maintenance=Math.max(0,Math.min(100,(s.maintenance||100)+(choice.maintenance||0)));if(choice.xp)earnExperience(choice.xp);notify(`Решение принято: «${event.title}».`);s.featureEvent=null;}
-    if(b.dataset.ageStart){if((s.inventory.spirit||0)<2||s.barrelAging.length>=3)return;queuePurchase(s,{key:"barrel-aging",kind:"barrelAging",name:"Закладка бочки на выдержку",cost:20,consume:{spirit:2}});notify("Закладка бочки добавлена в общую корзину.");}
-    if(b.dataset.ageCollect!==undefined){const i=Number(b.dataset.ageCollect);const barrel=s.barrelAging[i];if(!barrel?.ready)return;const got=addInventory(s,"aged_spirit",2);if(got===2){s.barrelAging.splice(i,1);s.money+=Math.round(2*18*(1+barrel.quality/100));notify("Выдержанный продукт принят на склад. Цена выше обычной.");}}
+    if(b.dataset.ageStart){const input=b.dataset.ageStart==="honey"?"honey_spirit":"spirit";if((s.inventory[input]||0)<2||s.barrelAging.length>=3)return;queuePurchase(s,{key:"barrel-aging:"+input,kind:"barrelAging",name:input==="honey_spirit"?"Выдержка медового дистиллята":"Выдержка спирта-сырца",cost:20,consume:{[input]:2},payload:{inputItem:input}});notify("Закладка бочки добавлена в общую корзину.");}
+    if(b.dataset.ageCollect!==undefined){const i=Number(b.dataset.ageCollect);const barrel=s.barrelAging[i];if(!barrel?.ready)return;const got=addInventory(s,barrel.outputItem||"aged_spirit",2);if(got===2){s.barrelAging.splice(i,1);s.money+=Math.round(2*18*(1+barrel.quality/100));notify("Выдержанный продукт принят на склад. Цена выше обычной.");}}
     if(b.dataset.farmBuild){const farm=FARMS.find(x=>x.id===b.dataset.farmBuild);if(!farm||s.farmUpgrades.includes(farm.id))return;queuePurchase(s,{key:"farm:"+farm.id,kind:"farmUpgrade",name:farm.name,cost:farm.cost,payload:{id:farm.id}});notify(farm.name+" добавлено в общую корзину.");}
     render();renderFeaturePack(s);
   });
