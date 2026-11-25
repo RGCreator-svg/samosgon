@@ -1,4 +1,5 @@
 import { addInventory, getStorageCapacity } from "./economy.js";
+import { getEquipmentProfile } from "./equipment.js";
 
 const RECIPES = [
   { id: "basic", name: "Сахарная брага", mashType: "sugar", outputItem: "braga", cost: 10, days: 2, output: 3, tier: 0, description: "Простая базовая партия из сахара." },
@@ -49,7 +50,8 @@ function qualityLabel(value) {
 function batchQuality(state, recipe) {
   const tierBonus = Math.max(0, Number(state.equipmentTier) || 0) * 6;
   const maintenanceEffect = ((Number(state.maintenance) || 0) - 60) * 0.22;
-  return Math.max(25, Math.min(100, Math.round(48 + tierBonus + maintenanceEffect + (recipe.qualityBonus || 0))));
+  const moduleBonus = getEquipmentProfile(state, recipe.mashType || "sugar").quality;
+  return Math.max(25, Math.min(100, Math.round(48 + tierBonus + maintenanceEffect + moduleBonus + (recipe.qualityBonus || 0))));
 }
 
 function lineCapacity(state) {
