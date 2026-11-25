@@ -1558,7 +1558,7 @@ button:disabled {
 .module-arrive::after{content:"";position:absolute;inset:-5px;border:2px solid #f4d58f;border-radius:inherit;pointer-events:none;animation:module-install-flash .82s ease-out both}
 .still-mounted-module.module-arrive{position:relative}
 .slot-release{animation:slot-release-pulse .72s ease-out both}
-@keyframes module-install-pop{0%{opacity:0;filter:brightness(2.2);transform:translateY(-22px) scale(.72)}48%{opacity:1;filter:brightness(1.55);transform:translateY(3px) scale(1.08)}72%{transform:translateY(-2px) scale(.98)}100%{opacity:1;filter:none;transform:translateY(0) scale(1)}}
+@keyframes module-install-pop{0%{opacity:0;filter:brightness(2.2);translate:0 -22px;scale:.72}48%{opacity:1;filter:brightness(1.55);translate:0 3px;scale:1.08}72%{translate:0 -2px;scale:.98}100%{opacity:1;filter:none;translate:0 0;scale:1}}
 @keyframes module-install-flash{0%{opacity:0;transform:scale(.8)}35%{opacity:.9}100%{opacity:0;transform:scale(1.16)}}
 @keyframes slot-release-pulse{0%{border-color:#e6c47e;box-shadow:0 0 0 4px #e6c47e44}100%{border-color:#777052;box-shadow:none}}
 @media(max-width:560px){.still-module-rack{left:2%;top:5%;max-width:35%;gap:3px}.still-mounted-module{font-size:.5rem;padding:3px 4px;min-height:19px}.still-mounted-module i{width:16px;height:16px;flex-basis:16px}}
