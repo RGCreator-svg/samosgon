@@ -83,6 +83,8 @@ export const ITEMS = [
   ,{ id:"water", name:"Подготовленная вода", emoji:"💧", price:2, description:"Игровое сырьё для медовых партий." }
   ,{ id:"yeast_nutrient", name:"Питательная добавка", emoji:"🧪", price:12, description:"Вспомогательный ингредиент для игровых партий брожения." }
 
+  ,{ id:"aged_honey_spirit", name:"Выдержанный медовый дистиллят", emoji:"🥃", price:96, description:"Игровой медовый дистиллят после выдержки в бочке." }
+
 ];
 
 export const SKILL_BRANCHES = [
