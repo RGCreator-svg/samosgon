@@ -1638,3 +1638,11 @@ button:disabled {
 #viticulturePanel .aging-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px;border-bottom:1px solid #55513f}
 #viticulturePanel .feature-meta{color:#dfc994}
 @media(max-width:620px){#viticulturePanel .aging-row{align-items:stretch;flex-direction:column}}
+
+/* PNG-иконки из набора прототипа: витрина, производство и склад винодельни. */
+#viticulturePanel .viticulture-icon{display:block;width:46px;height:46px;object-fit:contain;filter:drop-shadow(0 3px 4px #0006);margin:0 0 8px}
+#viticulturePanel>.feature-card>.viticulture-icon{width:56px;height:56px;float:right;margin:0 0 8px 12px}
+#viticulturePanel .economy-card .viticulture-icon{width:40px;height:40px;margin-bottom:6px}
+#viticulturePanel .economy-card{display:flex;flex-direction:column;align-items:flex-start}
+#viticulturePanel .economy-card button{margin-top:auto}
+@media(max-width:560px){#viticulturePanel>.feature-card>.viticulture-icon{width:46px;height:46px}}
