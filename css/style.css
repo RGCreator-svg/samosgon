@@ -1433,3 +1433,48 @@ button:disabled {
   border-color:#d29a70!important;
   box-shadow:0 0 12px #d29a7033;
 }
+
+
+/* Функциональные посадочные места модульного аппарата */
+.equipment-slots {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr));
+  gap:10px;
+  margin:12px 0 22px;
+}
+.equipment-slot {
+  position:relative;
+  min-width:0;
+  padding:13px;
+  border:1px dashed #777052;
+  border-radius:11px;
+  background:linear-gradient(145deg,#292e26,#1b201b);
+}
+.equipment-slot::before {
+  content:"";
+  position:absolute;
+  top:12px;
+  right:12px;
+  width:9px;
+  height:9px;
+  border:2px solid #8f896b;
+  border-radius:50%;
+  background:#272c24;
+}
+.equipment-slot.occupied {
+  border-style:solid;
+  border-color:#8b9b68;
+  background:linear-gradient(145deg,#303a2b,#20261f);
+  box-shadow:inset 0 0 18px #a4bf7020;
+}
+.equipment-slot.occupied::before {
+  border-color:#c5d99b;
+  background:#9ab96b;
+  box-shadow:0 0 9px #a9d98599;
+}
+.equipment-slot h4 { margin:0 18px 8px 0; color:#e4d1a1; }
+.equipment-slot p { margin:5px 0 9px; }
+.slot-installed { color:#d8e4b8; font-weight:700; }
+.slot-empty { color:#a9a18d; font-style:italic; }
+.slot-options { display:block; min-height:2.4em; color:#aaa18e; line-height:1.4; }
+.equipment-slot button { margin-top:8px; }
