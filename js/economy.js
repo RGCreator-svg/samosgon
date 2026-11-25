@@ -252,9 +252,9 @@ export function renderEconomy(state) {
     const cartButton = element("button", "", "Добавить 1 шт. в общую корзину");
     cartButton.dataset.economyAction = `cartOrder:${part.id}`;
     card.append(cartButton);
-    const orderButton = element("button", "", "Заказать с доставкой");
+    const orderButton = element("button", "", "Добавить доставку в общую корзину");
     orderButton.dataset.economyAction = `order:${part.id}`;
-    orderButton.disabled = state.money < part.price;
+    orderButton.disabled = false;
     card.append(orderButton);
     if (arrived > 0) {
       const collectButton = element("button", "collect-all-button", `Забрать всё доставленное (${arrived})`);
@@ -363,6 +363,12 @@ export function initEconomy(state, { render, notify }) {
     nav.querySelectorAll("[data-tab]").forEach(item => item.classList.toggle("active", item === button));
   });
 
+  registerCartHandler("partDelivery", (current, item) => {
+    const part = PARTS.find(entry => entry.id === item.payload?.id);
+    if (!part) return;
+    current.deliveries.push({ id: "delivery_" + Date.now() + "_" + Math.random().toString(16).slice(2), partId: part.id, name: part.name, quantity: item.quantity, arrivalDay: current.day + part.delivery });
+  });
+
   registerCartHandler("building", (current, item) => {
     const building = BUILDINGS.find(entry => entry.id === item.payload?.id);
     const level = current.buildings[item.payload?.id] || 0;
@@ -439,31 +445,9 @@ export function initEconomy(state, { render, notify }) {
 
     if (action === "order") {
       const part = PARTS.find(item => item.id === id);
-      if (!part || state.money < part.price) return;
-      state.money -= part.price;
-      state.deliveries.push({
-        id: `delivery_${Date.now()}_${Math.random().toString(16).slice(2)}`,
-        partId: part.id,
-        name: part.name,
-        quantity: 1,
-        arrivalDay: state.day + part.delivery
-      });
-      notify(`Заказ оформлен: ${part.name}. Почта обещает доставить через ${part.delivery} дн. Почта — оптимист.`);
-    }
-
-    if (action === "build") {
-      const building = BUILDINGS.find(item => item.id === id);
-      const level = state.buildings[id] || 0;
-      const upgrade = building?.levels[level];
-      if (!upgrade || state.money < upgrade.cost) return;
-      if (Object.entries(upgrade.parts).some(([partId, qty]) => (state.parts[partId] || 0) < qty)) {
-        notify("Не хватает комплектующих. Стройка пока на паузе.");
-        return;
-      }
-      state.money -= upgrade.cost;
-      Object.entries(upgrade.parts).forEach(([partId, qty]) => state.parts[partId] -= qty);
-      state.buildings[id] = level + 1;
-      notify(`${building.name} улучшен до уровня ${level + 1}! Соседи уже считают, что вы олигарх.`);
+      if (!part) return;
+      queuePurchase(state,{key:"delivery:"+id,kind:"partDelivery",name:"Доставка: "+part.name,cost:part.price,payload:{id},stackable:true});
+      notify("Заказ на доставку добавлен в общую корзину.");
     }
 
     if (action === "collectAll") {
