@@ -11,7 +11,11 @@ const GOALS = [
   {id:"farm_builder",title:"Хозяин угодий",icon:"🌱",desc:"Построй две хозяйственные постройки.",test:s=>(s.farmUpgrades||[]).length>=2,reward:{money:100,xp:40}},
   {id:"level_5",title:"Опытный хозяин",icon:"🎖️",desc:"Достигни 5-го уровня.",test:s=>(s.level||1)>=5,reward:{money:150,xp:60}},
   {id:"day_15",title:"Укоренился",icon:"📅",desc:"Доживи до 15-го игрового дня.",test:s=>(s.day||1)>=15,reward:{money:100,xp:40}},
-  {id:"orders_10",title:"Надёжный поставщик",icon:"🤝",desc:"Выполни 10 заказов.",test:s=>(s.orders?.completed||0)>=10,reward:{money:220,xp:80}}
+  {id:"orders_10",title:"Надёжный поставщик",icon:"🤝",desc:"Выполни 10 заказов.",test:s=>(s.orders?.completed||0)>=10,reward:{money:220,xp:80}},
+  {id:"four_seasons",title:"Круглый год в деревне",icon:"🗓️",desc:"Познакомься со всеми четырьмя сезонами.",test:s=>(s.world?.seasonsSeen||[]).length>=4,reward:{money:180,xp:65}},
+  {id:"weather_watcher",title:"Смотритель погоды",icon:"🌦️",desc:"Наблюдай не менее шести видов погоды.",test:s=>(s.world?.weatherSeen||[]).length>=6,reward:{money:130,xp:55}},
+  {id:"farm_network",title:"Большое хозяйство",icon:"🏡",desc:"Построй теплицу, полив и пасеку.",test:s=>(s.farmUpgrades||[]).length>=3,reward:{money:200,xp:75}},
+  {id:"first_winter",title:"Мороз нипочём",icon:"🧣",desc:"Доживи до зимнего сезона.",test:s=>(s.world?.seasonsSeen||[]).includes("winter"),reward:{money:100,xp:40}}
 ];
 function ensure(s){s.milestones??={claimed:[]};s.milestones.claimed=Array.isArray(s.milestones.claimed)?s.milestones.claimed:[];}
 function make(tag,cls,txt){const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;}
