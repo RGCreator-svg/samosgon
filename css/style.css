@@ -1226,3 +1226,51 @@ button:disabled {
   .feature-card button { width:100%; margin:5px 0; }
   .aging-row { align-items:flex-start; flex-direction:column; }
 }
+
+
+/* Долгосрочные цели и достижения */
+#milestones { display:block; }
+.milestone-summary {
+  padding:13px 16px;
+  margin:10px 0 16px;
+  border:1px solid #75613f;
+  border-radius:10px;
+  color:#e6d2a1;
+  background:linear-gradient(110deg,#69543255,#252920);
+  font-weight:700;
+}
+.milestone-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(min(100%,235px),1fr));
+  gap:12px;
+}
+.milestone-card {
+  min-width:0;
+  padding:15px;
+  border:1px solid #514d3c;
+  border-radius:11px;
+  background:linear-gradient(145deg,#30332a,#22251f);
+  opacity:.78;
+}
+.milestone-card.unlocked {
+  border-color:#8e8057;
+  opacity:1;
+  box-shadow:inset 0 0 24px #b99a4a0d;
+}
+.milestone-card.claimed {
+  border-color:#647a50;
+  background:linear-gradient(145deg,#303a2b,#22271f);
+  opacity:.88;
+}
+.milestone-card h3 { margin:0 0 7px; color:#e2cc98; font-size:1.08rem; }
+.milestone-card p { margin:7px 0; color:#c4bdac; }
+.milestone-card .milestone-reward { color:#d8bc79; font-weight:700; }
+.milestone-status {
+  display:inline-block;
+  margin:4px 0 8px;
+  color:#aaa18e;
+  font-size:.88rem;
+}
+.milestone-card.unlocked .milestone-status { color:#d9c58e; }
+.milestone-card.claimed .milestone-status { color:#b9d19d; }
+.milestone-card button { display:block; width:100%; margin:8px 0 0; }
