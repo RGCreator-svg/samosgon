@@ -133,12 +133,12 @@ initWorld(state, { render, notify });
 initViticulture(state, { render, notify });
 registerCartHandler("homesteadRepair",(current,item)=>{
   const action=item.payload.action;
-  if(action==="house")current.house=Math.min(100,current.house+20*item.quantity);
-  if(action==="barn")current.barn=Math.min(100,current.barn+25*item.quantity);
-  if(action==="still")current.still=Math.min(100,current.still+30*item.quantity);
+  if(action==="house"){current.house=Math.min(100,current.house+20*item.quantity);earnExperience(5*item.quantity);}
+  if(action==="barn"){current.barn=Math.min(100,current.barn+25*item.quantity);earnExperience(5*item.quantity);}
+  if(action==="still"){current.still=Math.min(100,current.still+30*item.quantity);earnExperience(8*item.quantity);}
   if(action==="garden")current.garden=Math.min(100,current.garden+30*item.quantity);
-  if(action==="orchard"&&!current.orchardRestored){current.orchardRestored=true;current.trees=current.skills.includes("orchard_lore")?5:3;}
-  if(action==="basicBatch"&&!current.production.active&&!current.production.ready){current.production.active=true;current.production.ready=false;current.production.daysLeft=current.skills.includes("patient_master")?1:2;}
+  if(action==="orchard"&&!current.orchardRestored){current.orchardRestored=true;current.trees=current.skills.includes("orchard_lore")?5:3;earnExperience(20);}
+  if(action==="basicBatch"&&!current.production.active&&!current.production.ready){current.energy=Math.max(0,current.energy-10);current.production.active=true;current.production.ready=false;current.production.daysLeft=current.skills.includes("patient_master")?1:2;}
 });
 
 // Журнал событий всегда находится внизу игрового экрана, после динамических вкладок.
