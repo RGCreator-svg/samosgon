@@ -109,7 +109,6 @@ function cartTotals(state) {
   const purchases = state.purchaseCart || [];
   const parts = {};
   purchases.forEach(item => Object.entries(item.parts || {}).forEach(([id, qty]) => { parts[id] = (parts[id] || 0) + qty * item.quantity; }));
-  Object.entries(state.materialCart || {}).forEach(([id, qty]) => { parts[id] = (parts[id] || 0) + qty; });
   const goodsCost = purchases.reduce((sum, item) => sum + item.cost * item.quantity, 0);
   const partsCost = Object.entries(state.materialCart || {}).reduce((sum, [id, qty]) => sum + (PARTS.find(part => part.id === id)?.price || 0) * qty, 0);
   return { purchases, parts, money: goodsCost + partsCost };
@@ -124,9 +123,11 @@ export function queuePart(state, id, quantity = 1) {
 export function queueMaterials(state, requirements) {
   state.materialCart ??= {};
   const added = {};
+  const committed = {};
+  (state.purchaseCart || []).forEach(item => Object.entries(item.parts || {}).forEach(([id, qty]) => { committed[id] = (committed[id] || 0) + qty * item.quantity; }));
   Object.entries(requirements || {}).forEach(([id, required]) => {
     if (!PARTS.some(part => part.id === id)) return;
-    const missing = Math.max(0, Math.floor(Number(required) || 0) - (Number(state.parts[id]) || 0) - (Number(state.materialCart[id]) || 0));
+    const missing = Math.max(0, Math.floor(Number(required) || 0) - (Number(state.parts[id]) || 0) - (Number(state.materialCart[id]) || 0) - (committed[id] || 0));
     if (missing) { state.materialCart[id] = (Number(state.materialCart[id]) || 0) + missing; added[id] = missing; }
   });
   renderMaterialCart(state);
