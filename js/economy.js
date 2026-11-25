@@ -102,7 +102,7 @@ export function queuePurchase(state, purchase) {
   const item = state.purchaseCart.find(entry => entry.key === purchase.key);
   if (item) { if (purchase.stackable) item.quantity += Math.max(1, Number(purchase.quantity) || 1); }
   else state.purchaseCart.push({ ...purchase, quantity: Math.max(1, Number(purchase.quantity) || 1) });
-  if (purchase.parts) queueMaterials(state, purchase.parts);
+  if (purchase.parts) queueMaterials(state, purchase.parts, true);
   renderMaterialCart(state);
 }
 
@@ -127,12 +127,12 @@ export function queuePart(state, id, quantity = 1) {
   renderMaterialCart(state);
 }
 
-export function queueMaterials(state, requirements) {
+export function queueMaterials(state, requirements, purchaseAlreadyQueued = false) {
   state.materialCart ??= {};
   const committed = {};
   (state.purchaseCart || []).forEach(item => Object.entries(item.parts || {}).forEach(([id, qty]) => { committed[id] = (committed[id] || 0) + qty * item.quantity; }));
   const targets = { ...committed };
-  Object.entries(requirements || {}).forEach(([id, qty]) => { targets[id] = Math.max(targets[id] || 0, Math.floor(Number(qty) || 0)); });
+  Object.entries(requirements || {}).forEach(([id, qty]) => { targets[id] = (targets[id] || 0) + (purchaseAlreadyQueued ? 0 : Math.floor(Number(qty) || 0)); });
   const added = {};
   Object.entries(targets).forEach(([id, required]) => {
     if (!PARTS.some(part => part.id === id)) return;
