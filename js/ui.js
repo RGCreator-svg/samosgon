@@ -325,6 +325,8 @@ export function renderXP(state) {
 
   setText("#xpValue", currentXP);
   setText("#xpNext", xpNeeded);
+  setText("#skillXpValue", currentXP);
+  setText("#skillXpNext", xpNeeded);
   setBar("#xpBar", progress);
 }
 
