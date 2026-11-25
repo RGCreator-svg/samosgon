@@ -238,14 +238,14 @@ export function initExpansion(state, { render, notify, earnExperience }) {
     nav.querySelectorAll("[data-tab]").forEach(item => item.classList.toggle("active", item.dataset.tab === "expansion"));
   });
 
-  registerCartHandler("productionRecipe",(current,item)=>{const recipe=RECIPES.find(entry=>entry.id===item.payload?.id);if(!recipe||current.equipmentTier<recipe.tier||current.advancedProduction.queue.length>=12)return;current.advancedProduction.queue.push({id:current.advancedProduction.nextId++,recipeId:recipe.id,name:recipe.name,mashType:recipe.mashType,outputItem:recipe.outputItem,days:recipe.days,remaining:recipe.days,output:recipe.output,quality:batchQuality(current,recipe),ready:false});startQueued(current);});
+  registerCartHandler("productionRecipe",(current,item)=>{const recipe=RECIPES.find(entry=>entry.id===item.payload?.id);if(!recipe||current.equipmentTier<recipe.tier||current.advancedProduction.queue.length>=12)return;for(let i=0;i<item.quantity;i++)current.advancedProduction.queue.push({id:current.advancedProduction.nextId++,recipeId:recipe.id,name:recipe.name,mashType:recipe.mashType,outputItem:recipe.outputItem,days:recipe.days,remaining:recipe.days,output:recipe.output,quality:batchQuality(current,recipe),ready:false});startQueued(current);});
   $("#expansion").addEventListener("click", event => {
     const recipeButton = event.target.closest("[data-production-recipe]");
     if (recipeButton) {
       const recipe = RECIPES.find(item => item.id === recipeButton.dataset.productionRecipe);
       if (!recipe || state.equipmentTier < recipe.tier) return;
       if (state.advancedProduction.queue.length >= 12) { notify("Очередь заполнена."); return; }
-      queuePurchase(state,{key:"recipe:"+recipe.id,kind:"productionRecipe",name:"Производство: "+recipe.name,cost:recipe.cost,parts:{},payload:{id:recipe.id}});
+      queuePurchase(state,{key:"recipe:"+recipe.id,kind:"productionRecipe",name:"Производство: "+recipe.name,cost:recipe.cost,parts:{},payload:{id:recipe.id},stackable:true});
       notify("Запуск производства добавлен в общую корзину: "+recipe.name+".");
       render(); return;
     }
