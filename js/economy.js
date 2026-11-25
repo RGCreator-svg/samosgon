@@ -102,6 +102,7 @@ export function queuePurchase(state, purchase) {
   const item = state.purchaseCart.find(entry => entry.key === purchase.key);
   if (item) { if (purchase.stackable) item.quantity += Math.max(1, Number(purchase.quantity) || 1); }
   else state.purchaseCart.push({ ...purchase, quantity: Math.max(1, Number(purchase.quantity) || 1) });
+  if (purchase.parts) queueMaterials(state, purchase.parts);
   renderMaterialCart(state);
 }
 
@@ -127,11 +128,9 @@ export function queuePart(state, id, quantity = 1) {
 export function queueMaterials(state, requirements) {
   state.materialCart ??= {};
   const added = {};
-  const committed = {};
-  (state.purchaseCart || []).forEach(item => Object.entries(item.parts || {}).forEach(([id, qty]) => { committed[id] = (committed[id] || 0) + qty * item.quantity; }));
   Object.entries(requirements || {}).forEach(([id, required]) => {
     if (!PARTS.some(part => part.id === id)) return;
-    const missing = Math.max(0, Math.floor(Number(required) || 0) - (Number(state.parts[id]) || 0) - (Number(state.materialCart[id]) || 0) - (committed[id] || 0));
+    const missing = Math.max(0, Math.floor(Number(required) || 0) - (Number(state.parts[id]) || 0) - (Number(state.materialCart[id]) || 0));
     if (missing) { state.materialCart[id] = (Number(state.materialCart[id]) || 0) + missing; added[id] = missing; }
   });
   renderMaterialCart(state);
@@ -180,7 +179,7 @@ function renderMaterialCart(state) {
   footer.append(element("b", "", `Итого: ${total} монет`));
   const pay = element("button", "primary-button", "Оплатить корзину");
   pay.dataset.economyAction = "pay";
-  const missingParts = Object.entries(totals.parts).some(([id, qty]) => (Number(state.parts[id]) || 0) < qty);
+  const missingParts = Object.entries(totals.parts).some(([id, qty]) => (Number(state.parts[id]) || 0) + (Number(state.materialCart[id]) || 0) < qty);
   const missingGoods = Object.entries(totals.inventory).some(([id, qty]) => (Number(state.inventory[id]) || 0) < qty);
   pay.disabled = (Number(state.money) || 0) < total || missingParts || missingGoods;
   const clear = element("button", "", "Очистить"); clear.dataset.economyAction = "clear";
@@ -419,7 +418,7 @@ export function initEconomy(state, { render, notify }) {
 
     if (action === "pay") {
       const totals = cartTotals(state);
-      const shortages = Object.entries(totals.parts).filter(([partId, qty]) => (Number(state.parts[partId]) || 0) < qty);
+      const shortages = Object.entries(totals.parts).filter(([partId, qty]) => (Number(state.parts[partId]) || 0) + (Number(state.materialCart[partId]) || 0) < qty);
       const inventoryShortages = Object.entries(totals.inventory).filter(([itemId, qty]) => (Number(state.inventory[itemId]) || 0) < qty);
       if ((!totals.purchases.length && !Object.keys(state.materialCart || {}).length) || (Number(state.money) || 0) < totals.money || shortages.length || inventoryShortages.length) {
         notify("Невозможно оплатить корзину: проверьте деньги и комплектующие.");
