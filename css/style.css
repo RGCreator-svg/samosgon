@@ -1621,3 +1621,20 @@ button:disabled {
 .event-console h2:before{content:"";width:8px;height:8px;border-radius:50%;background:#91bd69;box-shadow:0 0 9px #91bd69;flex:0 0 auto}
 #notifications{max-height:210px;overflow-y:auto;padding:8px;border:1px solid #3c4838;border-radius:8px;background:#101510;scrollbar-color:#65744e #1a2119}
 .event-console .notification{border-left-color:#8eaa69;background:linear-gradient(90deg,#293329,#202820);color:#d5ddc8;font-family:ui-monospace,monospace;font-size:.82rem}
+
+
+/* Винодельня, медоварня и общая система закупок. */
+.shared-purchase-cart{position:relative;border:1px solid #8c7449;background:linear-gradient(145deg,#302f25,#20251f);box-shadow:0 8px 22px #0004}
+.shared-purchase-cart h2{display:flex;align-items:center;gap:9px;color:#ecd7a4}
+.shared-purchase-cart .material-cart{margin-top:12px}
+#viticulturePanel{display:grid;gap:14px}
+#viticulturePanel>.feature-card{width:100%}
+#viticulturePanel .farm-upgrade{padding:12px;margin:9px 0;border:1px solid #655b43;border-radius:10px;background:linear-gradient(135deg,#33352b,#25291f)}
+#viticulturePanel .farm-upgrade h4{margin:0 0 6px;color:#e6d3a7}
+#viticulturePanel .farm-upgrade p{color:#c5bda9}
+#viticulturePanel .economy-grid{grid-template-columns:repeat(auto-fit,minmax(180px,1fr))}
+#viticulturePanel .economy-card{min-width:0}
+#viticulturePanel .tech-locked{display:block;margin-top:7px;color:#d5a27e}
+#viticulturePanel .aging-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px;border-bottom:1px solid #55513f}
+#viticulturePanel .feature-meta{color:#dfc994}
+@media(max-width:620px){#viticulturePanel .aging-row{align-items:stretch;flex-direction:column}}
