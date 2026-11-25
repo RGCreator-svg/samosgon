@@ -159,10 +159,13 @@ function renderMaterialCart(state) {
     const row = element("div", "material-cart-row");
     row.append(element("div", "material-cart-info", item.name + " × " + item.quantity + " · " + (item.cost * item.quantity) + " монет"));
     const controls = element("div", "material-cart-controls");
-    const minus = element("button", "", "−"); minus.dataset.economyAction = "purchaseDec:" + item.key;
-    const plus = element("button", "", "+"); plus.dataset.economyAction = "purchaseInc:" + item.key;
+    if (item.stackable) {
+      const minus = element("button", "", "−"); minus.dataset.economyAction = "purchaseDec:" + item.key;
+      const plus = element("button", "", "+"); plus.dataset.economyAction = "purchaseInc:" + item.key;
+      controls.append(minus, plus);
+    }
     const remove = element("button", "cart-remove", "Убрать"); remove.dataset.economyAction = "purchaseRemove:" + item.key;
-    controls.append(minus, plus, remove); row.append(controls); root.append(row);
+    controls.append(remove); row.append(controls); root.append(row);
   });
   entries.forEach(([id, quantity]) => {
     const part = PARTS.find(item => item.id === id);
@@ -419,8 +422,8 @@ export function initEconomy(state, { render, notify }) {
 
     if (action === "purchaseInc" || action === "purchaseDec" || action === "purchaseRemove") {
       const item = (state.purchaseCart || []).find(entry => entry.key === id);
-      if (item && action === "purchaseInc") item.quantity += 1;
-      if (item && action === "purchaseDec") item.quantity -= 1;
+      if (item && item.stackable && action === "purchaseInc") item.quantity += 1;
+      if (item && item.stackable && action === "purchaseDec") item.quantity -= 1;
       if (item && (action === "purchaseRemove" || item.quantity <= 0)) state.purchaseCart = state.purchaseCart.filter(entry => entry !== item);
     }
 
