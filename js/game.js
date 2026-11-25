@@ -10,6 +10,7 @@ import { initEquipment, renderEquipment } from "./equipment.js";
 import { initExpansion, renderExpansion, advanceExpansionDay } from "./expansion.js";
 import { initFeaturePack, renderFeaturePack, advanceFeaturePackDay, getMarketMultiplier } from "./featurepack.js";
 import { initMilestones, renderMilestones } from "./progression.js";
+import { initWorld, renderWorld, advanceWorldDay, getWorldYieldMultiplier, getWorldColdPenalty } from "./world.js";
 
 let state = loadGame();
 
@@ -57,6 +58,7 @@ function render() {
   renderExpansion(state);
   renderFeaturePack(state);
   renderMilestones(state);
+  renderWorld(state);
   renderAdvisor(state);
   save();
 }
@@ -125,6 +127,7 @@ initEquipment(state, { render, notify });
 initExpansion(state, { render, notify, earnExperience });
 initFeaturePack(state, { render, notify, earnExperience });
 initMilestones(state, { renderGame: render, notify, earnExperience });
+initWorld(state, { render, notify });
 
 // Продажа товаров — кнопки создаются в ui.js
 $("#marketItems")?.addEventListener("click", (event) => {
@@ -170,9 +173,10 @@ $("#harvestVegetables")?.addEventListener("click", () => {
   const bonus = state.skills.includes("green_thumb") ? 2 : 0;
   const harvestBonus = state.skills.includes("big_harvest") ? 2 : 0;
 
-  const harvested = addInventory(state, "potato", 2 + bonus + harvestBonus)
-    + addInventory(state, "carrot", 1 + (bonus ? 1 : 0))
-    + addInventory(state, "cabbage", 1);
+  const seasonYield = getWorldYieldMultiplier(state, "vegetable");
+  const harvested = addInventory(state, "potato", Math.max(1, Math.round((2 + bonus + harvestBonus) * seasonYield)))
+    + addInventory(state, "carrot", Math.max(1, Math.round((1 + (bonus ? 1 : 0)) * seasonYield)))
+    + addInventory(state, "cabbage", Math.max(1, Math.round(seasonYield)));
 
   state.energy -= 5;
   earnExperience(10);
@@ -235,8 +239,9 @@ $("#harvestFruit")?.addEventListener("click", () => {
 
   const bonus = state.skills.includes("big_harvest") ? 2 : 0;
 
-  const fruitHarvested = addInventory(state, "apple", state.trees + bonus)
-    + addInventory(state, "pear", Math.max(1, Math.floor(state.trees / 2)) + bonus);
+  const seasonYield = getWorldYieldMultiplier(state, "fruit");
+  const fruitHarvested = addInventory(state, "apple", Math.max(1, Math.round((state.trees + bonus) * seasonYield)))
+    + addInventory(state, "pear", Math.max(1, Math.round((Math.max(1, Math.floor(state.trees / 2)) + bonus) * seasonYield)));
 
   state.energy -= 5;
   earnExperience(12);
@@ -371,9 +376,10 @@ $("#sleepButton")?.addEventListener("click", () => {
   advanceDeliveries(state, notify);
   advanceExpansionDay(state, notify);
   advanceFeaturePackDay(state, notify);
+  advanceWorldDay(state, notify);
 
   const hungerLoss = state.skills.includes("country_life") ? 5 : 10;
-  const warmthLoss = state.skills.includes("country_life") ? 2 : 5;
+  const warmthLoss = (state.skills.includes("country_life") ? 2 : 5) + getWorldColdPenalty(state);
   const energyGain = state.skills.includes("good_sleep") ? 100 : 70;
 
   state.hunger = Math.max(0, state.hunger - hungerLoss);
