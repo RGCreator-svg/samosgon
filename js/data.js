@@ -73,7 +73,6 @@ export const ITEMS = [
   ,{ id:"grapes", name:"Виноград", emoji:"🍇", price:18, description:"Сырьё для винодельни; можно вырастить или купить." }
   ,{ id:"honey", name:"Мёд", emoji:"🍯", price:28, description:"Сырьё пасеки для медовухи и медового дистиллята." }
   ,{ id:"yeast", name:"Винные дрожжи", emoji:"🧫", price:16, description:"Игровой ингредиент для винных и медовых партий." }
-  ,{ id:"sugar", name:"Сахар", emoji:"🧂", price:9, description:"Дополнительный ингредиент медовых рецептур." }
   ,{ id:"bottles", name:"Пустые бутылки", emoji:"🍾", price:7, description:"Тара для готовой продукции." }
   ,{ id:"corks", name:"Пробки", emoji:"🪵", price:3, description:"Тара и укупорка для вина." }
   ,{ id:"wine", name:"Вино", emoji:"🍷", price:62, description:"Игровой продукт винодельни." }
