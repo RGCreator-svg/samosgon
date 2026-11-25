@@ -45,7 +45,7 @@ root.append(card);});
 function renderModules(s){
 const root=$("#moduleCatalog");if(!root)return;root.replaceChildren();
 const groups=[...new Set(EQUIPMENT_MODULES.map(m=>m.group))];
-groups.forEach(group=>{root.append(node("h3","module-group-title",group));const grid=node("div","module-grid"));
+groups.forEach(group=>{root.append(node("h3","module-group-title",group));const grid=node("div","module-grid");
 EQUIPMENT_MODULES.filter(m=>m.group===group).forEach(m=>{
 const owned=s.equipmentModules.includes(m.id);const slot=slotForModule(m.id);const occupant=slot?moduleInSlot(s,slot):null;
 const c=node("article","module-card"+(owned?" installed":""));
