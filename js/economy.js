@@ -157,7 +157,11 @@ function renderMaterialCart(state) {
   totals.purchases.forEach(item => {
     const row = element("div", "material-cart-row");
     row.append(element("div", "material-cart-info", item.name + " × " + item.quantity + " · " + (item.cost * item.quantity) + " монет"));
-    root.append(row);
+    const controls = element("div", "material-cart-controls");
+    const minus = element("button", "", "−"); minus.dataset.economyAction = "purchaseDec:" + item.key;
+    const plus = element("button", "", "+"); plus.dataset.economyAction = "purchaseInc:" + item.key;
+    const remove = element("button", "cart-remove", "Убрать"); remove.dataset.economyAction = "purchaseRemove:" + item.key;
+    controls.append(minus, plus, remove); row.append(controls); root.append(row);
   });
   entries.forEach(([id, quantity]) => {
     const part = PARTS.find(item => item.id === id);
@@ -175,7 +179,10 @@ function renderMaterialCart(state) {
   const footer = element("div", "material-cart-footer");
   footer.append(element("b", "", `Итого: ${total} монет`));
   const pay = element("button", "primary-button", "Оплатить корзину");
-  pay.dataset.economyAction = "pay"; pay.disabled = (Number(state.money) || 0) < total;
+  pay.dataset.economyAction = "pay";
+  const missingParts = Object.entries(totals.parts).some(([id, qty]) => (Number(state.parts[id]) || 0) < qty);
+  const missingGoods = Object.entries(totals.inventory).some(([id, qty]) => (Number(state.inventory[id]) || 0) < qty);
+  pay.disabled = (Number(state.money) || 0) < total || missingParts || missingGoods;
   const clear = element("button", "", "Очистить"); clear.dataset.economyAction = "clear";
   footer.append(pay, clear);
   if ((Number(state.money) || 0) < total) footer.append(element("small", "cart-warning", `Не хватает ${total - (Number(state.money) || 0)} монет.`));
@@ -401,7 +408,7 @@ export function initEconomy(state, { render, notify }) {
       if (action === "remove" || state.materialCart[id] === 0) delete state.materialCart[id];
     }
 
-    if (action === "clear") state.materialCart = {};
+    if (action === "clear") { state.materialCart = {}; state.purchaseCart = []; }
 
     if (action === "purchaseInc" || action === "purchaseDec" || action === "purchaseRemove") {
       const item = (state.purchaseCart || []).find(entry => entry.key === id);
