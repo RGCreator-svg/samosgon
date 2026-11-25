@@ -95,6 +95,25 @@ function addCard(parent, title, description, details, buttonText, action, disabl
   return card;
 }
 
+const CART_HANDLERS = new Map();
+export function registerCartHandler(kind, handler) { CART_HANDLERS.set(kind, handler); }
+export function queuePurchase(state, purchase) {
+  state.purchaseCart ??= [];
+  const item = state.purchaseCart.find(entry => entry.key === purchase.key);
+  if (item) item.quantity += Math.max(1, Number(purchase.quantity) || 1);
+  else state.purchaseCart.push({ ...purchase, quantity: Math.max(1, Number(purchase.quantity) || 1) });
+  renderMaterialCart(state);
+}
+
+function cartTotals(state) {
+  const purchases = state.purchaseCart || [];
+  const parts = {};
+  purchases.forEach(item => Object.entries(item.parts || {}).forEach(([id, qty]) => { parts[id] = (parts[id] || 0) + qty * item.quantity; }));
+  Object.entries(state.materialCart || {}).forEach(([id, qty]) => { parts[id] = (parts[id] || 0) + qty; });
+  const goodsCost = purchases.reduce((sum, item) => sum + item.cost * item.quantity, 0);
+  const partsCost = Object.entries(state.materialCart || {}).reduce((sum, [id, qty]) => sum + (PARTS.find(part => part.id === id)?.price || 0) * qty, 0);
+  return { purchases, parts, money: goodsCost + partsCost };
+}
 export function queuePart(state, id, quantity = 1) {
   if (!PARTS.some(part => part.id === id)) return;
   state.materialCart ??= {};
@@ -123,11 +142,18 @@ function renderMaterialCart(state) {
   if (!root) return;
   root.replaceChildren();
   state.materialCart ??= {};
+  state.purchaseCart ??= [];
+  const totals = cartTotals(state);
   const entries = Object.entries(state.materialCart).filter(([id, qty]) => PARTS.some(part => part.id === id) && Number(qty) > 0);
-  if (!entries.length) {
-    root.append(element("p", "economy-empty", "Корзина пока пуста. Добавьте материалы из карточки нужной постройки."));
+  if (!entries.length && !totals.purchases.length) {
+    root.append(element("p", "economy-empty", "Корзина пока пуста. Добавляйте товары и улучшения из разных вкладок."));
     return;
   }
+  totals.purchases.forEach(item => {
+    const row = element("div", "material-cart-row");
+    row.append(element("div", "material-cart-info", item.name + " × " + item.quantity + " · " + (item.cost * item.quantity) + " монет"));
+    root.append(row);
+  });
   entries.forEach(([id, quantity]) => {
     const part = PARTS.find(item => item.id === id);
     const row = element("div", "material-cart-row");
@@ -140,7 +166,7 @@ function renderMaterialCart(state) {
     const remove = element("button", "cart-remove", "Убрать"); remove.dataset.economyAction = `remove:${id}`;
     controls.append(minus, count, plus, remove); row.append(info, controls); root.append(row);
   });
-  const total = cartTotal(state);
+  const total = totals.money;
   const footer = element("div", "material-cart-footer");
   footer.append(element("b", "", `Итого: ${total} монет`));
   const pay = element("button", "primary-button", "Оплатить корзину");
@@ -163,6 +189,7 @@ export function renderEconomy(state) {
   stockRoot.replaceChildren();
   deliveriesRoot.replaceChildren();
   state.materialCart ??= {};
+  state.purchaseCart ??= [];
 
   BUILDINGS.forEach(building => {
     const level = state.buildings[building.id] || 0;
