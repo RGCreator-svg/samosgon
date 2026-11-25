@@ -1288,3 +1288,93 @@ button:disabled {
 .mash-picker{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
 .mash-picker button.selected{border-color:#d6bd80;background:#675638;box-shadow:0 0 0 1px #d6bd80}
 @media(max-width:560px){.mash-picker button{flex:1 1 100%}}
+
+
+/* Визуальная сборка модульного аппарата */
+#equipmentVisual { margin: 14px 0 22px; }
+.still-scene {
+  overflow: hidden;
+  padding: 18px;
+  border: 1px solid #716344;
+  border-radius: 16px;
+  background:
+    radial-gradient(ellipse at 50% 65%, #7c6a3a26, transparent 55%),
+    linear-gradient(145deg, #30372e, #171d19 72%);
+  box-shadow: inset 0 0 45px #080b08a8, 0 10px 28px #0005;
+}
+.still-scene-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.still-kicker {
+  color: #b5a277;
+  font-size: .68rem;
+  letter-spacing: 2px;
+  font-weight: 800;
+}
+.still-scene-heading h3 { margin: 3px 0; color: #ead5a4; font-size: 1.35rem; }
+.still-mode {
+  padding: 6px 11px;
+  border: 1px solid #8d784e;
+  border-radius: 99px;
+  color: #e6d3a5;
+  background: #51432e88;
+  font-size: .82rem;
+  font-weight: 700;
+}
+.still-illustration {
+  display: block;
+  width: 100%;
+  max-height: 390px;
+  margin: 0 auto;
+  overflow: visible;
+}
+.still-scene[data-mode="hybrid"] { border-color: #829a83; }
+.still-scene[data-mode="rectification"] {
+  border-color: #91a99b;
+  background:
+    radial-gradient(ellipse at 50% 30%, #7eaaa72b, transparent 48%),
+    linear-gradient(145deg, #293b37, #141b19 72%);
+}
+.still-installed {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 10px 12px;
+  border-top: 1px solid #71634488;
+  color: #c7bea9;
+  font-size: .88rem;
+}
+.still-installed b { color: #e2ca94; }
+.still-progress {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 13px;
+  color: #bdb49f;
+  font-size: .82rem;
+}
+.still-progress b { color: #e0c78f; }
+.still-progress-track {
+  height: 8px;
+  margin-top: 7px;
+  overflow: hidden;
+  border-radius: 8px;
+  background: #101410;
+}
+.still-progress-track i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #947447, #d6bd7b);
+  transition: width .35s ease;
+}
+@media (max-width: 560px) {
+  .still-scene { padding: 12px 9px; }
+  .still-illustration { min-height: 180px; }
+  .still-scene-heading h3 { font-size: 1.08rem; }
+}
