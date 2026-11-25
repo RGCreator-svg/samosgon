@@ -19,7 +19,10 @@ const GOALS = [
   {id:"first_wine",title:"Первый урожай винодела",icon:"🍷",desc:"Получи первую партию вина.",test:s=>(s.inventory?.wine||0)>0,reward:{money:120,xp:50}},
   {id:"first_mead",title:"Медовое ремесло",icon:"🍯",desc:"Получи первую медовуху.",test:s=>(s.inventory?.mead||0)>0,reward:{money:120,xp:50}},
   {id:"honey_spirit",title:"Золотая капля",icon:"🥃",desc:"Получи медовый дистиллят.",test:s=>(s.inventory?.honey_spirit||0)>0,reward:{money:160,xp:65}},
-  {id:"vineyard",title:"Свои лозы",icon:"🍇",desc:"Построй виноградник.",test:s=>(s.viticulture?.buildings||[]).includes("vineyard"),reward:{money:100,xp:40}}
+  {id:"vineyard",title:"Свои лозы",icon:"🍇",desc:"Построй виноградник.",test:s=>(s.viticulture?.buildings||[]).includes("vineyard"),reward:{money:100,xp:40}},
+  {id:"first_cider",title:"Яблочная искра",icon:"🍏",desc:"Получи первую партию яблочного сидра.",test:s=>(s.inventory?.apple_cider||0)>0,reward:{money:110,xp:45}},
+  {id:"first_pear_wine",title:"Грушевый букет",icon:"🍐",desc:"Получи первую партию грушевого вина.",test:s=>(s.inventory?.pear_wine||0)>0,reward:{money:130,xp:50}},
+  {id:"fruit_wine_master",title:"Садовый купажист",icon:"🍷",desc:"Получи фруктовое вино из яблок и груш.",test:s=>(s.inventory?.fruit_wine||0)>0,reward:{money:160,xp:65}}
 ];
 function ensure(s){s.milestones??={claimed:[]};s.milestones.claimed=Array.isArray(s.milestones.claimed)?s.milestones.claimed:[];}
 function make(tag,cls,txt){const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;}
