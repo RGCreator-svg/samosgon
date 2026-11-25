@@ -86,6 +86,9 @@ export const ITEMS = [
   ,{ id:"aged_honey_spirit", name:"Выдержанный медовый дистиллят", emoji:"🥃", price:96, description:"Игровой медовый дистиллят после выдержки в бочке." }
 
   ,{ id:"labels", name:"Этикетки", emoji:"🏷️", price:2, description:"Маркировка для готовой продукции винодельни." }
+  ,{ id:"apple_cider", name:"Яблочный сидр", emoji:"🍏", price:54, description:"Игровой яблочный напиток после созревания." }
+  ,{ id:"pear_wine", name:"Грушевое вино", emoji:"🍐", price:72, description:"Игровое вино из грушевого сырья." }
+  ,{ id:"fruit_wine", name:"Садовое фруктовое вино", emoji:"🍷", price:82, description:"Игровой купаж из яблок и груш." }
 
 ];
 
