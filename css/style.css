@@ -1065,3 +1065,25 @@ button:disabled {
   #game-layout { grid-template-columns: minmax(0, 1100px); }
   .game-advisor { display: none; }
 }
+
+
+/* Реплики Дядьки Гришки */
+.game-advisor-tip {
+  position: relative;
+  padding: 12px 11px;
+  border: 1px solid #756747;
+  border-radius: 11px;
+  background: #171c15;
+  line-height: 1.45;
+  transition: opacity .2s ease;
+}
+.game-advisor-tip::before {
+  content: "СОВЕТ ДНЯ";
+  display: block;
+  margin-bottom: 7px;
+  color: #bda875;
+  font-size: .68rem;
+  font-style: normal;
+  font-weight: bold;
+  letter-spacing: .12em;
+}
