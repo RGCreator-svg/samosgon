@@ -70,7 +70,8 @@ function renderVisualAssembly(s){
   const tier=Math.max(0,Math.min(4,Number(s.equipmentTier)||0));
   const rect=has("packed_column")&&has("dephlegmator");
   const hybrid=!rect&&has("plate_column")&&has("dephlegmator");
-  const column=rect||hybrid;
+  const column=has("packed_column")||has("plate_column");
+  const columnModule=has("packed_column")?"packed_column":"plate_column";
   const copper=has("copper_head");
   const arm=has("lyne_arm");
   const condenser=has("basic_condenser");
@@ -96,7 +97,7 @@ function renderVisualAssembly(s){
       <div class="workbench-wall"><span class="wall-pipe wall-pipe-one"></span><span class="wall-pipe wall-pipe-two"></span><span class="wall-hook"></span><span class="wall-shelf"></span></div>
       <div class="still-floor-shadow"></div>
       <div class="still-unit">
-        ${column?`<div class="still-column ${rect?"packed":"plate"}" data-module-visual="${rect?"packed_column":"plate_column"}"><i></i><i></i><i></i><i></i><span class="column-cap"></span></div>`:""}
+        ${column?`<div class="still-column ${rect?"packed":"plate"}" data-module-visual="${columnModule}"><i></i><i></i><i></i><i></i><span class="column-cap"></span></div>`:""}
         ${has("dephlegmator")?'<div class="still-dephlegmator" data-module-visual="dephlegmator"><span></span><i></i></div>':""}
         ${copper?'<div class="still-head" data-module-visual="copper_head"><span class="head-neck"></span><i class="head-rivet"></i></div>':'<div class="still-lid"></div>'}
         <div class="still-neck"></div>
