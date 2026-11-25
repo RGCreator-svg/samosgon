@@ -5,6 +5,8 @@ const el = (tag, cls, text) => { const node = document.createElement(tag); if (c
 
 const SUPPLIES = [
   { id:"grapes", name:"Виноград", emoji:"🍇", price:18, desc:"Свежее винодельческое сырьё." },
+  { id:"apple", name:"Яблоки для сидра", emoji:"🍎", price:15, desc:"Сырьё для сидра и фруктового вина." },
+  { id:"pear", name:"Груши для вина", emoji:"🍐", price:18, desc:"Сырьё для грушевого вина и купажей." },
   { id:"honey", name:"Мёд", emoji:"🍯", price:28, desc:"Для медовухи и медовой браги." },
   { id:"yeast", name:"Винные дрожжи", emoji:"🧫", price:16, desc:"Игровой ингредиент для брожения." },
   { id:"bottles", name:"Пустые бутылки", emoji:"🍾", price:7, desc:"Тара для готовой продукции." },
@@ -41,7 +43,7 @@ function render(s) {
   if(!root)return;
   root.replaceChildren();
   ensure(s);
-  const intro=el("p","feature-intro","Отдельное направление хозяйства: виноградник, винодельня, медоварня и медовый дистиллят. Сырьё можно вырастить/получить на ферме или купить у поставщика. Все покупки проходят через общую корзину.");
+  const intro=el("p","feature-intro","Отдельное направление хозяйства: виноградник, винодельня, медоварня, сидр и фруктовые вина. Яблоки и груши можно собрать в саду или купить у поставщика. Все закупки проходят через общую корзину.");
   root.append(intro);
 
   const b=card(root,"🏡 Производственные постройки","Стройте инфраструктуру постепенно. Постройки и комплектующие оплачиваются вместе через общую корзину.");
@@ -68,7 +70,10 @@ function render(s) {
   const recipes=[
     {id:"wine",name:"Виноградное вино",desc:"5 винограда + дрожжи + бутылки и пробки. Требуются пресс и погреб; виноград можно купить или вырастить.",consume:{grapes:5,yeast:1,yeast_nutrient:1,bottles:2,corks:2,labels:2},days:3,agingDays:2,output:"wine",amount:2,needs:["winePress","wineCellar","wineFilter"],skill:"cellar_aging"},
     {id:"mead",name:"Медовуха",desc:"Мёд, подготовленная вода, дрожжи и питательная добавка. Требуется навык медоварения и медоварня.",consume:{honey:4,water:2,yeast:1,yeast_nutrient:1,bottles:3,corks:3},days:3,agingDays:1,output:"mead",amount:3,needs:["meadery"],skill:"mead_brewing"},
-    {id:"honeyMash",name:"Медовая брага",desc:"Мёд, подготовленная вода, дрожжи и питательная добавка. После созревания брагу можно выбрать в игровой перегонке.",consume:{honey:6,water:2,yeast:1,yeast_nutrient:1},days:3,output:"honey_braga",amount:3,needs:["meadery"],skill:"honey_distillation"}
+    {id:"honeyMash",name:"Медовая брага",desc:"Мёд, подготовленная вода, дрожжи и питательная добавка. После созревания брагу можно выбрать в игровой перегонке.",consume:{honey:6,water:2,yeast:1,yeast_nutrient:1},days:3,output:"honey_braga",amount:3,needs:["meadery"],skill:"honey_distillation"},
+    {id:"cider",name:"Яблочный сидр",desc:"Яблоки превращаются в лёгкий фруктовый напиток. Нужны пресс, погреб и фильтр; сырьё можно собрать в саду или купить.",consume:{apple:6,yeast:1,yeast_nutrient:1,bottles:2,corks:2,labels:2},days:3,agingDays:2,output:"apple_cider",amount:2,needs:["winePress","wineCellar","wineFilter"],skill:"cider_making"},
+    {id:"pearWine",name:"Грушевое вино",desc:"Отдельная партия из груш с более длительным созреванием.",consume:{pear:6,yeast:1,yeast_nutrient:1,bottles:2,corks:2,labels:2},days:3,agingDays:3,output:"pear_wine",amount:2,needs:["winePress","wineCellar","wineFilter"],skill:"pear_wine"},
+    {id:"fruitWine",name:"Садовое фруктовое вино",desc:"Купаж яблок и груш. Требует навыка работы с фруктовыми партиями.",consume:{apple:3,pear:3,yeast:1,yeast_nutrient:1,bottles:3,corks:3,labels:3},days:4,agingDays:3,output:"fruit_wine",amount:3,needs:["winePress","wineCellar","wineFilter"],skill:"fruit_winemaking"}
   ];
   recipes.forEach(recipe=>{
     const missing=recipe.needs.filter(id=>!s.viticulture.buildings.includes(id));
@@ -85,7 +90,7 @@ function render(s) {
   if(!s.viticulture.batches.length)batches.append(el("p","economy-empty","Пока нет активных партий."));
   s.viticulture.batches.forEach(job=>{const row=el("div","aging-row",job.name+" · "+(job.ready?"готово к сбору":(job.stage==="aging"?"выдержка":"брожение")+" · осталось "+job.remaining+" дн."));if(job.ready){const collect=el("button","","Забрать продукцию");collect.dataset.vitiCollect=String(job.id);row.append(collect);}batches.append(row);});
   const stock=card(root,"📦 Запасы винодельни","Виноград и мёд с собственных хозяйств попадают сюда же, что и купленные партии.");
-  const stockNames={grapes:"Виноград",honey:"Мёд",yeast:"Дрожжи",yeast_nutrient:"Питательная добавка",water:"Вода",bottles:"Бутылки",corks:"Пробки",wine:"Вино",mead:"Медовуха",honey_braga:"Медовая брага",honey_spirit:"Медовый дистиллят"};Object.entries(stockNames).forEach(([id,name])=>stock.append(el("p","economy-detail",name+": "+(s.inventory[id]||0))));
+  const stockNames={grapes:"Виноград",apple:"Яблоки",pear:"Груши",honey:"Мёд",yeast:"Дрожжи",yeast_nutrient:"Питательная добавка",water:"Вода",bottles:"Бутылки",corks:"Пробки",wine:"Вино",mead:"Медовуха",apple_cider:"Яблочный сидр",pear_wine:"Грушевое вино",fruit_wine:"Фруктовое вино",honey_braga:"Медовая брага",honey_spirit:"Медовый дистиллят"};Object.entries(stockNames).forEach(([id,name])=>stock.append(el("p","economy-detail",name+": "+(s.inventory[id]||0))));
 }
 
 export function initViticulture(s,{render:renderGame,notify}) {
@@ -134,7 +139,10 @@ export function initViticulture(s,{render:renderGame,notify}) {
       const recipes={
         wine:{id:"wine",name:"Виноградное вино",consume:{grapes:5,yeast:1,yeast_nutrient:1,bottles:2,corks:2,labels:2},days:3,agingDays:2,output:"wine",amount:2,needs:["winePress","wineCellar","wineFilter"],skill:"cellar_aging"},
         mead:{id:"mead",name:"Медовуха",consume:{honey:4,water:2,yeast:1,yeast_nutrient:1,bottles:3,corks:3},days:3,agingDays:1,output:"mead",amount:3,needs:["meadery"],skill:"mead_brewing"},
-        honeyMash:{id:"honeyMash",name:"Медовая брага",consume:{honey:6,water:2,yeast:1,yeast_nutrient:1},days:3,output:"honey_braga",amount:3,needs:["meadery"],skill:"honey_distillation"}
+        honeyMash:{id:"honeyMash",name:"Медовая брага",consume:{honey:6,water:2,yeast:1,yeast_nutrient:1},days:3,output:"honey_braga",amount:3,needs:["meadery"],skill:"honey_distillation"},
+        cider:{id:"cider",name:"Яблочный сидр",desc:"Яблоки превращаются в лёгкий фруктовый напиток. Нужны пресс, погреб и фильтр; сырьё можно собрать в саду или купить.",consume:{apple:6,yeast:1,yeast_nutrient:1,bottles:2,corks:2,labels:2},days:3,agingDays:2,output:"apple_cider",amount:2,needs:["winePress","wineCellar","wineFilter"],skill:"cider_making"},
+        pearWine:{id:"pearWine",name:"Грушевое вино",desc:"Отдельная партия из груш с более длительным созреванием.",consume:{pear:6,yeast:1,yeast_nutrient:1,bottles:2,corks:2,labels:2},days:3,agingDays:3,output:"pear_wine",amount:2,needs:["winePress","wineCellar","wineFilter"],skill:"pear_wine"},
+        fruitWine:{id:"fruitWine",name:"Садовое фруктовое вино",desc:"Купаж яблок и груш. Требует навыка работы с фруктовыми партиями.",consume:{apple:3,pear:3,yeast:1,yeast_nutrient:1,bottles:3,corks:3,labels:3},days:4,agingDays:3,output:"fruit_wine",amount:3,needs:["winePress","wineCellar","wineFilter"],skill:"fruit_winemaking"}
       };
       const recipe=recipes[batch.dataset.vitiBatch];
       if(!recipe||recipe.needs.some(id=>!s.viticulture.buildings.includes(id))||!s.skills.includes(recipe.skill))return;
