@@ -1478,3 +1478,73 @@ button:disabled {
 .slot-empty { color:#a9a18d; font-style:italic; }
 .slot-options { display:block; min-height:2.4em; color:#aaa18e; line-height:1.4; }
 .equipment-slot button { margin-top:8px; }
+
+
+/* Реалистичная анимированная 2D-сборка аппарата — без SVG и внешних библиотек. */
+.still-scene-2d .still-workbench {
+  position:relative; isolation:isolate; overflow:hidden; min-height:390px; margin:15px -2px 0;
+  border:1px solid #655b45; border-radius:13px;
+  background:radial-gradient(ellipse at 52% 70%,#9c81502b,transparent 48%),linear-gradient(180deg,#252d27 0%,#1b211d 70%,#151a16 100%);
+  perspective:900px;
+}
+.still-workbench::before {
+  content:""; position:absolute; inset:0; opacity:.22;
+  background:repeating-linear-gradient(90deg,transparent 0 54px,#b7a47b12 55px 56px),linear-gradient(180deg,transparent 70%,#080c09 100%);
+}
+.workbench-wall {position:absolute;inset:0 0 25%;background:linear-gradient(180deg,#303a31,#252c26);border-bottom:5px solid #514633}
+.wall-pipe {position:absolute;top:0;width:9px;height:48%;border:2px solid #79847a;border-top:0;background:linear-gradient(90deg,#47534d,#aab5a6,#45534c);opacity:.65}
+.wall-pipe-one{left:12%}.wall-pipe-two{right:13%;height:32%}
+.wall-hook{position:absolute;right:23%;top:12%;width:28px;height:35px;border:4px solid #8d7958;border-top:0;border-radius:0 0 18px 18px}
+.wall-shelf{position:absolute;left:8%;top:32%;width:23%;height:9px;background:linear-gradient(#a68b5e,#4b3c2b);box-shadow:0 5px 8px #0008}
+.still-floor-shadow{position:absolute;left:12%;right:12%;bottom:12%;height:28px;border-radius:50%;background:#050806a8;filter:blur(10px)}
+.still-unit{position:absolute;left:50%;bottom:15%;width:min(560px,90%);height:75%;transform:translateX(-50%)}
+.still-boiler{position:absolute;z-index:4;left:26%;bottom:2%;width:43%;height:37%;border:4px solid var(--metal-edge,#c18b5c);border-radius:25% 25% 18% 18% / 22% 22% 17% 17%;background:linear-gradient(100deg,var(--metal-dark,#60402f) 0%,var(--metal-mid,#b77a4d) 24%,var(--metal-light,#e0b27b) 43%,var(--metal-mid,#a86c43) 68%,var(--metal-dark,#53382b) 100%);box-shadow:inset 9px 0 15px #fff2,inset -12px 0 18px #160d0b99,0 13px 18px #0008}
+.boiler-rim{position:absolute;left:-3%;top:-7%;width:106%;height:17%;border:4px solid var(--metal-edge,#d5a16c);border-radius:50%;background:linear-gradient(180deg,var(--metal-light,#e8c18b),var(--metal-mid,#9d603c));box-shadow:0 4px 8px #0008}
+.boiler-highlight{position:absolute;left:16%;top:20%;width:8%;height:58%;border-radius:50%;background:#fff5;filter:blur(5px)}
+.boiler-window{position:absolute;left:42%;top:38%;width:19%;aspect-ratio:1;border:4px solid #b9c8b6;border-radius:50%;background:radial-gradient(circle at 35% 30%,#d6eee2aa,#548a7c99 65%,#1b3430);opacity:.28;box-shadow:inset 0 0 8px #07110f,0 0 8px #c2e5d4}
+.boiler-window.active{opacity:1}.boiler-window i{position:absolute;left:15%;top:15%;width:22%;height:22%;border-radius:50%;background:#fff9;filter:blur(2px)}
+.boiler-seam{position:absolute;left:0;right:0;top:66%;height:2px;background:#f3c58a66}
+.boiler-leg{position:absolute;bottom:-17%;width:9%;height:20%;background:linear-gradient(90deg,#302b22,#a17b51,#33291f);border-radius:0 0 5px 5px}
+.leg-left{left:15%}.leg-right{right:15%}
+.boiler-tap{position:absolute;right:-12%;top:57%;width:15%;height:8px;background:linear-gradient(#e3c18b,#69472e);border-radius:6px;transform:rotate(12deg)}
+.still-neck{position:absolute;z-index:3;left:45%;bottom:38%;width:7%;height:9%;background:linear-gradient(90deg,var(--metal-dark,#65422e),var(--metal-light,#dfb37c),var(--metal-mid,#94603e));border:2px solid var(--metal-edge,#c18b5c);border-radius:5px 5px 0 0}
+.still-lid{position:absolute;z-index:5;left:36%;bottom:45%;width:25%;height:8%;border:3px solid var(--metal-edge,#c18b5c);border-radius:50%;background:linear-gradient(180deg,var(--metal-light,#e9c38e),var(--metal-mid,#9e6541));box-shadow:0 4px 8px #0008}
+.still-head{position:absolute;z-index:5;left:34%;bottom:44%;width:29%;height:18%;border:4px solid var(--metal-edge,#c18b5c);border-radius:48% 48% 12% 12%;background:linear-gradient(105deg,var(--metal-dark,#69432e),var(--metal-light,#e7bb82) 35%,var(--metal-mid,#a96d43) 68%,var(--metal-dark,#53382a));box-shadow:inset 8px 0 10px #fff2,0 5px 10px #0008}
+.head-neck{position:absolute;left:44%;top:-24%;width:13%;height:28%;border:3px solid var(--metal-edge,#d4a16c);background:linear-gradient(90deg,var(--metal-dark),var(--metal-light),var(--metal-mid))}
+.head-rivet{position:absolute;right:15%;top:40%;width:7px;height:7px;border-radius:50%;background:#f2d5a1;box-shadow:0 0 4px #fff8}
+.still-vapor-arm{position:absolute;z-index:6;left:49%;bottom:59%;width:31%;height:18%;border-top:13px solid var(--metal-light,#d6a875);border-right:13px solid var(--metal-mid,#a66b42);border-radius:0 30px 0 0;filter:drop-shadow(0 4px 3px #0008)}
+.still-vapor-arm i{position:absolute;right:-14px;top:-13px;width:16px;height:16px;border-radius:50%;background:var(--metal-edge,#d6a875)}
+.still-vapor-arm b{position:absolute;right:-5px;top:0;width:12px;height:36px;border-radius:8px;background:linear-gradient(90deg,#795037,#d5a16b,#69452f)}
+.still-column{position:absolute;z-index:7;left:42%;bottom:61%;width:13%;height:37%;border:4px solid #aebbb0;border-radius:8px;background:linear-gradient(90deg,#45534e,#c4d0c6 28%,#75877e 65%,#35433e);box-shadow:inset 5px 0 8px #fff4,0 5px 10px #0008}
+.still-column i{position:relative;display:block;width:100%;height:20%;margin-top:3%;border-bottom:3px solid #394b45}
+.column-cap{position:absolute;left:-20%;top:-7%;width:140%;height:9px;border-radius:5px;background:linear-gradient(#e3e9dd,#77877d)}
+.still-dephlegmator{position:absolute;z-index:8;left:56%;bottom:83%;width:15%;height:9%;border:3px solid #d3ddd2;border-radius:9px;background:linear-gradient(90deg,#51625b,#d0d9cf,#53635c);box-shadow:0 4px 7px #0008}
+.still-dephlegmator span{position:absolute;left:15%;right:15%;top:45%;height:3px;background:#52675e}.still-dephlegmator i{position:absolute;right:-12px;top:30%;width:14px;height:5px;background:#d3ddd2}
+.still-condenser{position:absolute;z-index:9;right:1%;bottom:48%;width:27%;height:14%;border:4px solid #bac7bd;border-radius:18px;background:linear-gradient(100deg,#485a53,#d2ddd1 22%,#7c9185 55%,#34443e);box-shadow:inset 0 5px 7px #fff5,0 7px 10px #0008;transform:rotate(-8deg)}
+.still-condenser i{position:relative;display:inline-block;width:3px;height:80%;margin:3% 4%;background:#40554d;opacity:.7}
+.cool-water{position:absolute;left:10%;right:10%;bottom:-8px;height:5px;border-radius:5px;background:#80c9d4;box-shadow:0 0 8px #65d7e7;animation:water-flow 1.4s linear infinite}
+.still-control{position:absolute;z-index:10;left:18%;bottom:25%;width:35px;height:54px;border:3px solid #a8ba9c;border-radius:7px;background:linear-gradient(90deg,#1b2722,#66796b,#202c25);box-shadow:0 4px 8px #0008}
+.still-control i{position:absolute;left:9px;top:9px;width:9px;height:9px;border-radius:50%;background:#8ee18d;box-shadow:0 0 9px #8ee18d;animation:status-blink 1.8s ease-in-out infinite}
+.still-control b{position:absolute;left:7px;right:7px;bottom:8px;height:13px;border-radius:2px;background:#17201b;border:1px solid #a7b5a4}
+.still-receiver{position:absolute;z-index:9;right:0;bottom:0;width:45px;height:76px;border:3px solid #bdd2c5;border-radius:8px 8px 13px 13px;background:linear-gradient(90deg,#668c7c66,#c1e5d355,#52786c88);box-shadow:inset 4px 0 8px #fff4}
+.still-receiver span{position:absolute;top:-13px;left:8px;width:24px;height:14px;border:3px solid #c8d4c9;border-radius:4px;background:#788a7c}
+.still-receiver i{position:absolute;bottom:0;left:0;right:0;height:34%;background:linear-gradient(#d4b46b99,#b47a3b99);animation:receiver-fill 4s ease-in-out infinite alternate}
+.still-hose{position:absolute;z-index:8;width:34%;height:18%;border:5px solid #527e78;border-top:0;border-left:0;border-radius:0 0 25px 0;opacity:.85}
+.hose-left{left:2%;bottom:20%;transform:scaleX(-1)}.hose-right{right:3%;bottom:22%;border-color:#b47e50;transform:rotate(20deg)}
+.still-steam{position:absolute;z-index:11;left:48%;bottom:64%;width:12px;height:36px;border-radius:50%;background:#e8eee7aa;filter:blur(7px);opacity:0;animation:steam-rise 2.8s ease-out infinite}
+.steam-two{left:52%;animation-delay:.9s}.steam-three{left:45%;animation-delay:1.7s}
+.still-bench{position:absolute;z-index:12;left:5%;right:5%;bottom:10%;height:17px;border:2px solid #8b704b;border-radius:4px;background:repeating-linear-gradient(90deg,#674a31 0 34px,#795a3c 35px 38px);box-shadow:0 8px 12px #0008}
+.still-workbench-label{position:absolute;z-index:13;left:7%;right:7%;bottom:2%;display:flex;justify-content:space-between;gap:8px;color:#aa9d7e;font-size:.62rem;letter-spacing:.08em}
+.still-workbench-label b{color:#d8c38f}
+.cooling-indicator{position:absolute;right:3%;top:5%;color:#9fd5d1;font-size:.62rem;letter-spacing:.1em}
+.cooling-indicator i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#8ee4dc;box-shadow:0 0 8px #8ee4dc;animation:status-blink 1.4s infinite}
+@keyframes steam-rise{0%{transform:translateY(10px) scale(.6);opacity:0}25%{opacity:.65}100%{transform:translateY(-48px) scale(1.8);opacity:0}}
+@keyframes water-flow{from{transform:translateX(-8px);opacity:.5}to{transform:translateX(8px);opacity:1}}
+@keyframes status-blink{50%{opacity:.35;filter:brightness(.7)}}
+@keyframes receiver-fill{from{height:20%}to{height:48%}}
+.still-scene-2d[data-finish="rustic"] .still-workbench{--metal-dark:#493528;--metal-mid:#986443;--metal-light:#d2a06b;--metal-edge:#bd8958}
+.still-scene-2d[data-finish="copper"] .still-workbench{--metal-dark:#573021;--metal-mid:#b96d3e;--metal-light:#f0bd83;--metal-edge:#e1a16a}
+.still-scene-2d[data-finish="steel"] .still-workbench{--metal-dark:#394643;--metal-mid:#84938e;--metal-light:#dce4dc;--metal-edge:#aebbb5}
+.still-scene-2d[data-finish="copper"] .still-boiler,.still-scene-2d[data-finish="copper"] .still-head{filter:saturate(1.2)}
+@media(max-width:560px){.still-scene-2d .still-workbench{min-height:300px}.still-unit{width:98%;height:72%}.still-workbench-label{font-size:.48rem}.still-condenser{width:24%}}
+@media(prefers-reduced-motion:reduce){.still-scene-2d *{animation:none!important;transition:none!important}}
