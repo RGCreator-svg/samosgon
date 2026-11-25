@@ -1,7 +1,7 @@
 
 import { loadGame, saveGame, addXP } from "./engine.js";
 import { ITEMS, SKILL_BRANCHES } from "./data.js";
-import { renderAll, renderAdvisor } from "./ui.js";
+import { renderAll, renderAdvisor, reactGrishkaToEvent } from "./ui.js";
 import { initOrders, advanceOrdersDay } from "./orders.js";
 import { initDevTools } from "./dev.js";
 import { startNewDay } from "./events.js";
@@ -34,6 +34,7 @@ function save() {
 }
 
 function notify(message) {
+  reactGrishkaToEvent(message);
   const container = $("#notifications");
   if (!container) return;
 
