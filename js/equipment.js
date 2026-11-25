@@ -61,7 +61,7 @@ function renderVisualAssembly(s){
       <ellipse cx="370" cy="220" rx="125" ry="24" fill="#d69b65" stroke="#f0c58a" stroke-width="4"/>
       <path d="M275 267Q370 291 465 267" fill="none" stroke="#f0c58a" stroke-opacity=".5" stroke-width="4"/>
       <path d="M295 321V338M445 321V338" stroke="#b47b4f" stroke-width="12"/>
-      <circle cx="370" cy="268" r="24" fill="url(#stillGlass)" stroke="#d7e4d8" stroke-width="4" ${glass?"":"opacity=".18""}/>
+      <circle cx="370" cy="268" r="24" fill="url(#stillGlass)" stroke="#d7e4d8" stroke-width="4" ${glass?"":'opacity="0.18"'}/>
       ${copper?'<path d="M300 205Q300 161 370 142Q440 161 440 205Z" fill="url(#stillCopper)" stroke="#f0c58a" stroke-width="4"/><path d="M370 143V122" stroke="#e8bc82" stroke-width="10"/>':'<path d="M300 204Q370 175 440 204" fill="none" stroke="#92724d" stroke-width="7"/>'}
       ${arm?'<path d="M370 122V96Q370 73 400 73H462Q485 73 485 96V111" fill="none" stroke="url(#stillCopper)" stroke-width="17" stroke-linecap="round"/><path d="M485 111H526" stroke="#c78a59" stroke-width="13" stroke-linecap="round"/>':''}
       ${condenser?'<rect x="516" y="91" width="150" height="47" rx="19" fill="url(#stillSteel)" stroke="#d4e0d9" stroke-width="4"/><path d="M535 99V130M550 96V133M565 96V133M580 96V133M595 96V133M610 96V133M625 96V133M640 99V130" stroke="#526864" stroke-width="3"/><path d="M666 115H691V181" fill="none" stroke="#b8d7d0" stroke-width="8" stroke-linecap="round"/>':''}
