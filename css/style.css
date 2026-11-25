@@ -1134,3 +1134,95 @@ button:disabled {
   70% { transform: scale(.99) rotate(1deg); }
   100% { transform: scale(1) rotate(0); }
 }
+
+
+/* Самогон 2.0 — технологическая панель и новая визуальная система. */
+#featurePack { display:grid; gap:16px; }
+.feature-intro {
+  padding:14px 16px;
+  border-left:4px solid #b79a5c;
+  border-radius:8px;
+  color:#e4d4ae;
+  background:linear-gradient(100deg,#66533244,#252820);
+}
+.feature-card {
+  min-width:0;
+  padding:17px;
+  border:1px solid #62583f;
+  border-radius:14px;
+  background:
+    radial-gradient(ellipse at 100% 0%,#b99b4c12,transparent 48%),
+    linear-gradient(145deg,#30352b,#20241e);
+  box-shadow:0 8px 22px #0003,inset 0 1px #ffffff08;
+}
+.feature-card h3 { margin:0 0 8px; color:#e4c98f; }
+.feature-card h4 { color:#e9d7ad; }
+.feature-card p { color:#c8c0ad; }
+.feature-card button {
+  margin:6px 7px 4px 0;
+  border-color:#8b7549;
+  background:linear-gradient(180deg,#625237,#443a29);
+}
+.feature-card button:hover:not(:disabled) {
+  border-color:#d0b577;
+  box-shadow:0 0 14px #d0b57733;
+}
+.feature-card button:disabled { filter:grayscale(.5); }
+.feature-meta { color:#d8bd7d !important; font-weight:700; }
+.feature-success {
+  padding:10px 12px;
+  border:1px solid #829a62;
+  border-radius:8px;
+  color:#d8e8bd !important;
+  background:#43543755;
+}
+.aging-row,.farm-upgrade {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:8px;
+  margin:8px 0;
+  padding:11px 12px;
+  border:1px solid #575642;
+  border-radius:9px;
+  background:#191e18;
+  color:#e0d5ba;
+}
+.farm-upgrade { display:block; }
+.farm-upgrade p { margin:4px 0; font-size:.9rem; }
+#featurePack .feature-card:first-of-type {
+  background:
+    radial-gradient(circle at 90% 5%,#a5a05a22,transparent 35%),
+    linear-gradient(145deg,#34372a,#20241e);
+}
+#featurePack .feature-card:nth-of-type(2) {
+  background:
+    radial-gradient(circle at 90% 5%,#9fbe8c1b,transparent 35%),
+    linear-gradient(145deg,#303a2d,#20241e);
+}
+#featurePack .feature-card:nth-of-type(3) {
+  background:
+    radial-gradient(circle at 90% 5%,#d5ae6820,transparent 35%),
+    linear-gradient(145deg,#3a3428,#20241e);
+}
+#featurePack .feature-card:nth-of-type(4) {
+  background:
+    radial-gradient(circle at 90% 5%,#b17b4c20,transparent 35%),
+    linear-gradient(145deg,#382f27,#20241e);
+}
+#featurePack .feature-card:nth-of-type(5) {
+  background:
+    radial-gradient(circle at 90% 5%,#8da96b20,transparent 35%),
+    linear-gradient(145deg,#2d382a,#20241e);
+}
+@media (min-width:850px) {
+  #featurePack { grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; }
+  #featurePack > .feature-intro { grid-column:1/-1; }
+  #featurePack > .feature-card:last-child { grid-column:1/-1; }
+}
+@media (max-width:560px) {
+  .feature-card { padding:13px; }
+  .feature-card button { width:100%; margin:5px 0; }
+  .aging-row { align-items:flex-start; flex-direction:column; }
+}
