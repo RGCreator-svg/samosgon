@@ -12,6 +12,7 @@ import { initFeaturePack, renderFeaturePack, advanceFeaturePackDay, getMarketMul
 import { initMilestones, renderMilestones } from "./progression.js";
 import { initWorld, renderWorld, advanceWorldDay, getWorldYieldMultiplier, getWorldColdPenalty } from "./world.js";
 import { initViticulture, renderViticulture, advanceViticultureDay } from "./viticulture.js";
+import { initProductionHub, renderProductionHub, recordProduction } from "./productionhub.js";
 
 let state = loadGame();
 
@@ -61,6 +62,7 @@ function render() {
   renderMilestones(state);
   renderWorld(state);
   renderViticulture(state);
+  renderProductionHub(state);
   renderAdvisor(state);
   save();
 }
@@ -131,6 +133,7 @@ initFeaturePack(state, { render, notify, earnExperience });
 initMilestones(state, { renderGame: render, notify, earnExperience });
 initWorld(state, { render, notify });
 initViticulture(state, { render, notify });
+initProductionHub(state);
 registerCartHandler("homesteadRepair",(current,item)=>{
   const action=item.payload.action;
   if(action==="house"){current.house=Math.min(100,current.house+20*item.quantity);earnExperience(5*item.quantity);}
@@ -284,6 +287,7 @@ $("#collectBatch")?.addEventListener("click", () => {
   const quantity = state.skills.includes("clean_barrel") ? 5 : 3;
 
   const collected = addInventory(state, "braga", quantity);
+  if (collected > 0) recordProduction(state, { name: "Базовая брага", amount: collected, item: "braga", process: "Брожение" });
   state.production.active = false;
   state.production.ready = false;
   state.production.daysLeft = 0;
