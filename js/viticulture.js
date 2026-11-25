@@ -9,6 +9,7 @@ const SUPPLIES = [
   { id:"yeast", name:"Винные дрожжи", emoji:"🧫", price:16, desc:"Игровой ингредиент для брожения." },
   { id:"bottles", name:"Пустые бутылки", emoji:"🍾", price:7, desc:"Тара для готовой продукции." },
   { id:"corks", name:"Пробки", emoji:"🪵", price:3, desc:"Укупорка бутылок." },
+  { id:"labels", name:"Этикетки", emoji:"🏷️", price:2, desc:"Маркировка готовой продукции." },
   { id:"water", name:"Подготовленная вода", emoji:"💧", price:2, desc:"Игровой ингредиент для медовых партий." },
   { id:"yeast_nutrient", name:"Питательная добавка", emoji:"🧪", price:12, desc:"Вспомогательный ингредиент для стабильного игрового брожения." }
 ];
@@ -16,7 +17,8 @@ const SUPPLIES = [
 const BUILDINGS = [
   { id:"vineyard", name:"Виноградник", cost:620, parts:{timber:5,tools:1}, skill:"wine_basics", desc:"Даёт виноград каждый игровой день в подходящий сезон." },
   { id:"winePress", name:"Винный пресс", cost:480, parts:{timber:3,metal:2,tools:1}, skill:"wine_pressing", desc:"Открывает переработку винограда в игровые партии вина." },
-  { id:"wineCellar", name:"Винный погреб", cost:850, parts:{timber:6,metal:3}, skill:"cellar_aging", desc:"Ускоряет и улучшает выдержку вина и медовухи." },
+  { id:"wineCellar", name:"Винный погреб", cost:850, parts:{timber:6,metal:3}, skill:"cellar_aging", desc:"Обеспечивает отдельную стадию созревания вина." },
+  { id:"wineFilter", name:"Узел осветления и фильтрации", cost:360, parts:{metal:2,tools:1}, skill:"cellar_aging", desc:"Финишная подготовка вина перед розливом." },
   { id:"meadery", name:"Медоварня", cost:540, parts:{timber:3,metal:2,tools:1}, skill:"mead_brewing", desc:"Открывает отдельную линейку медовых напитков." }
 ];
 
@@ -64,7 +66,7 @@ function render(s) {
 
   const prod=card(root,"🍷 Производственные линии","Игровые циклы условны и не являются реальными технологическими инструкциями. Сырьё списывается при оплате заказа, а готовая партия появляется через несколько игровых дней.");
   const recipes=[
-    {id:"wine",name:"Виноградное вино",desc:"5 винограда + дрожжи + бутылки и пробки. Требуются пресс и погреб; виноград можно купить или вырастить.",consume:{grapes:5,yeast:1,yeast_nutrient:1,bottles:2,corks:2},days:3,agingDays:2,output:"wine",amount:2,needs:["winePress","wineCellar"],skill:"cellar_aging"},
+    {id:"wine",name:"Виноградное вино",desc:"5 винограда + дрожжи + бутылки и пробки. Требуются пресс и погреб; виноград можно купить или вырастить.",consume:{grapes:5,yeast:1,yeast_nutrient:1,bottles:2,corks:2,labels:2},days:3,agingDays:2,output:"wine",amount:2,needs:["winePress","wineCellar","wineFilter"],skill:"cellar_aging"},
     {id:"mead",name:"Медовуха",desc:"Мёд, подготовленная вода, дрожжи и питательная добавка. Требуется навык медоварения и медоварня.",consume:{honey:4,water:2,yeast:1,yeast_nutrient:1,bottles:3,corks:3},days:3,agingDays:1,output:"mead",amount:3,needs:["meadery"],skill:"mead_brewing"},
     {id:"honeyMash",name:"Медовая брага",desc:"Мёд, подготовленная вода, дрожжи и питательная добавка. После созревания брагу можно выбрать в игровой перегонке.",consume:{honey:6,water:2,yeast:1,yeast_nutrient:1},days:3,output:"honey_braga",amount:3,needs:["meadery"],skill:"honey_distillation"}
   ];
@@ -130,7 +132,7 @@ export function initViticulture(s,{render:renderGame,notify}) {
     const batch=event.target.closest("[data-viti-batch]");
     if(batch){
       const recipes={
-        wine:{id:"wine",name:"Виноградное вино",consume:{grapes:5,yeast:1,yeast_nutrient:1,bottles:2,corks:2},days:3,agingDays:2,output:"wine",amount:2,needs:["vineyard","winePress","wineCellar"],skill:"cellar_aging"},
+        wine:{id:"wine",name:"Виноградное вино",consume:{grapes:5,yeast:1,yeast_nutrient:1,bottles:2,corks:2,labels:2},days:3,agingDays:2,output:"wine",amount:2,needs:["vineyard","winePress","wineCellar"],skill:"cellar_aging"},
         mead:{id:"mead",name:"Медовуха",consume:{honey:4,water:2,yeast:1,yeast_nutrient:1,bottles:3,corks:3},days:3,agingDays:1,output:"mead",amount:3,needs:["meadery"],skill:"mead_brewing"},
         honeyMash:{id:"honeyMash",name:"Медовая брага",consume:{honey:6,water:2,yeast:1,yeast_nutrient:1},days:3,output:"honey_braga",amount:3,needs:["meadery"],skill:"honey_distillation"}
       };
