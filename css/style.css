@@ -1583,3 +1583,14 @@ button:disabled {
 @keyframes medal-unlock{0%{transform:rotate(-16deg) scale(.55);filter:brightness(2)}65%{transform:rotate(7deg) scale(1.12)}100%{transform:rotate(0) scale(1);filter:none}}
 @media(max-width:620px){.world-forecast{grid-template-columns:1fr}.world-scene{min-height:160px}.milestone-card{grid-template-columns:58px 1fr}.milestone-emblem{width:52px;height:52px;font-size:23px}}
 @media(prefers-reduced-motion:reduce){.world-scene *,.milestone-emblem.earned{animation:none!important;transition:none!important}}
+
+/* Сезонная окраска кроны и характер облаков. */
+.world-scene.season-spring .world-tree:before{background:radial-gradient(circle at 35% 28%,#f1c4b2 0 16%,#9fbd79 38%,#557d4c 75%)}
+.world-scene.season-summer .world-tree:before{background:radial-gradient(circle at 35% 28%,#a9c86d,#47713e 72%)}
+.world-scene.season-autumn .world-tree:before{background:radial-gradient(circle at 35% 28%,#e9bd69,#b76f3d 55%,#7e5035 82%)}
+.world-scene.season-winter .world-tree:before{background:radial-gradient(circle at 35% 28%,#edf2e8,#9aafb0 58%,#708b8b 82%)}
+.world-scene.weather-cloudy .world-cloud{background:#c4cfccd9;transform:scale(1.13)}
+.world-scene.weather-cloudy .world-sun{opacity:.42}
+.world-scene.weather-heat .world-sun{box-shadow:0 0 0 13px #f7df9b33,0 0 48px #f8d98caa}
+.world-scene.weather-wind .world-cloud{animation-duration:7s}
+.world-scene.weather-frost .world-sun{opacity:.48;filter:hue-rotate(155deg)}
