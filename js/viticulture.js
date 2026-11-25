@@ -103,7 +103,7 @@ export function initViticulture(s,{render:renderGame,notify}) {
   });
   registerCartHandler("viticultureSupply",(state,item)=>{
     const supply=SUPPLIES.find(x=>x.id===item.payload?.id);
-    if(supply)addInventory(state,supply.id,item.quantity);
+    if(supply)state.inventory[supply.id]=(Number(state.inventory[supply.id])||0)+item.quantity;
   });
   registerCartHandler("viticultureBatch",(state,item)=>{
     const recipe=item.payload?.recipe;
@@ -123,7 +123,7 @@ export function initViticulture(s,{render:renderGame,notify}) {
     const supply=event.target.closest("[data-viti-supply]");
     if(supply){
       const item=SUPPLIES.find(x=>x.id===supply.dataset.vitiSupply);if(!item)return;
-      queuePurchase(s,{key:"viti-supply:"+item.id,kind:"viticultureSupply",name:item.name,cost:item.price,payload:{id:item.id},quantity:1,stackable:true});
+      queuePurchase(s,{key:"viti-supply:"+item.id,kind:"viticultureSupply",name:item.name,cost:item.price,payload:{id:item.id},output:{[item.id]:1},quantity:1,stackable:true});
       notify(item.name+" добавлено в общую корзину.");renderGame();return;
     }
     const batch=event.target.closest("[data-viti-batch]");
