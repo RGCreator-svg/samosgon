@@ -21,13 +21,14 @@ function render(s){
  root.replaceChildren();
  const done=GOALS.filter(g=>g.test(s));
  const claimed=done.filter(g=>s.milestones.claimed.includes(g.id)).length;
- const summary=make("div","milestone-summary",`Открыто целей: ${done.length}/${GOALS.length} · Получено наград: ${claimed}/${GOALS.length}`);
+ const summary=make("div","milestone-summary milestone-summary-visual",`Открыто целей: ${done.length}/${GOALS.length} · Получено наград: ${claimed}/${GOALS.length}`);
  root.append(summary);
  const list=make("div","milestone-grid");
  GOALS.forEach(goal=>{
   const unlocked=goal.test(s), received=s.milestones.claimed.includes(goal.id);
   const card=make("article",`milestone-card ${unlocked?"unlocked":""} ${received?"claimed":""}`);
-  card.append(make("h3","",`${goal.icon} ${goal.title}`),make("p","",goal.desc));
+  const emblem=make("div",`milestone-emblem ${unlocked?"earned":"locked"} ${received?"collected":""}`,goal.icon);emblem.dataset.medal=goal.id;emblem.setAttribute("aria-hidden","true");
+  card.append(emblem,make("h3","milestone-title",goal.title),make("p","",goal.desc));
   card.append(make("p","milestone-reward",`Награда: ${goal.reward.money} монет · ${goal.reward.xp} XP`));
   const status=make("span","milestone-status",received?"Награда получена":unlocked?"Цель выполнена":"Ещё впереди");
   card.append(status);
