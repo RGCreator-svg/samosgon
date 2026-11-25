@@ -1,5 +1,6 @@
 import { addInventory } from "./economy.js";
 import { getEquipmentProfile } from "./equipment.js";
+import { getWorldYieldMultiplier } from "./world.js";
 
 const $ = (s) => document.querySelector(s);
 const el = (tag, cls, value) => { const n = document.createElement(tag); if (cls) n.className = cls; if (value !== undefined) n.textContent = value; return n; };
@@ -122,7 +123,7 @@ export function advanceFeaturePackDay(s,notify) {
   s.market.lastShiftDay=s.day;
   if(s.specialization==="engineer")s.maintenance=Math.min(100,(s.maintenance||0)+1);
   s.barrelAging.forEach(b=>{if(!b.ready){b.remaining-=s.specialization==="engineer"?1:1;if(b.remaining<=0){b.remaining=0;b.ready=true;b.quality=Math.min(100,b.quality+12);notify("Бочка выдержки готова! Качество выросло.");}}});
-  s.farmUpgrades.forEach(id=>{const farm=FARMS.find(x=>x.id===id);if(!farm)return;Object.entries(farm.yields).forEach(([item,qty])=>addInventory(s,item,qty+(s.specialization==="farmer"?1:0)));if(id==="apiary")s.money+=8;});
+  s.farmUpgrades.forEach(id=>{const farm=FARMS.find(x=>x.id===id);if(!farm)return;Object.entries(farm.yields).forEach(([item,qty])=>{const base=qty+(s.specialization==="farmer"?1:0);addInventory(s,item,Math.max(1,Math.round(base*getWorldYieldMultiplier(s,item==="apple"||item==="pear"?"fruit":"vegetable",true))));});if(id==="apiary")s.money+=8;});
   if(!s.featureEvent && Math.random()<.24){const event=EVENTS[Math.floor(Math.random()*EVENTS.length)];s.featureEvent={id:event.id,day:s.day};notify(`Новое событие: ${event.title}. Загляни во вкладку «Технологии».`);}
 }
 export function getMarketMultiplier(s){ensure(s);return s.market.multiplier*(s.specialization==="merchant"?1.1:1);}
