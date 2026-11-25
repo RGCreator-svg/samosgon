@@ -129,6 +129,10 @@ initFeaturePack(state, { render, notify, earnExperience });
 initMilestones(state, { renderGame: render, notify, earnExperience });
 initWorld(state, { render, notify });
 
+// Журнал событий всегда находится внизу игрового экрана, после динамических вкладок.
+const eventConsole = $("#notifications")?.closest(".event-console");
+if (eventConsole) $("#game")?.append(eventConsole);
+
 // Продажа товаров — кнопки создаются в ui.js
 $("#marketItems")?.addEventListener("click", (event) => {
   const button = event.target.closest("[data-sell]");
