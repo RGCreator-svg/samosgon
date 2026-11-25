@@ -95,6 +95,17 @@ function addCard(parent, title, description, details, buttonText, action, disabl
   return card;
 }
 
+export function queueMaterials(state, requirements) {
+  state.materialCart ??= {};
+  const added = {};
+  Object.entries(requirements || {}).forEach(([id, required]) => {
+    if (!PARTS.some(part => part.id === id)) return;
+    const missing = Math.max(0, Math.floor(Number(required) || 0) - (Number(state.parts[id]) || 0) - (Number(state.materialCart[id]) || 0));
+    if (missing) { state.materialCart[id] = (Number(state.materialCart[id]) || 0) + missing; added[id] = missing; }
+  });
+  return added;
+}
+
 function cartTotal(state) {
   return Object.entries(state.materialCart || {}).reduce((sum, [id, qty]) => sum + (PARTS.find(part => part.id === id)?.price || 0) * Math.max(0, Number(qty) || 0), 0);
 }
@@ -266,6 +277,15 @@ export function initEconomy(state, { render, notify }) {
   const game = $("#game");
   if (!nav || !game) return;
 
+  if (!$("#sharedPurchaseCart")) {
+    const cartSection = element("section", "panel shared-purchase-cart");
+    cartSection.id = "sharedPurchaseCart";
+    cartSection.append(element("h2", "", "🛒 Единая корзина закупок"), element("p", "economy-detail", "Материалы из строительства и мастерской объединяются по типу. Повторное добавление учитывает уже имеющийся запас и количество в корзине."));
+    const cartRoot = element("div", "material-cart"); cartRoot.id = "materialCart"; cartSection.append(cartRoot);
+    const eventPanel = $("#notifications")?.closest(".event-console");
+    if (eventPanel?.parentElement === game) game.insertBefore(cartSection, eventPanel); else game.append(cartSection);
+  }
+
   if (!$("#economy")) {
     const tab = element("button", "", "🏗️ Стройка");
     tab.dataset.tab = "economy";
@@ -277,7 +297,7 @@ export function initEconomy(state, { render, notify }) {
       <h2>🏗️ Строительство и снабжение</h2>
       <p>Хозяйство растёт. Теперь даже гвозди требуют финансового планирования.</p>
       <h3>Постройки</h3><div id="buildingCards" class="economy-grid"></div>
-      <h3>🛒 Корзина строительных материалов</h3><p class="economy-detail">Добавляйте недостающие детали из карточек построек, меняйте количество и оплачивайте весь заказ сразу. Материалы поступят на склад комплектующих.</p><div id="materialCart" class="material-cart"></div>
+      
       <h3>Магазин «СельхозТехСнаб»</h3><div id="partsCatalog" class="economy-grid"></div>
       <h3>Мои комплектующие</h3><div id="partsStock" class="parts-stock"></div>
       <h3>Доставка</h3><div id="partsDeliveries" class="parts-stock"></div>`;
@@ -303,10 +323,7 @@ export function initEconomy(state, { render, notify }) {
       const upgrade = building?.levels[state.buildings[id] || 0];
       if (!upgrade) return;
       state.materialCart ??= {};
-      Object.entries(upgrade.parts).forEach(([partId, required]) => {
-        const missing = Math.max(0, required - (Number(state.parts[partId]) || 0) - (Number(state.materialCart[partId]) || 0));
-        if (missing) state.materialCart[partId] = (Number(state.materialCart[partId]) || 0) + missing;
-      });
+      queueMaterials(state, upgrade.parts);
       notify(`Материалы для «${building.name}» добавлены в корзину.`);
     }
 
