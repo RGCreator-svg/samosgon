@@ -19,7 +19,7 @@ const EVENTS = [
 const FARMS = [
   { id:"greenhouse", name:"Теплица", icon:"🏡", cost:260, desc:"Каждый новый день даёт овощи.", yields:{potato:2,carrot:1} },
   { id:"irrigation", name:"Поливочная система", icon:"💧", cost:340, desc:"Улучшает урожай огорода и снижает износ.", yields:{potato:2,cabbage:1} },
-  { id:"apiary", name:"Пасека", icon:"🐝", cost:300, desc:"Приносит регулярный доход и помогает саду.", yields:{apple:1,pear:1} }
+  { id:"apiary", name:"Пасека", icon:"🐝", cost:300, desc:"Приносит регулярный доход и помогает саду.", yields:{apple:1,pear:1,honey:1} }
 ];
 
 function ensure(s) {
