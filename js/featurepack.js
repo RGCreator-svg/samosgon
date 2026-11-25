@@ -31,7 +31,7 @@ function ensure(s) {
   s.farmUpgrades ??= [];
   s.featureEvent ??= null;
 }
-function btn(label, attr, value, disabled=false) { const b=el("button","",label); b.dataset[attr]=value; b.disabled=disabled; return b; }
+function btn(label, attr, value, disabled=false) { const b=el("button","",label); b.setAttribute(`data-${attr}`,value); b.disabled=disabled; return b; }
 function card(parent,title,desc) { const c=el("article","feature-card"); c.append(el("h3","",title),el("p","",desc)); parent.append(c); return c; }
 
 function renderDistillation(s, root) {
