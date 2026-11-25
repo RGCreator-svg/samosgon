@@ -99,6 +99,7 @@ export function queuePart(state, id, quantity = 1) {
   if (!PARTS.some(part => part.id === id)) return;
   state.materialCart ??= {};
   state.materialCart[id] = Math.max(0, Number(state.materialCart[id]) || 0) + Math.max(1, Math.floor(Number(quantity) || 1));
+  renderMaterialCart(state);
 }
 
 export function queueMaterials(state, requirements) {
@@ -109,6 +110,7 @@ export function queueMaterials(state, requirements) {
     const missing = Math.max(0, Math.floor(Number(required) || 0) - (Number(state.parts[id]) || 0) - (Number(state.materialCart[id]) || 0));
     if (missing) { state.materialCart[id] = (Number(state.materialCart[id]) || 0) + missing; added[id] = missing; }
   });
+  renderMaterialCart(state);
   return added;
 }
 
