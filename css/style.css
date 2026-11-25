@@ -1594,3 +1594,30 @@ button:disabled {
 .world-scene.weather-heat .world-sun{box-shadow:0 0 0 13px #f7df9b33,0 0 48px #f8d98caa}
 .world-scene.weather-wind .world-cloud{animation-duration:7s}
 .world-scene.weather-frost .world-sun{opacity:.48;filter:hue-rotate(155deg)}
+
+
+/* Корзина материалов для строительства. */
+.building-material-action{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:6px 0}
+.building-material-action .economy-detail{flex:1 1 230px;margin:5px 0}
+.building-material-action button{flex:0 1 auto;font-size:.88rem}
+.material-cart{display:grid;gap:8px;padding:12px;border:1px solid #786744;border-radius:12px;background:linear-gradient(145deg,#292d24,#1d211b)}
+.material-cart-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 10px;border:1px solid #4d503d;border-radius:8px;background:#303328}
+.material-cart-info{display:grid;gap:2px;min-width:0}
+.material-cart-info small{color:#bdb49e;font-size:.8rem}
+.material-cart-controls{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.material-cart-controls button{min-width:34px;padding:5px 9px;margin:0}
+.material-cart-quantity{min-width:24px;text-align:center;color:#f0d7a3}
+.material-cart-controls .cart-remove{margin-left:5px;font-size:.8rem}
+.material-cart-footer{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-top:8px;border-top:1px solid #5c523c}
+.material-cart-footer>b{margin-right:auto;color:#f0d7a3;font-size:1.05rem}
+.material-cart-footer button{margin:0}
+.material-cart-footer .cart-warning{flex-basis:100%;color:#e4a17c}
+.material-cart .primary-button{background:#6b5735;border-color:#c2a36a}
+@media(max-width:560px){.material-cart-row{align-items:flex-start;flex-direction:column}.material-cart-controls{width:100%}.material-cart-footer{align-items:stretch}.material-cart-footer>b{flex-basis:100%}.material-cart-footer button{flex:1}}
+
+/* Нижняя консоль игрового журнала. */
+.event-console{margin-top:22px;border:1px solid #68704d;background:linear-gradient(180deg,#242a21,#171c17);box-shadow:inset 0 1px 0 #ffffff0a,0 8px 20px #0004}
+.event-console h2{display:flex;align-items:center;gap:8px;margin:0 0 12px;color:#c9d49b;font-family:ui-monospace,monospace;font-size:1rem;letter-spacing:.04em}
+.event-console h2:before{content:"";width:8px;height:8px;border-radius:50%;background:#91bd69;box-shadow:0 0 9px #91bd69;flex:0 0 auto}
+#notifications{max-height:210px;overflow-y:auto;padding:8px;border:1px solid #3c4838;border-radius:8px;background:#101510;scrollbar-color:#65744e #1a2119}
+.event-console .notification{border-left-color:#8eaa69;background:linear-gradient(90deg,#293329,#202820);color:#d5ddc8;font-family:ui-monospace,monospace;font-size:.82rem}
