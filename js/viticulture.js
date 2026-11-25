@@ -33,7 +33,7 @@ function ensure(s) {
 
 function addIcon(parent,file,alt) {
   const image=el("img","viticulture-icon");
-  image.src="dev/distillery-tycoon/src/assets/"+file;
+  image.src="assets/images/ui/"+file;
   image.alt=alt;
   image.loading="lazy";
   parent.append(image);
