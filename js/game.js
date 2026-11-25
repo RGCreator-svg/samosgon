@@ -9,6 +9,7 @@ import { initEconomy, renderEconomy, advanceDeliveries, addInventory } from "./e
 import { initEquipment, renderEquipment } from "./equipment.js";
 import { initExpansion, renderExpansion, advanceExpansionDay } from "./expansion.js";
 import { initFeaturePack, renderFeaturePack, advanceFeaturePackDay, getMarketMultiplier } from "./featurepack.js";
+import { initMilestones, renderMilestones } from "./progression.js";
 
 let state = loadGame();
 
@@ -55,6 +56,7 @@ function render() {
   renderEquipment(state);
   renderExpansion(state);
   renderFeaturePack(state);
+  renderMilestones(state);
   renderAdvisor(state);
   save();
 }
@@ -122,6 +124,7 @@ initEconomy(state, { render, notify });
 initEquipment(state, { render, notify });
 initExpansion(state, { render, notify, earnExperience });
 initFeaturePack(state, { render, notify, earnExperience });
+initMilestones(state, { renderGame: render, notify, earnExperience });
 
 // Продажа товаров — кнопки создаются в ui.js
 $("#marketItems")?.addEventListener("click", (event) => {
