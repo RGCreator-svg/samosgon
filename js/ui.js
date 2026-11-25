@@ -146,8 +146,30 @@ export function renderAdvisor(state) {
     ? advice.text
     : GRISHKA_DEFAULT_LINES[Math.abs(Number(state.day) || 1) % GRISHKA_DEFAULT_LINES.length];
 
+  const adviceId = advice?.id || "general";
   tip.textContent = `«${line}»`;
-  tip.dataset.advice = advice?.id || "general";
+  tip.dataset.advice = adviceId;
+
+  // Меняем настроение портрета вместе с текущим советом.
+  const advisor = tip.closest(".game-advisor");
+  if (advisor) {
+    advisor.classList.remove("mood-worried", "mood-happy", "mood-thinking", "mood-neutral");
+
+    const worried = ["low-energy", "low-hunger", "cold", "poor", "repair-still", "repair-barn", "repair-house", "garden", "full-warehouse"];
+    const happy = ["orchard-restored", "automation", "equipment", "skills"];
+    const thinking = ["ready-braga", "fermenting", "unspent-points", "orchard"];
+
+    const mood = worried.includes(adviceId)
+      ? "mood-worried"
+      : happy.includes(adviceId)
+        ? "mood-happy"
+        : thinking.includes(adviceId)
+          ? "mood-thinking"
+          : "mood-neutral";
+
+    advisor.classList.add(mood);
+    advisor.dataset.mood = mood.replace("mood-", "");
+  }
 }
 
 export function renderXP(state) {
