@@ -1,10 +1,11 @@
 import { addInventory, getStorageCapacity } from "./economy.js";
 
 const RECIPES = [
-  { id: "basic", name: "Обычная партия браги", cost: 10, days: 2, output: 3, tier: 0, description: "Небольшая партия на старом оборудовании." },
-  { id: "refined", name: "Улучшенная партия", cost: 35, days: 2, output: 5, tier: 2, description: "Технологическая партия для модернизированной установки." },
-  { id: "precision", name: "Точная партия", cost: 75, days: 1, output: 7, tier: 3, qualityBonus: 12, description: "Быстрая партия с повышенным качеством." },
-  { id: "master", name: "Мастерская партия", cost: 140, days: 2, output: 9, tier: 4, qualityBonus: 22, description: "Премиальная партия для полностью развитой установки." }
+  { id: "basic", name: "Сахарная брага", mashType: "sugar", outputItem: "braga", cost: 10, days: 2, output: 3, tier: 0, description: "Простая базовая партия из сахара." },
+  { id: "fruit", name: "Фруктовая брага", mashType: "fruit", outputItem: "fruit_braga", cost: 35, days: 2, output: 5, tier: 1, qualityBonus: 5, description: "Ароматная партия из яблок и других фруктов." },
+  { id: "grain", name: "Зерновая брага", mashType: "grain", outputItem: "grain_braga", cost: 55, days: 3, output: 5, tier: 2, qualityBonus: 8, description: "Зерновая партия для более сложной производственной ветки." },
+  { id: "precision", name: "Точная зерновая партия", mashType: "grain", outputItem: "grain_braga", cost: 95, days: 2, output: 7, tier: 3, qualityBonus: 16, description: "Улучшенная партия с повышенным качеством." },
+  { id: "master", name: "Мастерская сахарная партия", mashType: "sugar", outputItem: "braga", cost: 140, days: 2, output: 9, tier: 4, qualityBonus: 22, description: "Премиальная партия для полностью развитой установки."}
 ];
 
 const CHAPTERS = [
@@ -90,7 +91,7 @@ function renderProduction(state) {
     const card = el("article", "expansion-card");
     card.append(el("h3", "", recipe.name), el("p", "", recipe.description),
       el("p", "", `Стоимость: ${recipe.cost} монет · Срок: ${recipe.days} дн. · Выход: ${recipe.output} ед. · Ожидаемое качество: ${batchQuality(state, recipe)}/100`),
-      el("p", "", `Требуется ступень аппарата: ${recipe.tier}`));
+      el("p", "", `Сырьё: ${{sugar:"сахар",fruit:"фрукты",grain:"зерно"}[recipe.mashType]} · Требуется ступень аппарата: ${recipe.tier}`));
     const button = el("button", "", "Добавить в очередь");
     button.dataset.productionRecipe = recipe.id;
     button.disabled = state.equipmentTier < recipe.tier || state.money < recipe.cost || state.advancedProduction.queue.length >= 12;
@@ -246,8 +247,9 @@ export function initExpansion(state, { render, notify, earnExperience }) {
       state.money -= recipe.cost;
       state.advancedProduction.queue.push({
         id: state.advancedProduction.nextId++,
-        recipeId: recipe.id, name: recipe.name, days: recipe.days,
-        remaining: recipe.days, output: recipe.output, quality: batchQuality(state, recipe), ready: false
+        recipeId: recipe.id, name: recipe.name, mashType: recipe.mashType, outputItem: recipe.outputItem,
+        days: recipe.days, remaining: recipe.days, output: recipe.output,
+        quality: batchQuality(state, recipe), ready: false
       });
       startQueued(state);
       notify(`В очередь добавлено: «${recipe.name}». Прогноз качества — ${batchQuality(state, recipe)}/100.`);
@@ -261,7 +263,7 @@ export function initExpansion(state, { render, notify, earnExperience }) {
       if (!line?.ready) return;
       const expected = line.output;
       const oldQty = Math.max(0, Number(state.inventory.braga) || 0);
-      const received = addInventory(state, "braga", expected);
+      const received = addInventory(state, line.outputItem || "braga", expected);
       if (received > 0) state.bragaQuality = Math.round(((state.bragaQuality * oldQty) + (line.quality * received)) / Math.max(1, oldQty + received));
       if (received < expected) {
         line.output = expected - received;
@@ -323,7 +325,7 @@ export function advanceExpansionDay(state, notify) {
       if (!line.ready) continue;
       const expected = line.output;
       const oldQty = Math.max(0, Number(state.inventory.braga) || 0);
-      const received = addInventory(state, "braga", expected);
+      const received = addInventory(state, line.outputItem || "braga", expected);
       if (received > 0) state.bragaQuality = Math.round(((state.bragaQuality * oldQty) + (line.quality * received)) / Math.max(1, oldQty + received));
       if (received === expected) {
         state.advancedProduction.lines.splice(index, 1);
