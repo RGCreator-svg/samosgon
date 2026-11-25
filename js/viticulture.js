@@ -80,7 +80,7 @@ function render(s) {
 
   const batches=card(root,"⏳ Подвальные партии","Текущие партии созревают по игровому календарю.");
   if(!s.viticulture.batches.length)batches.append(el("p","economy-empty","Пока нет активных партий."));
-  s.viticulture.batches.forEach(job=>batches.append(el("p","",job.name+" · осталось "+job.remaining+" дн."+(job.ready?" · готово к сбору":""))));
+  s.viticulture.batches.forEach(job=>{const row=el("div","aging-row",job.name+" · "+(job.ready?"готово к сбору":"осталось "+job.remaining+" дн."));if(job.ready){const collect=el("button","","Забрать продукцию");collect.dataset.vitiCollect=String(job.id);row.append(collect);}batches.append(row);});
   const stock=card(root,"📦 Запасы винодельни","Виноград и мёд с собственных хозяйств попадают сюда же, что и купленные партии.");
   ["grapes","honey","yeast","sugar","bottles","corks","wine","mead","honey_braga","honey_spirit"].forEach(id=>stock.append(el("p","economy-detail",id+": "+(s.inventory[id]||0))));
 }
@@ -111,6 +111,8 @@ export function initViticulture(s,{render:renderGame,notify}) {
     for(let i=0;i<item.quantity;i++)state.viticulture.batches.push({id:state.viticulture.nextId++,name:recipe.name,remaining:recipe.days,days:recipe.days,output:recipe.amount,outputItem:recipe.output,ready:false});
   });
   $("#viticulture").addEventListener("click",event=>{
+    const collect=event.target.closest("[data-viti-collect]");
+    if(collect){const index=s.viticulture.batches.findIndex(job=>String(job.id)===collect.dataset.vitiCollect);const job=s.viticulture.batches[index];if(!job?.ready)return;const received=addInventory(s,job.outputItem,job.output);job.output-=received;if(job.output<=0)s.viticulture.batches.splice(index,1);notify("На склад помещено: "+received+" ед. продукции.");renderGame();return;}
     const build=event.target.closest("[data-viti-build]");
     if(build){
       const item=BUILDINGS.find(x=>x.id===build.dataset.vitiBuild);
@@ -158,12 +160,8 @@ export function advanceViticultureDay(s,notify){
     job.remaining--;
     if(job.remaining<=0){
       job.remaining=0;job.ready=true;
-      const received=addInventory(s,job.outputItem,job.output);
-      job.output-=received;
-      if(job.output<=0)notify("Готова партия: "+job.name+". Продукция помещена на склад.");
-      else notify("Партия "+job.name+" готова, но склад переполнен. Остаток ждёт места.");
+      notify("Партия готова: "+job.name+". Заберите её во вкладке «Винодельня».");
     }
   });
-  s.viticulture.batches=s.viticulture.batches.filter(job=>!job.ready||job.output>0);
 }
 export function renderViticulture(s){render(s);}
