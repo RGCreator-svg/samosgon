@@ -31,8 +31,18 @@ function ensure(s) {
   s.viticulture.nextId ??= 1;
 }
 
+function addIcon(parent,file,alt) {
+  const image=el("img","viticulture-icon");
+  image.src="dev/distillery-tycoon/src/assets/"+file;
+  image.alt=alt;
+  image.loading="lazy";
+  parent.append(image);
+}
+
 function card(root,title,description) {
   const c=el("article","feature-card");
+  const icon=title.includes("Постройки")?"icon_gear.png":title.includes("Поставщик")?"icon_shop.png":title.includes("линии")?"icon_flask.png":title.includes("партии")?"icon_barrel.png":"icon_leaf.png";
+  addIcon(c,icon,title);
   c.append(el("h3","",title),el("p","",description));
   root.append(c);
   return c;
@@ -59,6 +69,8 @@ function render(s) {
   const grid=el("div","economy-grid");
   SUPPLIES.forEach(item=>{
     const c=el("article","economy-card");
+    const icon=item.id==="honey"?"icon_honey.png":item.id==="water"?"icon_drop.png":item.id==="yeast"||item.id==="yeast_nutrient"?"icon_flask.png":item.id==="grapes"||item.id==="apple"||item.id==="pear"?"icon_leaf.png":"icon_barrel.png";
+    addIcon(c,icon,item.name);
     c.append(el("h4","",item.emoji+" "+item.name),el("p","",item.desc),el("p","economy-detail","Цена: "+item.price+" монет · На складе: "+(s.inventory[item.id]||0)));
     const button=el("button","","Добавить 1 шт. в общую корзину");
     button.dataset.vitiSupply=item.id;
