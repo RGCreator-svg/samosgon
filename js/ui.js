@@ -235,6 +235,7 @@ const GRISHKA_EVENT_REACTIONS = [
 ];
 
 let grishkaReactionCount = 0;
+let pendingGrishkaReaction = null;
 
 export function reactGrishkaToEvent(message) {
   const reaction = GRISHKA_EVENT_REACTIONS.find(entry => entry.test.test(String(message)));
@@ -243,6 +244,7 @@ export function reactGrishkaToEvent(message) {
   const line = reaction.lines[grishkaReactionCount % reaction.lines.length];
   grishkaReactionCount += 1;
 
+  pendingGrishkaReaction = { line, mood: reaction.mood };
   const tip = $("#grishkaTip");
   const advisor = tip?.closest(".game-advisor");
   if (tip) {
@@ -270,15 +272,19 @@ export function renderAdvisor(state) {
   const tip = $("#grishkaTip");
   if (!tip) return;
 
+  const reaction = pendingGrishkaReaction;
+  pendingGrishkaReaction = null;
   const advice = GRISHKA_ADVICE.find(entry => entry.when(state));
   const variants = advice && GRISHKA_VARIANTS[advice.id];
-  const line = variants
-    ? variants[(Math.max(1, Number(state.day) || 1) - 1) % variants.length]
-    : advice
-      ? advice.text
-      : GRISHKA_DEFAULT_LINES[Math.abs(Number(state.day) || 1) % GRISHKA_DEFAULT_LINES.length];
+  const line = reaction
+    ? reaction.line
+    : variants
+      ? variants[(Math.max(1, Number(state.day) || 1) - 1) % variants.length]
+      : advice
+        ? advice.text
+        : GRISHKA_DEFAULT_LINES[Math.abs(Number(state.day) || 1) % GRISHKA_DEFAULT_LINES.length];
 
-  const adviceId = advice?.id || "general";
+  const adviceId = reaction ? "event-reaction" : advice?.id || "general";
   tip.textContent = `«${line}»`;
   tip.dataset.advice = adviceId;
 
@@ -291,16 +297,19 @@ export function renderAdvisor(state) {
     const happy = ["orchard-restored", "automation", "equipment", "first-skills"];
     const thinking = ["ready-braga", "fermenting", "unspent-points", "orchard"];
 
-    const mood = worried.includes(adviceId)
-      ? "mood-worried"
-      : happy.includes(adviceId)
-        ? "mood-happy"
-        : thinking.includes(adviceId)
-          ? "mood-thinking"
-          : "mood-neutral";
+    const mood = reaction
+      ? `mood-${reaction.mood}`
+      : worried.includes(adviceId)
+        ? "mood-worried"
+        : happy.includes(adviceId)
+          ? "mood-happy"
+          : thinking.includes(adviceId)
+            ? "mood-thinking"
+            : "mood-neutral";
 
     advisor.classList.add(mood);
     advisor.dataset.mood = mood.replace("mood-", "");
+    if (reaction) advisor.classList.add("reaction-pop");
   }
 }
 
