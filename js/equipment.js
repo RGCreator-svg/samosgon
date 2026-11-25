@@ -21,7 +21,65 @@ function renderTrack(root,tiers,current,s,action){root.replaceChildren();tiers.f
 function canInstallModule(s,m){return (s.equipmentModules||[]).includes(m.id)||s.equipmentTier>=m.tier&&s.money>=m.cost&&Object.entries(m.parts).every(([id,n])=>(s.parts[id]||0)>=n);}
 function renderModules(s){const root=$("#moduleCatalog");if(!root)return;root.replaceChildren();const groups=[...new Set(EQUIPMENT_MODULES.map(m=>m.group))];groups.forEach(group=>{root.append(node("h3","module-group-title",group));const grid=node("div","module-grid");EQUIPMENT_MODULES.filter(m=>m.group===group).forEach(m=>{const owned=s.equipmentModules.includes(m.id);const c=node("article","module-card"+(owned?" installed":""));c.append(node("h4","",m.name),node("p","",m.desc),node("p","module-meta","Ступень аппарата: "+m.tier+" · "+m.cost+" монет"));const parts=Object.entries(m.parts).map(([id,n])=>id+": "+n).join(" · ");c.append(node("small","module-parts",parts||"Без деталей"));if(owned)c.append(node("span","tech-status","Установлен"));else{const b=node("button","","Установить модуль");b.dataset.installModule=m.id;b.disabled=!canInstallModule(s,m);c.append(b);if(s.equipmentTier<m.tier)c.append(node("small","tech-locked","Сначала улучшите аппарат до нужной ступени."));}grid.append(c);});root.append(grid);});}
 export function getEquipmentProfile(s,mashType="sugar"){const owned=new Set(s.equipmentModules||[]);const has=id=>owned.has(id);let mode="pot",quality=0,output=0,flavour=0;if(has("plate_column")&&has("dephlegmator"))mode="hybrid";if(has("packed_column")&&has("dephlegmator"))mode="rectification";if(has("copper_head"))flavour+=10;if(has("sight_glass"))quality+=3;if(has("auto_cooling"))quality+=8;if(has("fraction_receiver"))quality+=5;if(has("carbon_filter"))quality+=7;if(has("grain_screen")&&mashType==="grain")quality+=8;if(has("fruit_filter")&&mashType==="fruit")quality+=8;if(has("sugar_tank")&&mashType==="sugar")quality+=8;if(has("airlock"))quality+=3;if(has("cooling_jacket"))quality+=5;if(has("mixer")&&mashType!=="sugar")quality+=4;if(has("oak_module"))flavour+=6;if(mode==="hybrid"){quality+=8;output-=1;}if(mode==="rectification"){quality+=18;flavour-=8;}if(mashType==="fruit")flavour+=12;if(mashType==="grain")flavour+=8;return {mode,quality,output,flavour,installed:owned.size};}
-export function renderEquipment(s){const equipment=$("#equipmentTrack"),automation=$("#automationTrack"),summary=$("#equipmentSummary");if(!equipment||!automation||!summary)return;renderTrack(equipment,EQUIPMENT_TIERS,s.equipmentTier,s,"equipment");renderTrack(automation,AUTOMATION_TIERS,s.automationTier,s,"automation");summary.textContent="Оборудование: "+(EQUIPMENT_TIERS[s.equipmentTier]?.name||"неизвестно")+" · Автоматика: "+(AUTOMATION_TIERS[s.automationTier]?.name||"неизвестно")+" · Модулей: "+s.equipmentModules.length;renderModules(s);}
-export function initEquipment(s,{render,notify}){ensureState(s);const nav=$(".navigation"),game=$("#game");if(!nav||!game)return;if(!$("#equipment")){const tab=node("button","","⚙️ Оборудование");tab.dataset.tab="equipment";nav.append(tab);const section=node("section","tab-content panel hidden");section.id="equipment";section.innerHTML='<h2>⚙️ Мастерская оборудования</h2><p>Собирай конфигурацию из модулей. Все эффекты ниже — игровые характеристики, а не инструкция по сборке реального оборудования.</p><div id="equipmentSummary" class="equipment-summary"></div><h3>Базовые ступени аппарата</h3><div id="equipmentTrack" class="tech-track"></div><h3>Автоматизация</h3><div id="automationTrack" class="tech-track"></div><h3>Каталог модулей и аксессуаров</h3><div id="moduleCatalog"></div>';game.append(section);}
+function renderVisualAssembly(s){
+  const root=$("#equipmentVisual");
+  if(!root)return;
+  const owned=new Set(s.equipmentModules||[]);
+  const has=id=>owned.has(id);
+  const tier=Math.max(0,Math.min(4,Number(s.equipmentTier)||0));
+  const rect=has("packed_column")&&has("dephlegmator");
+  const hybrid=!rect&&has("plate_column")&&has("dephlegmator");
+  const column=rect||hybrid;
+  const copper=has("copper_head");
+  const condenser=has("basic_condenser");
+  const arm=has("lyne_arm");
+  const glass=has("sight_glass");
+  const sensor=has("safety_monitor")||has("auto_cooling");
+  const labels=[];
+  if(copper)labels.push("Медный шлем");
+  if(arm)labels.push("Паропровод");
+  if(condenser)labels.push("Холодильник");
+  if(has("plate_column"))labels.push("Тарельчатая секция");
+  if(has("dephlegmator"))labels.push("Дефлегматор");
+  if(has("packed_column"))labels.push("Насадочная колонна");
+  if(has("fraction_receiver"))labels.push("Приёмник");
+  const status=rect?"Ректификация":hybrid?"Гибридный режим":tier>=1||copper||arm?"Дистилляция":"Базовый аппарат";
+  const stage=rect?"Колонна с насадкой":hybrid?"Модульная колонна":tier>=2?"Улучшенный перегонный куб":"Старый перегонный куб";
+  root.innerHTML=`<div class="still-scene" data-mode="${rect?"rectification":hybrid?"hybrid":"pot"}">
+    <div class="still-scene-heading"><div><span class="still-kicker">ТЕКУЩАЯ КОНФИГУРАЦИЯ</span><h3>${stage}</h3></div><span class="still-mode">${status}</span></div>
+    <svg class="still-illustration" viewBox="0 0 760 390" role="img" aria-label="Иллюстрация установленной конфигурации аппарата">
+      <defs>
+        <linearGradient id="stillCopper" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f0c58a"/><stop offset=".45" stop-color="#a9663d"/><stop offset="1" stop-color="#573a2c"/></linearGradient>
+        <linearGradient id="stillSteel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e1e5dc"/><stop offset=".5" stop-color="#7f918c"/><stop offset="1" stop-color="#3c504d"/></linearGradient>
+        <linearGradient id="stillGlass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#b8e4d7" stop-opacity=".8"/><stop offset="1" stop-color="#477d77" stop-opacity=".35"/></linearGradient>
+        <filter id="stillGlow"><feGaussianBlur stdDeviation="7"/></filter>
+      </defs>
+      <ellipse cx="375" cy="340" rx="280" ry="24" fill="#050806" opacity=".55"/>
+      <path d="M110 342H650" stroke="#78694d" stroke-width="5" stroke-linecap="round"/>
+      <path d="M175 336V300M575 336V300" stroke="#6c5037" stroke-width="13" stroke-linecap="round"/>
+      <rect x="245" y="211" width="250" height="112" rx="42" fill="url(#stillCopper)" stroke="#e5bb82" stroke-width="4"/>
+      <ellipse cx="370" cy="220" rx="125" ry="24" fill="#d69b65" stroke="#f0c58a" stroke-width="4"/>
+      <path d="M275 267Q370 291 465 267" fill="none" stroke="#f0c58a" stroke-opacity=".5" stroke-width="4"/>
+      <path d="M295 321V338M445 321V338" stroke="#b47b4f" stroke-width="12"/>
+      <circle cx="370" cy="268" r="24" fill="url(#stillGlass)" stroke="#d7e4d8" stroke-width="4" ${glass?"":"opacity=".18""}/>
+      ${copper?'<path d="M300 205Q300 161 370 142Q440 161 440 205Z" fill="url(#stillCopper)" stroke="#f0c58a" stroke-width="4"/><path d="M370 143V122" stroke="#e8bc82" stroke-width="10"/>':'<path d="M300 204Q370 175 440 204" fill="none" stroke="#92724d" stroke-width="7"/>'}
+      ${arm?'<path d="M370 122V96Q370 73 400 73H462Q485 73 485 96V111" fill="none" stroke="url(#stillCopper)" stroke-width="17" stroke-linecap="round"/><path d="M485 111H526" stroke="#c78a59" stroke-width="13" stroke-linecap="round"/>':''}
+      ${condenser?'<rect x="516" y="91" width="150" height="47" rx="19" fill="url(#stillSteel)" stroke="#d4e0d9" stroke-width="4"/><path d="M535 99V130M550 96V133M565 96V133M580 96V133M595 96V133M610 96V133M625 96V133M640 99V130" stroke="#526864" stroke-width="3"/><path d="M666 115H691V181" fill="none" stroke="#b8d7d0" stroke-width="8" stroke-linecap="round"/>':''}
+      ${column?'<rect x="336" y="35" width="68" height="108" rx="12" fill="url(#stillSteel)" stroke="#d8e0d8" stroke-width="4"/><path d="M343 55H397M343 78H397M343 101H397M343 124H397" stroke="#52645f" stroke-width="4"/><rect x="322" y="27" width="96" height="13" rx="6" fill="#a9b8ad"/>':''}
+      ${hybrid?'<path d="M404 62H462Q482 62 482 82V92" fill="none" stroke="#c98a58" stroke-width="9" stroke-linecap="round"/><rect x="458" y="88" width="54" height="28" rx="10" fill="url(#stillSteel)" stroke="#d9e0d8" stroke-width="3"/>':''}
+      ${rect?'<rect x="320" y="12" width="100" height="18" rx="7" fill="#c5d0c6" stroke="#eef0e8" stroke-width="3"/><path d="M420 20H484V64H465" fill="none" stroke="#a9b8ad" stroke-width="9" stroke-linecap="round"/><rect x="453" y="60" width="62" height="36" rx="11" fill="url(#stillSteel)" stroke="#e2e9df" stroke-width="3"/>':''}
+      ${sensor?'<rect x="205" y="225" width="28" height="48" rx="6" fill="#303d38" stroke="#b9d6a0" stroke-width="3"/><circle cx="219" cy="238" r="5" fill="#a9d985"/><path d="M219 273V291" stroke="#b9d6a0" stroke-width="3"/>':''}
+      ${has("fraction_receiver")?'<path d="M680 181H706V222" fill="none" stroke="#b8d7d0" stroke-width="6"/><path d="M687 222H725L715 290H697Z" fill="url(#stillGlass)" stroke="#d7e4d8" stroke-width="3"/>':''}
+      <path d="M120 330Q160 270 200 330" fill="none" stroke="#8a9a64" stroke-width="8" opacity=".7"/>
+      <circle cx="160" cy="293" r="8" fill="#a8b66e"/><circle cx="183" cy="309" r="6" fill="#a8b66e"/>
+      <text x="370" y="375" text-anchor="middle" fill="#c9b991" font-size="13" letter-spacing="3">МАСТЕРСКАЯ САМОГОН 2.0</text>
+    </svg>
+    <div class="still-installed"><b>На аппарате:</b><span>${labels.length?labels.join(" · "):"Пока установлены только базовые узлы"}</span></div>
+    <div class="still-progress"><span>Развитие оборудования</span><b>${tier+1} / 5 ступеней · ${(s.equipmentModules||[]).length} модулей</b></div>
+    <div class="still-progress-track"><i style="width:${(tier+1)*20}%"></i></div>
+  </div>`;
+}
+export function renderEquipment(s){const equipment=$("#equipmentTrack"),automation=$("#automationTrack"),summary=$("#equipmentSummary");if(!equipment||!automation||!summary)return;renderVisualAssembly(s);renderTrack(equipment,EQUIPMENT_TIERS,s.equipmentTier,s,"equipment");renderTrack(automation,AUTOMATION_TIERS,s.automationTier,s,"automation");summary.textContent="Оборудование: "+(EQUIPMENT_TIERS[s.equipmentTier]?.name||"неизвестно")+" · Автоматика: "+(AUTOMATION_TIERS[s.automationTier]?.name||"неизвестно")+" · Модулей: "+s.equipmentModules.length;renderModules(s);}
+export function initEquipment(s,{render,notify}){ensureState(s);const nav=$(".navigation"),game=$("#game");if(!nav||!game)return;if(!$("#equipment")){const tab=node("button","","⚙️ Оборудование");tab.dataset.tab="equipment";nav.append(tab);const section=node("section","tab-content panel hidden");section.id="equipment";section.innerHTML='<h2>⚙️ Мастерская оборудования</h2><div id="equipmentVisual"></div><p>Собирай конфигурацию из модулей. Все эффекты ниже — игровые характеристики, а не инструкция по сборке реального оборудования.</p><div id="equipmentSummary" class="equipment-summary"></div><h3>Базовые ступени аппарата</h3><div id="equipmentTrack" class="tech-track"></div><h3>Автоматизация</h3><div id="automationTrack" class="tech-track"></div><h3>Каталог модулей и аксессуаров</h3><div id="moduleCatalog"></div>';game.append(section);}
 nav.addEventListener("click",e=>{const b=e.target.closest('[data-tab="equipment"]');if(!b)return;document.querySelectorAll(".tab-content").forEach(x=>x.classList.toggle("hidden",x.id!=="equipment"));nav.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x===b));});
 $("#equipment").addEventListener("click",e=>{const tech=e.target.closest("[data-tech-action]");if(tech){const isEq=tech.dataset.techAction==="equipment",tiers=isEq?EQUIPMENT_TIERS:AUTOMATION_TIERS,current=isEq?s.equipmentTier:s.automationTier,next=tiers[current+1];if(!next||!canAfford(s,next)){notify("Не выполнены требования для улучшения.");return;}s.money-=next.cost;Object.entries(next.parts).forEach(([id,n])=>s.parts[id]-=n);if(isEq)s.equipmentTier++;else s.automationTier++;notify("Открыта ступень: "+next.name);render();return;}const install=e.target.closest("[data-install-module]");if(install){const m=EQUIPMENT_MODULES.find(x=>x.id===install.dataset.installModule);if(!m||s.equipmentModules.includes(m.id)||s.equipmentTier<m.tier||s.money<m.cost||!Object.entries(m.parts).every(([id,n])=>(s.parts[id]||0)>=n))return;s.money-=m.cost;Object.entries(m.parts).forEach(([id,n])=>s.parts[id]-=n);s.equipmentModules.push(m.id);notify("Установлен модуль: "+m.name);render();return;}});renderEquipment(s);}
