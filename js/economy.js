@@ -100,7 +100,7 @@ export function registerCartHandler(kind, handler) { CART_HANDLERS.set(kind, han
 export function queuePurchase(state, purchase) {
   state.purchaseCart ??= [];
   const item = state.purchaseCart.find(entry => entry.key === purchase.key);
-  if (item) item.quantity += Math.max(1, Number(purchase.quantity) || 1);
+  if (item) { if (purchase.stackable) item.quantity += Math.max(1, Number(purchase.quantity) || 1); }
   else state.purchaseCart.push({ ...purchase, quantity: Math.max(1, Number(purchase.quantity) || 1) });
   renderMaterialCart(state);
 }
