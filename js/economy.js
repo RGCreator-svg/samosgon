@@ -108,10 +108,14 @@ export function queuePurchase(state, purchase) {
 function cartTotals(state) {
   const purchases = state.purchaseCart || [];
   const parts = {};
-  purchases.forEach(item => Object.entries(item.parts || {}).forEach(([id, qty]) => { parts[id] = (parts[id] || 0) + qty * item.quantity; }));
+  const inventory = {};
+  purchases.forEach(item => {
+    Object.entries(item.parts || {}).forEach(([id, qty]) => { parts[id] = (parts[id] || 0) + qty * item.quantity; });
+    Object.entries(item.consume || {}).forEach(([id, qty]) => { inventory[id] = (inventory[id] || 0) + qty * item.quantity; });
+  });
   const goodsCost = purchases.reduce((sum, item) => sum + item.cost * item.quantity, 0);
   const partsCost = Object.entries(state.materialCart || {}).reduce((sum, [id, qty]) => sum + (PARTS.find(part => part.id === id)?.price || 0) * qty, 0);
-  return { purchases, parts, money: goodsCost + partsCost };
+  return { purchases, parts, inventory, money: goodsCost + partsCost };
 }
 export function queuePart(state, id, quantity = 1) {
   if (!PARTS.some(part => part.id === id)) return;
@@ -409,12 +413,14 @@ export function initEconomy(state, { render, notify }) {
     if (action === "pay") {
       const totals = cartTotals(state);
       const shortages = Object.entries(totals.parts).filter(([partId, qty]) => (Number(state.parts[partId]) || 0) < qty);
-      if ((!totals.purchases.length && !Object.keys(state.materialCart || {}).length) || (Number(state.money) || 0) < totals.money || shortages.length) {
+      const inventoryShortages = Object.entries(totals.inventory).filter(([itemId, qty]) => (Number(state.inventory[itemId]) || 0) < qty);
+      if ((!totals.purchases.length && !Object.keys(state.materialCart || {}).length) || (Number(state.money) || 0) < totals.money || shortages.length || inventoryShortages.length) {
         notify("Невозможно оплатить корзину: проверьте деньги и комплектующие.");
         renderEconomy(state); return;
       }
       state.money -= totals.money;
       Object.entries(totals.parts).forEach(([partId, qty]) => { state.parts[partId] = (Number(state.parts[partId]) || 0) - qty; });
+      Object.entries(totals.inventory).forEach(([itemId, qty]) => { state.inventory[itemId] = (Number(state.inventory[itemId]) || 0) - qty; });
       Object.entries(state.materialCart || {}).forEach(([partId, qty]) => { state.parts[partId] = (Number(state.parts[partId]) || 0) + qty; });
       const purchases = [...totals.purchases];
       state.materialCart = {};
