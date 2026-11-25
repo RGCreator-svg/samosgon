@@ -95,6 +95,12 @@ function addCard(parent, title, description, details, buttonText, action, disabl
   return card;
 }
 
+export function queuePart(state, id, quantity = 1) {
+  if (!PARTS.some(part => part.id === id)) return;
+  state.materialCart ??= {};
+  state.materialCart[id] = Math.max(0, Number(state.materialCart[id]) || 0) + Math.max(1, Math.floor(Number(quantity) || 1));
+}
+
 export function queueMaterials(state, requirements) {
   state.materialCart ??= {};
   const added = {};
@@ -202,7 +208,10 @@ export function renderEconomy(state) {
     const card = element("article", "economy-card");
     card.append(element("h3", "", `${part.emoji} ${part.name}`), element("p", "", part.description));
     lines.forEach(line => card.append(element("p", "economy-detail", line)));
-    const orderButton = element("button", "", "Заказать 1 шт.");
+    const cartButton = element("button", "", "Добавить 1 шт. в общую корзину");
+    cartButton.dataset.economyAction = `cartOrder:${part.id}`;
+    card.append(cartButton);
+    const orderButton = element("button", "", "Заказать с доставкой");
     orderButton.dataset.economyAction = `order:${part.id}`;
     orderButton.disabled = state.money < part.price;
     card.append(orderButton);
@@ -317,6 +326,13 @@ export function initEconomy(state, { render, notify }) {
     const button = event.target.closest("[data-economy-action]");
     if (!button) return;
     const [action, id] = button.dataset.economyAction.split(":");
+
+    if (action === "cartOrder") {
+      const part = PARTS.find(item => item.id === id);
+      if (!part) return;
+      queuePart(state, id, 1);
+      notify(`${part.name} добавлены в общую корзину. Повторные добавления суммируются.`);
+    }
 
     if (action === "add") {
       const building = BUILDINGS.find(item => item.id === id);
