@@ -132,7 +132,7 @@ export function initViticulture(s,{render:renderGame,notify}) {
     const batch=event.target.closest("[data-viti-batch]");
     if(batch){
       const recipes={
-        wine:{id:"wine",name:"Виноградное вино",consume:{grapes:5,yeast:1,yeast_nutrient:1,bottles:2,corks:2,labels:2},days:3,agingDays:2,output:"wine",amount:2,needs:["vineyard","winePress","wineCellar"],skill:"cellar_aging"},
+        wine:{id:"wine",name:"Виноградное вино",consume:{grapes:5,yeast:1,yeast_nutrient:1,bottles:2,corks:2,labels:2},days:3,agingDays:2,output:"wine",amount:2,needs:["winePress","wineCellar","wineFilter"],skill:"cellar_aging"},
         mead:{id:"mead",name:"Медовуха",consume:{honey:4,water:2,yeast:1,yeast_nutrient:1,bottles:3,corks:3},days:3,agingDays:1,output:"mead",amount:3,needs:["meadery"],skill:"mead_brewing"},
         honeyMash:{id:"honeyMash",name:"Медовая брага",consume:{honey:6,water:2,yeast:1,yeast_nutrient:1},days:3,output:"honey_braga",amount:3,needs:["meadery"],skill:"honey_distillation"}
       };
