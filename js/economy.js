@@ -190,6 +190,8 @@ function renderMaterialCart(state) {
   const clear = element("button", "", "Очистить"); clear.dataset.economyAction = "clear";
   footer.append(pay, clear);
   if ((Number(state.money) || 0) < total) footer.append(element("small", "cart-warning", `Не хватает ${total - (Number(state.money) || 0)} монет.`));
+  if (missingParts) footer.append(element("small", "cart-warning", "Не хватает комплектующих на складе. Добавьте нужные позиции в корзину."));
+  if (missingGoods) footer.append(element("small", "cart-warning", "Не хватает производственного сырья. Его можно заказать у поставщика в соответствующей вкладке."));
   root.append(footer);
 }
 
