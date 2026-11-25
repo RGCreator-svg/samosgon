@@ -330,7 +330,7 @@ export function initEconomy(state, { render, notify }) {
   if (!$("#sharedPurchaseCart")) {
     const cartSection = element("section", "panel shared-purchase-cart");
     cartSection.id = "sharedPurchaseCart";
-    cartSection.append(element("h2", "", "🛒 Единая корзина закупок"), element("p", "economy-detail", "Материалы из строительства и мастерской объединяются по типу. Повторное добавление учитывает уже имеющийся запас и количество в корзине."));
+    cartSection.append(element("h2", "", "🛒 Единая корзина закупок"), element("p", "economy-detail", "Здесь объединяются товары, сырьё, комплектующие, строительство, услуги и технологические улучшения из всех вкладок. Одинаковые позиции суммируются, а недостающие детали автоматически добавляются к заказу."));
     const cartRoot = element("div", "material-cart"); cartRoot.id = "materialCart"; cartSection.append(cartRoot);
     const eventPanel = $("#notifications")?.closest(".event-console");
     if (eventPanel?.parentElement === game) game.insertBefore(cartSection, eventPanel); else game.append(cartSection);
