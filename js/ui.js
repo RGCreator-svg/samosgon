@@ -417,7 +417,7 @@ export function renderMarket(state) {
     stock.textContent = `В запасе: ${quantity}`;
 
     const price = document.createElement("p");
-    const multiplier = state.skills.includes("bargain") ? 1.2 : 1;
+    const multiplier = (state.skills.includes("bargain") ? 1.2 : 1) * (Number(state.market?.multiplier) || 1) * (state.specialization === "merchant" ? 1.1 : 1);
     const salePrice = Math.round(item.price * multiplier);
     price.textContent = `Цена: ${salePrice} монет за штуку`;
 
