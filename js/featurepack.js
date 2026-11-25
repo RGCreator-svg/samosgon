@@ -23,6 +23,7 @@ function ensure(s) {
   s.market ??= { multiplier:1, trend:"ровный", lastShiftDay:0 };
   s.specialization ??= null;
   s.distillation ??= { active:false, quality:0, result:0 };
+  s.bragaQuality = Math.max(0, Math.min(100, Number(s.bragaQuality ?? 55)));
   s.barrelAging ??= [];
   s.farmUpgrades ??= [];
   s.featureEvent ??= null;
@@ -93,7 +94,7 @@ export function initFeaturePack(s,{render,notify,earnExperience}) {
   $("#featurePack").addEventListener("click",e=>{
     const b=e.target.closest("button");if(!b)return;
     if(b.dataset.distillStart){if((s.inventory.braga||0)<3||s.distillation.result>0)return;s.inventory.braga-=3;s.distillation.active=true;notify("Игровая перегонка запущена. Выбери режим контроля качества.");}
-    if(b.dataset.distillCut){if(!s.distillation.active)return;const mode=b.dataset.distillCut;const bonus=s.specialization==="artisan"?8:0;const values={careful:{quality:92,output:2},balanced:{quality:76,output:3},yield:{quality:52,output:4}};const v=values[mode];s.distillation={active:false,quality:Math.min(100,v.quality+bonus),result:v.output};notify(`Перегонка завершена: ${s.distillation.result} ед., качество ${s.distillation.quality}/100.`);earnExperience(14);}
+    if(b.dataset.distillCut){if(!s.distillation.active)return;const mode=b.dataset.distillCut;const bonus=s.specialization==="artisan"?8:0;const values={careful:{quality:24,output:2},balanced:{quality:8,output:3},yield:{quality:-12,output:4}};const v=values[mode];const equipmentBonus=(Number(s.equipmentTier)||0)*4;const baseQuality=Number(s.bragaQuality)||55;s.distillation={active:false,quality:Math.max(20,Math.min(100,Math.round(baseQuality+v.quality+bonus+equipmentBonus))),result:v.output};notify(`Перегонка завершена: ${s.distillation.result} ед., качество ${s.distillation.quality}/100.`);earnExperience(14);}
     if(b.dataset.distillCollect){const n=s.distillation.result;const got=addInventory(s,"spirit",n);if(got===n)s.distillation.result=0;else s.distillation.result-=got;if(got)notify(`На склад помещено ${got} ед. спирта-сырца.`);}
     if(b.dataset.specialize){if(s.specialization||(s.skillPoints||0)<3)return;s.skillPoints-=3;s.specialization=b.dataset.specialize;notify(`Выбрана специализация: ${SPECIALIZATIONS.find(x=>x.id===s.specialization).name}.`);}
     if(b.dataset.eventChoice!==undefined){const event=EVENTS.find(x=>x.id===s.featureEvent?.id);const choice=event?.choices[Number(b.dataset.eventChoice)];if(!choice || ((choice.money||0)<0 && s.money<Math.abs(choice.money)))return;s.money=Math.max(0,s.money+(choice.money||0));s.reputation=Math.max(0,Math.min(100,(s.reputation||0)+(choice.reputation||0)));s.market.multiplier=Math.max(.75,Math.min(1.35,s.market.multiplier+(choice.market||0)));s.maintenance=Math.max(0,Math.min(100,(s.maintenance||100)+(choice.maintenance||0)));if(choice.xp)earnExperience(choice.xp);notify(`Решение принято: «${event.title}».`);s.featureEvent=null;}
