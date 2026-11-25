@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Интерактивный Самогонный Аппарат (DOM + CSS)</title>
+<style>
+  * { box-sizing: border-box; user-select: none; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: #14171c;
+    color: #e6edf3;
+    font-family: system-ui, -apple-system, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+  }
+
+  /* Сцена аппарата */
+  .scene {
+    position: relative;
+    width: 720px;
+    height: 440px;
+    background: radial-gradient(circle at 50% 40%, #222730 0%, #12151a 100%);
+    border: 2px solid #30363d;
+    border-radius: 16px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+    overflow: hidden;
+  }
+
+  /* Трубки (SVG внутри DOM) */
+  .pipes {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .pipe-metal {
+    fill: none;
+    stroke: #8b949e;
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .pipe-vapor {
+    fill: none;
+    stroke: #58a6ff;
+    stroke-width: 4;
+    stroke-dasharray: 8 12;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .pipe-vapor.active {
+    opacity: 0.85;
+    animation: flow 1s linear infinite;
+  }
+  @keyframes flow {
+    to { stroke-dashoffset: -20; }
+  }
+
+  /* 1. Горелка и огонь */
+  .burner {
+    position: absolute;
+    bottom: 24px;
+    left: 85px;
+    width: 130px;
+    height: 18px;
+    background: #30363d;
+    border-radius: 4px;
+    border-top: 3px solid #484f58;
+  }
+  .flames {
+    position: absolute;
+    bottom: 42px;
+    left: 95px;
+    width: 110px;
+    height: 36px;
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.2s;
+    transform-origin: bottom;
+  }
+  .flame {
+    width: 18px;
+    height: 32px;
+    background: radial-gradient(circle at 50% 80%, #fff 5%, #38bdf8 40%, #f97316 85%, transparent 100%);
+    border-radius: 50% 50% 20% 20%;
+    animation: flicker 0.25s infinite alternate;
+  }
+  .flame:nth-child(2) { animation-delay: 0.08s; height: 36px; }
+  .flame:nth-child(3) { animation-delay: 0.15s; }
+  .flame:nth-child(4) { animation-delay: 0.05s; height: 35px; }
+  @keyframes flicker {
+    from { transform: scaleY(0.92) skewX(-2deg); }
+    to   { transform: scaleY(1.06) skewX(2deg); }
+  }
+
+  /* 2. Перегонный куб */
+  .boiler {
+    position: absolute;
+    bottom: 70px;
+    left: 60px;
+    width: 180px;
+    height: 210px;
+    background: linear-gradient(90deg, #6e7681 0%, #c9d1d9 30%, #8b949e 75%, #484f58 100%);
+    border-radius: 24px 24px 12px 12px;
+    border: 2px solid #30363d;
+    box-shadow: inset 0 -10px 20px rgba(0,0,0,0.4);
+    overflow: hidden;
+    transition: transform 0.05s;
+  }
+  .boiler.shake {
+    animation: shake 0.15s infinite;
+  }
+  @keyframes shake {
+    0% { transform: translate(0, 0); }
+    25% { transform: translate(-2px, 1px); }
+    50% { transform: translate(2px, -1px); }
+    75% { transform: translate(-1px, -2px); }
+    100% { transform: translate(1px, 2px); }
+  }
+  /* Смотровое окно браги */
+  .boiler-window {
+    position: absolute;
+    inset: 25px 20px 18px 20px;
+    background: #161b22;
+    border-radius: 12px;
+    border: 3px solid #30363d;
+    overflow: hidden;
+  }
+  .mash {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 75%;
+    background: linear-gradient(180deg, #d97706 0%, #92400e 100%);
+    transition: height 0.5s;
+  }
+  .bubble {
+    position: absolute;
+    bottom: 4px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    animation: rise linear forwards;
+  }
+  @keyframes rise {
+    to { transform: translateY(-130px) scale(1.4); opacity: 0; }
+  }
+
+  /* Термометр на кубе */
+  .gauge {
+    position: absolute;
+    top: 115px;
+    left: 122px;
+    width: 56px;
+    height: 56px;
+    background: #f0f6fc;
+    border: 4px solid #30363d;
+    border-radius: 50%;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .gauge::after {
+    content: "";
+    width: 8px;
+    height: 8px;
+    background: #1f2328;
+    border-radius: 50%;
+    z-index: 2;
+  }
+  .needle {
+    position: absolute;
+    bottom: 50%;
+    left: calc(50% - 1.5px);
+    width: 3px;
+    height: 20px;
+    background: #cf222e;
+    transform-origin: bottom center;
+    transform: rotate(-120deg);
+    transition: transform 0.2s ease-out;
+  }
+  .temp-readout {
+    position: absolute;
+    top: 175px;
+    left: 115px;
+    width: 70px;
+    text-align: center;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: bold;
+    padding: 2px 0;
+    color: #58a6ff;
+  }
+
+  /* 3. Сухопарник */
+  .thumper {
+    position: absolute;
+    top: 140px;
+    left: 310px;
+    width: 76px;
+    height: 110px;
+    background: rgba(200, 230, 255, 0.14);
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top: 12px solid #8b949e;
+    border-radius: 10px 10px 16px 16px;
+    backdrop-filter: blur(2px);
+    overflow: hidden;
+  }
+  .fusel {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 0%;
+    background: rgba(234, 179, 8, 0.45);
+    transition: height 0.5s;
+  }
+
+  /* 4. Холодильник со змеевиком */
+  .condenser {
+    position: absolute;
+    top: 120px;
+    left: 455px;
+    width: 90px;
+    height: 165px;
+    background: rgba(56, 189, 248, 0.18);
+    border: 2px solid #58a6ff;
+    border-radius: 12px;
+    box-shadow: inset 0 0 20px rgba(56, 189, 248, 0.25);
+  }
+  .condenser-label {
+    position: absolute;
+    bottom: 6px;
+    width: 100%;
+    text-align: center;
+    font-size: 11px;
+    color: #79c0ff;
+  }
+
+  /* 5. Приёмная банка и капли */
+  .drop {
+    position: absolute;
+    top: 295px;
+    left: 615px;
+    width: 8px;
+    height: 11px;
+    background: #a5f3fc;
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    opacity: 0;
+  }
+  .drop.fall {
+    animation: drip 0.55s ease-in forwards;
+  }
+  @keyframes drip {
+    0%   { transform: translateY(0) scale(0.7); opacity: 1; }
+    100% { transform: translateY(105px) scale(1); opacity: 0.9; }
+  }
+
+  .jar {
+    position: absolute;
+    bottom: 24px;
+    left: 565px;
+    width: 108px;
+    height: 130px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top: 8px solid #8b949e;
+    border-radius: 14px 14px 18px 18px;
+    overflow: hidden;
+  }
+  .product {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 0%;
+    background: linear-gradient(180deg, rgba(165, 243, 252, 0.65), rgba(56, 189, 248, 0.45));
+    transition: height 0.3s;
+  }
+  .jar-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+    text-shadow: 0 1px 4px #000;
+  }
+
+  /* Панель управления */
+  .controls {
+    width: 720px;
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  .slider-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1;
+  }
+  input[type="range"] { width: 100%; cursor: pointer; }
+  .status {
+    flex: 1.4;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #8b949e;
+  }
+  .status strong { color: #e6edf3; }
+  button {
+    background: #238636;
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  button:hover { background: #2ea043; }
+</style>
+</head>
+<body>
+
+<div class="scene">
+  <!-- Соединительные трубки и змеевик -->
+  <svg class="pipes" viewBox="0 0 720 440">
+    <!-- Из куба в сухопарник -->
+    <path class="pipe-metal" d="M 150 160 L 150 90 L 348 90 L 348 140" />
+    <path id="vapor1" class="pipe-vapor" d="M 150 160 L 150 90 L 348 90 L 348 140" />
+    <!-- Из сухопарника в холодильник -->
+    <path class="pipe-metal" d="M 365 140 L 365 90 L 500 90 L 500 135" />
+    <path id="vapor2" class="pipe-vapor" d="M 365 140 L 365 90 L 500 90 L 500 135" />
+    <!-- Змеевик внутри холодильника и выход в банку -->
+    <path class="pipe-metal" d="M 500 135 C 530 135, 530 160, 500 160 C 470 160, 470 185, 500 185 C 530 185, 530 210, 500 210 C 470 210, 470 235, 500 235 C 530 235, 530 260, 500 260 L 500 292 L 619 292" />
+    <path id="vapor3" class="pipe-vapor" d="M 500 135 C 530 135, 530 160, 500 160 C 470 160, 470 185, 500 185 C 530 185, 530 210, 500 210 C 470 210, 470 235, 500 235 C 530 235, 530 260, 500 260 L 500 292 L 619 292" />
+  </svg>
+
+  <!-- Нагрев -->
+  <div id="flames" class="flames">
+    <div class="flame"></div><div class="flame"></div>
+    <div class="flame"></div><div class="flame"></div>
+  </div>
+  <div class="burner"></div>
+
+  <!-- Куб -->
+  <div id="boiler" class="boiler">
+    <div class="boiler-window" id="window">
+      <div id="mash" class="mash"></div>
+    </div>
+  </div>
+  <div class="gauge"><div id="needle" class="needle"></div></div>
+  <div id="tempReadout" class="temp-readout">22.0 °C</div>
+
+  <!-- Сухопарник -->
+  <div class="thumper"><div id="fusel" class="fusel"></div></div>
+
+  <!-- Холодильник -->
+  <div class="condenser"><div class="condenser-label">Охлаждение 14°C</div></div>
+
+  <!-- Капля и приёмная банка -->
+  <div id="drop" class="drop"></div>
+  <div class="jar">
+    <div id="product" class="product"></div>
+    <div id="jarLabel" class="jar-label">0 мл</div>
+  </div>
+</div>
+
+<div class="controls">
+  <div class="slider-group">
+    <label for="heat">Мощность нагрева: <strong id="heatVal">0%</strong></label>
+    <input id="heat" type="range" min="0" max="100" value="0">
+  </div>
+  <div id="status" class="status">
+    <strong>Режим ожидания.</strong><br>Добавьте мощность горелки для разогрева куба.
+  </div>
+  <button id="resetBtn">Слить и залить заново</button>
+</div>
+
+<script>
+// Инициализация аудио-движка (активируется при первом клике)
+let audioCtx = null;
+function initAudio() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+}
+document.addEventListener('pointerdown', initAudio, { once: true });
+
+// Звук падающей капли («бульк» с быстрым повышением частоты)
+function playDropSound() {
+  if (!audioCtx) return;
+  const t = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'sine';
+  osc.frequency.setValueAtTime(520, t);
+  osc.frequency.exponentialRampToValueAtTime(1150, t + 0.08);
+  gain.gain.setValueAtTime(0.08, t);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + 0.09);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start(t);
+  osc.stop(t + 0.1);
+}
+
+// Звук пузырька кипения
+function playBubbleSound() {
+  if (!audioCtx) return;
+  const t = audioCtx.currentTime;
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = 'triangle';
+  const baseFreq = 180 + Math.random() * 140;
+  osc.frequency.setValueAtTime(baseFreq, t);
+  osc.frequency.exponentialRampToValueAtTime(baseFreq * 1.8, t + 0.06);
+  gain.gain.setValueAtTime(0.025, t);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + 0.07);
+  osc.connect(gain);
+  gain.connect(audioCtx.destination);
+  osc.start(t);
+  osc.stop(t + 0.08);
+}
+
+
+const heatSlider = document.getElementById('heat');
+const heatVal = document.getElementById('heatVal');
+const flames = document.getElementById('flames');
+const boiler = document.getElementById('boiler');
+const boilerWin = document.getElementById('window');
+const mashEl = document.getElementById('mash');
+const fuselEl = document.getElementById('fusel');
+const productEl = document.getElementById('product');
+const jarLabel = document.getElementById('jarLabel');
+const needle = document.getElementById('needle');
+const tempReadout = document.getElementById('tempReadout');
+const statusEl = document.getElementById('status');
+const dropEl = document.getElementById('drop');
+const vapors = [document.getElementById('vapor1'), document.getElementById('vapor2'), document.getElementById('vapor3')];
+let temp = 22.0;      // Температура в кубе
+let mashLevel = 75;   // Уровень браги (%)
+let productMl = 0;    // Собрано продукта (мл)
+let fuselLevel = 0;   // Сивушные масла в сухопарнике (%)
+let dropCooldown = 0;
+// Регулировка огня
+heatSlider.addEventListener('input', () => {
+const p = Number(heatSlider.value);
+heatVal.textContent = p + '%';
+flames.style.opacity = p > 0 ? Math.max(0.3, p / 100) : 0;
+flames.style.transform = scaleY(${0.4 + (p / 100) * 0.8});
+});
+// Сброс
+document.getElementById('resetBtn').addEventListener('click', () => {
+heatSlider.value = 0;
+heatSlider.dispatchEvent(new Event('input'));
+temp = 22.0;
+mashLevel = 75;
+productMl = 0;
+fuselLevel = 0;
+boiler.classList.remove('shake');
+});
+// Генерация пузырьков при кипении
+function spawnBubble() {
+const b = document.createElement('div');
+b.className = 'bubble';
+const size = 4 + Math.random() * 6;
+b.style.width = size + 'px';
+b.style.height = size + 'px';
+b.style.left = (10 + Math.random() * 110) + 'px';
+b.style.animationDuration = (0.6 + Math.random() * 0.6) + 's';
+boilerWin.appendChild(b);
+setTimeout(() => b.remove(), 1200);
+}
+// Анимация падения капли
+function triggerDrop() {
+dropEl.classList.remove('fall');
+void dropEl.offsetWidth; // перезапуск CSS-анимации
+dropEl.classList.add('fall');
+}
+// Основной цикл физики (10 раз в секунду)
+setInterval(() => {
+const power = Number(heatSlider.value);
+// Изменение температуры: нагрев минус естественное остывание
+const targetTemp = 22 + power * 0.82;
+temp += (targetTemp - temp) * 0.04;
+// Стрелка манометра/термометра (-120deg при 20°C до +120deg при 105°C)
+const angle = -120 + ((temp - 20) / 85) * 240;
+needle.style.transform = rotate(${Math.max(-120, Math.min(125, angle))}deg);
+tempReadout.textContent = temp.toFixed(1) + ' °C';
+const boiling = temp >= 78.4 && mashLevel > 10;
+const overheating = temp > 94 && mashLevel > 10;
+// Пузырьки и тряска при перегреве
+if (temp > 65 && mashLevel > 10) {
+if (Math.random() < (temp - 60) / 40) spawnBubble();
+}
+boiler.classList.toggle('shake', overheating);
+// Движение пара по трубкам
+vapors.forEach(v => v.classList.toggle('active', boiling));
+// Конденсация и наполнение банки
+if (boiling && productMl < 1000) {
+const rate = (temp - 78) * 0.35;
+dropCooldown -= rate;
+if (dropCooldown <= 0) {
+dropCooldown = 4;
+triggerDrop();
+productMl = Math.min(1000, productMl + Math.round(4 + rate));
+mashLevel = Math.max(10, mashLevel - 0.35);
+fuselLevel = Math.min(65, fuselLevel + (overheating ? 0.6 : 0.15));
+}
+}
+// Обновление уровней жидкости в DOM
+mashEl.style.height = mashLevel + '%';
+fuselEl.style.height = fuselLevel + '%';
+productEl.style.height = (productMl / 10) + '%';
+jarLabel.textContent = productMl + ' мл';
+// Статус процесса
+if (mashLevel <= 10) {
+statusEl.innerHTML = 'Перегонка завершена.
+Спирт в браге закончился, убавьте нагрев.';
+} else if (overheating) {
+statusEl.innerHTML = '⚠ Перегрев! Пошли «хвосты».
+Убавьте огонь до 75–80%, иначе в банку попадёт сивуха.';
+} else if (boiling) {
+statusEl.innerHTML = '✓ Идёт отбор продукта.
+Оптимальная температура кипения спиртовых паров.';
+} else if (power > 0) {
+statusEl.innerHTML = 'Разогрев куба...
+Испарение начнётся при достижении 78.4 °C.';
+} else {
+statusEl.innerHTML = 'Режим ожидания.
+Добавьте мощность горелки для разогрева куба.';
+}
+}, 100);
+
+### Что уже работает в этом примере
+* **Физика нагрева и остывания.** Температура плавно растёт в зависимости от положения ползунка и падает, если убавить огонь.
+* **Кипение и испарение.** После **78.4 °C** (температура кипения спирта) в кубе активно поднимаются пузырьки, по трубкам начинает двигаться пар, а из змеевика в банку падают капли.
+* **Контроль перегрева.** Если выкрутить огонь на максимум (выше **94 °C**), куб начнёт вибрировать, а в сухопарнике быстрее скопятся сивушные масла.
+
+<FollowUp>
+Хотите добавить сюда **звуки кипения и капель** на **Web Audio API** (как в игре с Пикабу) или усложнить механику отбором **«голов», «тела» и «хвостов»** в разные банки?
+</FollowUp>

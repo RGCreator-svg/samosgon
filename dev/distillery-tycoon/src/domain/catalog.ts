@@ -112,6 +112,7 @@ export const MATERIALS: Record<string, { name: string; price: number }> = {
   yeast_us05:  { name: "Дрожжи US-05",             price: 450 },
   yeast_lager: { name: "Дрожжи лагерные",          price: 1200 },
   samogon:     { name: "Дистиллят (л)",            price: 350 },
+  "any-raw":   { name: "Дистиллят-сырец (л)",      price: 0 },
 };
 
 // ------------------------------------------------------------
@@ -135,6 +136,13 @@ export const PRODUCTS: Product[] = [
 // РЕЦЕПТЫ (партии на вкладке «Производство»)
 // ------------------------------------------------------------
 
+// Быстрый доступ к товару по id (PRODUCTS — массив, для поиска по id используй эту карту)
+export const PRODUCTS_BY_ID: Record<string, Product> = {};
+PRODUCTS.forEach((p) => { PRODUCTS_BY_ID[p.id] = p; });
+
+// Дистиллят-сырец любого вида: суммируется из raw-sugar / raw-fruit / raw-veg
+export const ANY_RAW_IDS = ["raw-sugar", "raw-fruit", "raw-veg"];
+
 export const RECIPES: Recipe[] = [
   { id: "braga-sugar", name: "Сахарная брага",  kind: "mash",  days: 5,  liters: 25, inputs: { sugar: 10, yeast: 2 },                       output: "raw-sugar" },
   { id: "braga-fruit", name: "Фруктовая брага", kind: "fruit", days: 6,  liters: 22, inputs: { fruit: 15, sugar: 5, yeast: 2 },              output: "raw-fruit" },
@@ -143,5 +151,5 @@ export const RECIPES: Recipe[] = [
   { id: "beer-lager",  name: "Лагер",           kind: "beer",  days: 10, liters: 20, inputs: { malt: 8, hops_munich: 2, yeast_lager: 1 },   output: "lager", needs: "brewery" },
   { id: "mead",        name: "Медовуха",        kind: "mead",  days: 10, liters: 15, inputs: { honey: 8, yeast: 2 },                        output: "mead",  needs: "mead" },
   { id: "cider",       name: "Сидр",            kind: "cider", days: 7,  liters: 18, inputs: { fruit: 15 },                                 output: "cider", needs: "cider" },
-  { id: "tincture",    name: "Травяная настойка", kind: "tinct", days: 3, liters: 3, inputs: { samogon: 2, herbs: 3 },                      output: "tincture", needs: "tinct" },
+  { id: "tincture",    name: "Травяная настойка", kind: "tinct", days: 3, liters: 3, inputs: { "any-raw": 2, herbs: 3 },                    output: "tincture", needs: "tinct" },
 ];

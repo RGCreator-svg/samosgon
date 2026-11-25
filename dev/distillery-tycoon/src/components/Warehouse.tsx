@@ -1,6 +1,6 @@
 import React from 'react';
 import { useGame } from '../store/useGame';
-import { PRODUCTS, MATERIALS } from '../domain/catalog';
+import { PRODUCTS_BY_ID, MATERIALS } from '../domain/catalog';
 
 export function Warehouse() {
   const warehouse = useGame((s: any) => s.warehouse);
@@ -12,9 +12,9 @@ export function Warehouse() {
   const units = capacityUnits();
   const entries = Object.keys(warehouse).filter((k) => warehouse[k] > 0).map((k) => ({
     id: k,
-    name: (PRODUCTS[k] || MATERIALS[k] || { name: k }).name,
+    name: (PRODUCTS_BY_ID[k] || MATERIALS[k] || { name: k }).name,
     qty: warehouse[k],
-    isProduct: !!PRODUCTS[k],
+    isProduct: !!PRODUCTS_BY_ID[k],
   }));
   return (
     <div className="panel">

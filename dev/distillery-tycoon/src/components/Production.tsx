@@ -41,9 +41,7 @@ const missing = (r: any) => {
     <div className="panel" style={{ flex: 1 }}>
       <h2>Производство</h2>
       <ThreeWhales />
-      <h2>Производство</h2>
-<ThreeWhales />
-<WhalesProgress />
+      <WhalesProgress />
 <h3>Поставить партию</h3>
       <div className="cards">
         {unlocked.map((r) => {

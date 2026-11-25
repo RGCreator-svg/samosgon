@@ -1,6 +1,7 @@
 import React from 'react';
 import { useGame } from '../store/useGame';
 import { PRODUCTS } from '../domain/catalog';
+import infographic from '../assets/infographic.png';
 
 export function ThreeWhales() {
   const batches = useGame((s: any) => s.batches);
@@ -8,10 +9,10 @@ export function ThreeWhales() {
   const fer = batches.filter((b: any) => !b.ready).length;
   const ready = batches.filter((b: any) => b.ready).length;
   const rawL = (warehouse['raw-sugar'] || 0) + (warehouse['raw-fruit'] || 0) + (warehouse['raw-veg'] || 0);
-  const readyL = Object.keys(PRODUCTS).reduce((a, p) => a + (warehouse[p] || 0), 0);
+  const readyL = PRODUCTS.reduce((a, p) => a + (warehouse[p.id] || 0), 0);
   return (
     <div className="whales-wrap">
-      <img src="/src/assets/infographic.png" className="whales-img" alt="Три кита" />
+      <img src={infographic} className="whales-img" alt="Три кита" />
       <div className="whale-cards">
         <div className="whale-card">
           <div className="whale-title">Приготовление браги</div>

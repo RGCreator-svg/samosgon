@@ -4,10 +4,10 @@ import { SHOP } from '../domain/catalog';
 
 const SECTIONS: [string, string][] = [
   ['column', 'Ректификационная колонна'],
-  ['still', 'Перегонка'],
-  ['brewery', 'Пивоварня'],
-  ['provisions', 'Провизия'],
-  ['storage', 'Стройка склада'],
+  ['distill', 'Перегонка'],
+  ['brew', 'Пивоварня'],
+  ['provision', 'Провизия'],
+  ['build', 'Стройка склада'],
 ];
 
 export function Shop() {
@@ -26,7 +26,7 @@ export function Shop() {
               const owned = equipment.includes(e.id) || constructions.includes(e.id);
               return (
                 <div className={'shop-card q' + e.quality} key={e.id}>
-                  <div className="q-stars">{'✦'.repeat(e.quality)}</div>
+                  <div className="q-stars">{'✦'.repeat(e.quality || 1)}</div>
                   <div className="sc-name">{e.name}</div>
                   <div className="sc-desc">{e.desc}</div>
                   <div className="sc-price">{e.price.toLocaleString('ru')} руб.</div>

@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { SHOP, RECIPES, PRODUCTS } from '../domain/catalog';
+import { SHOP, RECIPES, PRODUCTS, PRODUCTS_BY_ID } from '../domain/catalog';
 import { SKILLS, bonuses, canLearn, Bonuses } from '../domain/skillTree';
 import { EVENTS, EventOption } from '../domain/events';
 
@@ -13,6 +13,7 @@ export interface Batch {
 
 interface LogEntry { day: number; text: string; }
 
+const RAW_IDS = ['raw-sugar', 'raw-fruit', 'raw-veg'];
 let bidCounter = 1;
 
 export const useGame = create<any>()(
@@ -32,6 +33,7 @@ export const useGame = create<any>()(
       eventCooldown: 2,
       pendingEvent: null as string | null,
       pendingHeads: null as string | null,
+      resetUsed: false,
       log: [{ day: 1, text: 'ДЯДЮШКА ТЫК: ДОБРО ПОЖАЛОВАТЬ НА ЗАВОДСКОЙ ДВОР!' }] as LogEntry[],
 
       say(text: string) {
@@ -44,8 +46,8 @@ export const useGame = create<any>()(
         let mult = 1;
         s.constructions.forEach((id: string) => {
           const it = SHOP.find((x) => x.id === id);
-          if (it && it.capBonus) cap += it.capBonus;
-          if (it && it.capMult) mult *= it.capMult;
+          if (it && it.storageBonus) cap += it.storageBonus;
+          if (it && it.storageMultiplier) mult *= it.storageMultiplier;
         });
         return Math.floor(cap * mult);
       },
@@ -74,22 +76,25 @@ export const useGame = create<any>()(
         const it = SHOP.find((x) => x.id === id);
         if (!it) return;
         if (s.equipment.includes(id) || s.constructions.includes(id)) { s.say('УЖЕ КУПЛЕНО.'); return; }
-        if (s.money < it.price) { s.say('ДЕНЕГ НЕ ХВАТАЕТ: НУЖНО ' + it.price + ' РУБ.'); return; }
-        if (it.consumable) {
-          const pack = it.pack || 1;
-          if (s.usedUnits() + pack > s.capacityUnits()) {
+        const price = it.section === 'provision'
+          ? Math.round(it.price * (1 - bonuses(s.skills).discount))
+          : it.price;
+        if (s.money < price) { s.say('ДЕНЕГ НЕ ХВАТАЕТ: НУЖНО ' + price + ' РУБ.'); return; }
+        if (it.material) {
+          const qty = it.qty || 0;
+          if (s.usedUnits() + qty > s.capacityUnits()) {
             s.say('СКЛАД ПОЛОН — РАСШИРЬ ЕГО В РАЗДЕЛЕ «СТРОЙКА СКЛАДА».');
             return;
           }
-          set({ money: s.money - it.price });
-          get().addItem(id, pack);
-          s.say('КУПЛЕНО: ' + it.name.toUpperCase() + ' (Х' + pack + ').');
+          set({ money: s.money - price });
+          get().addItem(it.material, qty);
+          s.say('КУПЛЕНО И ДОСТАВЛЕНО НА СКЛАД: ' + it.name.toUpperCase() + '.');
           return;
         }
-        if (it.capBonus || it.capMult) {
-          set({ money: s.money - it.price, constructions: [...s.constructions, id] });
+        if (it.storageBonus || it.storageMultiplier) {
+          set({ money: s.money - price, constructions: [...s.constructions, id] });
         } else {
-          set({ money: s.money - it.price, equipment: [...s.equipment, id] });
+          set({ money: s.money - price, equipment: [...s.equipment, id] });
         }
         s.say('КУПЛЕНО И УСТАНОВЛЕНО: ' + it.name.toUpperCase() + '.');
       },
@@ -108,6 +113,21 @@ export const useGame = create<any>()(
         s.say('ИЗУЧЕНО: ' + node.name.toUpperCase() + '!');
       },
 
+      resetBranch(branch: string) {
+        const s = get();
+        const bn = bonuses(s.skills);
+        if (!bn.resetOnce || s.resetUsed) { s.say('КНИГА ТЫКА УЖЕ ИСПОЛЬЗОВАНА!'); return; }
+        const ids = SKILLS.filter((n) => n.branch === branch && s.skills.includes(n.id)).map((n) => n.id);
+        if (ids.length === 0) { s.say('В ЭТОЙ ВЕТКЕ НЕЧЕГО СБРАСЫВАТЬ.'); return; }
+        const refunded = ids.reduce((a, id) => a + (SKILLS.find((n) => n.id === id)?.cost || 0), 0);
+        set({
+          skills: s.skills.filter((id: string) => !ids.includes(id)),
+          skillPoints: s.skillPoints + refunded,
+          resetUsed: true,
+        });
+        s.say('КНИГА ТЫКА: ВЕТКА «' + branch.toUpperCase() + '» СБРОШЕНА, ВОЗВРАЩЕНО ' + refunded + ' ОЧКОВ.');
+      },
+
       startBatch(recipeId: string) {
         const s = get();
         const r = RECIPES.find((x) => x.id === recipeId);
@@ -118,17 +138,35 @@ export const useGame = create<any>()(
         if (r.needs === 'tinct' && !bn.tinct) { s.say('НАСТОЙКИ НЕ ОТКРЫТЫ — УЧИ ТРАВЫ!'); return; }
         if (r.needs === 'brewery' && !s.equipment.includes('brew-kettle')) { s.say('НУЖНА ПИВОВАРНЯ — КУПИ КОТ В МАГАЗИНЕ!'); return; }
         if (s.batches.length >= 4) { s.say('ВСЁ ЗАЛЯТО — БОЛЬШЕ ЧАНОВ НЕТ.'); return; }
+        // «any-raw»: подходит любой дистиллят-сырец
+        const need = { ...r.inputs } as Record<string, number>;
+        if (need['any-raw']) {
+          const total = RAW_IDS.reduce((a, id) => a + (s.warehouse[id] || 0), 0);
+          if (total < need['any-raw']) { s.say('НЕ ХВАТАЕТ ДИСТИЛЛЯТА-СЫРЦА НА СКЛАДЕ!'); return; }
+          delete need['any-raw'];
+        }
         const w = { ...s.warehouse };
+        if (r.inputs['any-raw']) {
+          let rest = r.inputs['any-raw'];
+          for (const id of RAW_IDS) {
+            const take = Math.min(w[id] || 0, rest);
+            w[id] = (w[id] || 0) - take;
+            if (w[id] <= 0) delete w[id];
+            rest -= take;
+            if (rest <= 0) break;
+          }
+        }
         let ok = true;
-        Object.keys(r.inputs).forEach((k) => { if ((w[k] || 0) < r.inputs[k]) ok = false; });
+        Object.keys(need).forEach((k) => { if ((w[k] || 0) < need[k]) ok = false; });
         if (!ok) { s.say('НЕ ХВАТАЕТ СЫРЬЯ НА СКЛАДЕ!'); return; }
-        Object.keys(r.inputs).forEach((k) => {
-          w[k] = (w[k] || 0) - r.inputs[k];
+        Object.keys(need).forEach((k) => {
+          w[k] = (w[k] || 0) - need[k];
           if (w[k] <= 0) delete w[k];
         });
+        const faster = ['mash', 'fruit', 'veg'].includes(r.kind) ? Math.max(1, r.days - bn.brewSpeed) : r.days;
         set({
           warehouse: w,
-          batches: [...s.batches, { id: 'b' + bidCounter++ + '_' + s.day, recipeId, daysLeft: r.days, ready: false }],
+          batches: [...s.batches, { id: 'b' + bidCounter++ + '_' + s.day, recipeId, daysLeft: faster, ready: false }],
         });
         s.say('ПОСТАВЛЕНА ПАРТИЯ: ' + r.name.toUpperCase());
       },
@@ -147,13 +185,15 @@ export const useGame = create<any>()(
         if (!b) { set({ pendingHeads: null }); return; }
         const r = RECIPES.find((x) => x.id === b.recipeId)!;
         const bn = bonuses(s.skills);
-        const eff = Math.max(0, pct - bn.headsSoft);
-        const appQ = s.bestQuality(['dimka2', 'pure-spirit-app', 'tyk-pro']) || 1;
+        let eff = Math.max(0, pct - bn.headsSoft - bn.handsZone * 10);
+        let perfect = false;
+        if (Math.random() < bn.perfectChance) { eff = 0; perfect = true; }
+        const appQ = s.bestQuality(['dimka-2', 'apparatus-pure', 'tyk-pro']) || 1;
         const yieldL = Math.max(0.5, Math.round(r.liters * (0.65 - eff * 0.01) * (1 + bn.yield) * (1 + 0.06 * (appQ - 1)) * 10) / 10);
         set({ pendingHeads: null, batches: s.batches.filter((x: Batch) => x.id !== b.id) });
-        get().addItem(r.out, yieldL);
-        if (eff <= 5) set((st: any) => ({ reputation: st.reputation + 1 }));
-        s.say('ПЕРЕГОНКА ГОТОВА: ' + yieldL + ' Л. ОТСЕЧЕНИЕ ' + eff + '%.');
+        get().addItem(r.output, yieldL);
+        set((st: any) => ({ reputation: st.reputation + (eff <= 5 ? 1 + bn.handsReward : 0) }));
+        s.say('ПЕРЕГОНКА ГОТОВА: ' + yieldL + ' Л. ОТСЕЧЕНИЕ ' + eff + '%' + (perfect ? ' — ИДЕАЛЬНО!' : ''));
       },
 
       bottle(batchId: string) {
@@ -162,10 +202,10 @@ export const useGame = create<any>()(
         if (!b || !b.ready) return;
         const r = RECIPES.find((x) => x.id === b.recipeId)!;
         const bn = bonuses(s.skills);
-        const fq = s.bestQuality(['fermenter-plastic', 'fermenter-steel']) || 1;
+        const fq = s.bestQuality(['fermenter-basic', 'fermenter-seal', 'fermenter-pro']) || 1;
         const liters = Math.max(0.5, Math.round(r.liters * (1 + bn.yield) * (1 + 0.08 * (fq - 1)) * 10) / 10);
         set({ batches: s.batches.filter((x: Batch) => x.id !== b.id) });
-        get().addItem(r.out, liters);
+        get().addItem(r.output, liters);
         set((st: any) => ({ reputation: st.reputation + 0.5 }));
         s.say('РАЗЛИТО: ' + r.name.toUpperCase() + ' — ' + liters + ' Л.');
       },
@@ -173,10 +213,10 @@ export const useGame = create<any>()(
       columnComplete(): boolean {
         const s = get();
         const fams: string[][] = [
-          ['tsarga-steel', 'tsarga-copper'],
-          ['dephlegm-basic', 'dephlegm-ice'],
-          ['takeoff-basic'],
-          ['cooler-basic', 'cooler-dimrot'],
+          ['tsarga-n', 'tsarga-copper', 'tsarga-pro'],
+          ['packing-rpn', 'packing-sel', 'packing-pro'],
+          ['dephl-simple', 'dephl-ice', 'dephl-pro'],
+          ['node-simple', 'node-precise', 'node-pro'],
         ];
         return fams.every((f) => f.some((id) => s.equipment.includes(id)));
       },
@@ -184,35 +224,33 @@ export const useGame = create<any>()(
       columnQuality(): number {
         const s = get();
         const fams: string[][] = [
-          ['tsarga-steel', 'tsarga-copper'],
-          ['dephlegm-basic', 'dephlegm-ice'],
-          ['takeoff-basic'],
-          ['cooler-basic', 'cooler-dimrot'],
+          ['tsarga-n', 'tsarga-copper', 'tsarga-pro'],
+          ['packing-rpn', 'packing-sel', 'packing-pro'],
+          ['dephl-simple', 'dephl-ice', 'dephl-pro'],
+          ['node-simple', 'node-precise', 'node-pro'],
         ];
         let q = 0;
         fams.forEach((f) => {
           q += Math.max(0, ...f.map((id) => {
             const it = SHOP.find((x) => x.id === id);
-            return it && s.equipment.includes(id) ? it.quality : 0;
+            return it && s.equipment.includes(id) ? (it.quality || 1) : 0;
           }));
         });
-        q /= 4;
-        if (s.equipment.includes('packing-selivanenko')) q += 0.5;
-        return Math.min(3.5, Math.max(1, q));
+        return Math.min(3.5, Math.max(1, q / 4));
       },
 
       rectifyAll() {
         const s = get();
         if (!s.columnComplete()) { s.say('КОЛОННА НЕ СОБРАНА — КУПИ ВСЕ 4 УЗЛА!'); return; }
-        const raws = ['raw-sugar', 'raw-fruit', 'raw-veg'];
+        const bn = bonuses(s.skills);
         let total = 0;
         const w = { ...s.warehouse };
-        raws.forEach((id) => { total += w[id] || 0; w[id] = 0; });
+        RAW_IDS.forEach((id) => { total += w[id] || 0; w[id] = 0; });
         if (total < 1) { s.say('НЕЧЕГО РЕКТИФИЦИРОВАТЬ.'); return; }
-        const out = Math.round(total * 0.8 * 10) / 10;
-        w['rect-spirit'] = (w['rect-spirit'] || 0) + out;
+        const out = Math.round(total * Math.min(0.9, 0.75 + 0.05 * bn.purity) * 10) / 10;
+        w['rectified'] = (w['rectified'] || 0) + out;
         set({ warehouse: w });
-        s.say('РЕКТИФИКАЦИЯ: ' + out + ' Л ЧИСТОГО СПИРТА 96,6%.');
+        s.say('РЕКТИФИКАЦИЯ: ' + out + ' Л РЕКТИФИКАТА 96,6%.');
       },
 
       barrelAll() {
@@ -220,14 +258,15 @@ export const useGame = create<any>()(
         if (!s.equipment.includes('barrel-oak') && !s.equipment.includes('barrel-france')) {
           s.say('НУЖНА ДУБОВАЯ БОЧКА!'); return;
         }
-        const raws = ['raw-sugar', 'raw-fruit', 'raw-veg'];
         let total = 0;
         const w = { ...s.warehouse };
-        raws.forEach((id) => { total += w[id] || 0; w[id] = 0; });
+        RAW_IDS.forEach((id) => { total += w[id] || 0; w[id] = 0; });
         if (total < 1) { s.say('БОЧКА ПУСТА — НЕТ ДИСТИЛЛЯТА.'); return; }
-        w['aged-spirit'] = (w['aged-spirit'] || 0) + Math.round(total * 10) / 10;
+        const bn = bonuses(s.skills);
+        const aged = Math.round(total * (1 + 0.05 * bn.aging) * 10) / 10;
+        w['aged'] = (w['aged'] || 0) + aged;
         set({ warehouse: w });
-        s.say('ДИСТИЛЛЯТ УШЁЛ В БОЧКУ. ТЕРПЕНИЕ — ЭТО ТОЖЕ ИНГРЕДИЕНТ.');
+        s.say('ДИСТИЛЛЯТ УШЁЛ В БОЧКУ: ' + aged + ' Л. ТЕРПЕНИЕ — ЭТО ТОЖЕ ИНГРЕДИЕНТ.');
       },
 
       bestQuality(ids: string[]): number {
@@ -235,23 +274,33 @@ export const useGame = create<any>()(
         let q = 0;
         ids.forEach((id) => {
           const it = SHOP.find((x) => x.id === id);
-          if (it && s.equipment.includes(id)) q = Math.max(q, it.quality);
+          if (it && s.equipment.includes(id)) q = Math.max(q, it.quality || 1);
         });
         return q;
       },
 
       priceOf(productId: string): number {
         const s = get();
+        const prod = PRODUCTS_BY_ID[productId];
+        if (!prod) return 0;
         const bn = bonuses(s.skills);
         let qm = 1;
-        if (productId === 'rect-spirit') qm = 1 + 0.1 * (s.columnQuality() - 1);
-        if (productId === 'aged-spirit') { const bq = s.bestQuality(['barrel-oak', 'barrel-france']) || 1; qm = 1 + 0.15 * (bq - 1); }
+        if (productId === 'rectified') qm = 1 + 0.1 * (s.columnQuality() - 1) + bn.purity * 0.5;
+        if (productId === 'aged') {
+          const bq = s.bestQuality(['barrel-oak', 'barrel-france']) || 1;
+          qm = 1 + 0.15 * (bq - 1) + bn.agedPrice;
+        }
         if (['ale', 'lager', 'mead', 'cider'].includes(productId)) {
-          const fq = s.bestQuality(['fermenter-plastic', 'fermenter-steel']) || 1;
+          const fq = s.bestQuality(['fermenter-basic', 'fermenter-seal', 'fermenter-pro']) || 1;
           qm = 1 + 0.08 * (fq - 1);
         }
+        if (productId === 'tincture') qm = 1 + bn.tinctBoost;
+        if (productId === 'mead') qm *= 1 + bn.meadPrice;
+        if ((productId === 'raw-fruit' || productId === 'raw-veg') && bn.rare) qm *= 1 + bn.rarePrice;
+        if (productId.startsWith('raw-')) qm *= 1 + bn.aroma * 0.4;
+        if (s.day % 7 === 0 && bn.rareSale && ['tincture', 'mead', 'aged'].includes(productId)) qm *= 1.5;
         const pm = 1 + Math.min(0.3, s.reputation * 0.02);
-        return Math.round(PRODUCTS[productId].price * (1 + bn.price) * s.marketMult * qm * pm);
+        return Math.round(prod.basePrice * (1 + bn.price) * s.marketMult * qm * pm);
       },
 
       sell(productId: string, liters: number) {
@@ -267,7 +316,7 @@ export const useGame = create<any>()(
           warehouse: w,
           money: s.money + money,
           skillPoints: s.skillPoints + 1,
-          reputation: s.reputation + (productId === 'rect-spirit' || productId === 'aged-spirit' ? 1 : 0.5),
+          reputation: s.reputation + (productId === 'rectified' || productId === 'aged' ? 1 : 0.5),
         });
         s.say('ПРОДАНО: ' + qty + ' Л ЗА ' + money.toLocaleString('ru') + ' РУБ. +1 ОЧКО УМЕНИЙ!');
       },
@@ -286,7 +335,14 @@ export const useGame = create<any>()(
         const becameReady = batches.filter(
           (b: Batch) => b.ready && !s.batches.find((x: Batch) => x.id === b.id && x.ready)
         );
-        set({ day: s.day + 1, batches });
+        const patch: any = { day: s.day + 1, batches };
+        if (bn.contract && (s.day + 1) % 7 === 0) {
+          const readyL = PRODUCTS.reduce((a, p) => a + (s.warehouse[p.id] || 0), 0);
+          const bonus = 500 + Math.round(s.reputation * 50) + Math.round(readyL * 20);
+          patch.money = s.money + bonus;
+          get().say('КОНТРАКТ С ТРАКТИРОМ: ЕЖЕНЕДЕЛЬНАЯ ПРЕМИЯ ' + bonus + ' РУБ.!');
+        }
+        set(patch);
         if (bn.veg) get().addItem('veg', bn.veg);
         if (bn.honey) get().addItem('honey', bn.honey);
         if (bn.fruit) get().addItem('fruit', bn.fruit);
@@ -297,12 +353,12 @@ export const useGame = create<any>()(
         });
         const swing = (Math.random() - 0.45) * 0.3 * (1 - bn.marketStab * 0.7);
         set({ marketMult: Math.max(0.8, Math.min(1.25, get().marketMult + swing)) });
-        const cd = get().eventCooldown - 1;
+        const cd = get().eventCooldown - (bn.luck ? 0.5 : 1);
         if (cd <= 0 && !get().pendingEvent) {
           const ev = EVENTS[Math.floor(Math.random() * EVENTS.length)];
-          set({ pendingEvent: ev.id, eventCooldown: 4 + Math.floor(Math.random() * 3) });
+          set({ pendingEvent: ev.id, eventCooldown: 4 + Math.floor(Math.random() * 3) + (bn.luck ? 2 : 0) });
         } else {
-          set({ eventCooldown: cd });
+          set({ eventCooldown: Math.max(0, cd) });
         }
       },
 
@@ -312,8 +368,13 @@ export const useGame = create<any>()(
         const ev = EVENTS.find((e) => e.id === s.pendingEvent);
         if (!ev) { set({ pendingEvent: null }); return; }
         const opt: EventOption = ev.options[i] || ev.options[0];
+        const bn = bonuses(s.skills);
         const patch: any = { pendingEvent: null, eventCooldown: 4 + Math.floor(Math.random() * 3) };
-        if (opt.money) patch.money = s.money + opt.money;
+        if (opt.money) {
+          let m = opt.money;
+          if (m < 0 && (bn.discount || bn.contract)) m = Math.ceil(m / 2);
+          patch.money = s.money + m;
+        }
         if (opt.rep) patch.reputation = Math.max(0, s.reputation + opt.rep);
         if (opt.market) patch.marketMult = Math.max(0.7, Math.min(1.3, s.marketMult + opt.market));
         set(patch);

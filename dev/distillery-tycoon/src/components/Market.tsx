@@ -7,7 +7,9 @@ export function Market() {
   const sell = useGame((s: any) => s.sell);
   const warehouse = useGame((s: any) => s.warehouse);
   const marketMult = useGame((s: any) => s.marketMult);
-  const available = Object.keys(PRODUCTS).filter((p) => warehouse[p] > 0);
+  const available = PRODUCTS.filter((p) => (warehouse[p.id] || 0) > 0);
+// и в разметке: p.id, p.name, warehouse[p.id], sell(p.id, 1), sell(p.id, warehouse[p.id])
+
   return (
     <div className="panel">
       <h2>Рынок</h2>
@@ -16,12 +18,12 @@ export function Market() {
       </div>
       <div className="cards">
         {available.map((p) => (
-          <div className="shop-card" key={p}>
-            <div className="sc-name">{PRODUCTS[p].name}</div>
-            <div className="inv-qty">{warehouse[p].toFixed(1)} л</div>
-            <div className="sc-price">{priceOf(p).toLocaleString('ru')} руб./л</div>
-            <button className="btn" onClick={() => sell(p, 1)}>Продать 1 л</button>
-            <button className="btn gold" onClick={() => sell(p, warehouse[p])}>Продать всё</button>
+          <div className="shop-card" key={p.id}>
+            <div className="sc-name">{p.name}</div>
+            <div className="inv-qty">{warehouse[p.id].toFixed(1)} л</div>
+            <div className="sc-price">{priceOf(p.id).toLocaleString('ru')} руб./л</div>
+            <button className="btn" onClick={() => sell(p.id, 1)}>Продать 1 л</button>
+            <button className="btn gold" onClick={() => sell(p.id, warehouse[p.id])}>Продать всё</button>
           </div>
         ))}
         {available.length === 0 && <div className="sc-desc">Пока нечего продавать — готовь партии!</div>}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useGame } from './store/useGame';
 import { Production } from './components/Production';
-import { SkillTree } from './components/SkillTree';
+import  SkillTreeRF  from './components/SkillTreeRF';
 import { Shop } from './components/Shop';
 import { Warehouse } from './components/Warehouse';
 import { Market } from './components/Market';
@@ -20,6 +20,7 @@ const TABS: [string, string][] = [
 export default function App() {
   const [tab, setTab] = useState('prod');
   const autoProgress = useGame((s: any) => s.autoProgress);
+  const nextDay = useGame((s: any) => s.nextDay);
   const day = useGame((s: any) => s.day);
   const money = useGame((s: any) => s.money);
   const sp = useGame((s: any) => s.skillPoints);
@@ -38,6 +39,7 @@ export default function App() {
         <div className="h-stats">
           День {day} · {money.toLocaleString('ru')} руб. · Очки: {sp} · Репутация: {rep.toFixed(1)} · Склад {used()}/{cu()} ед.
         </div>
+        <button className="btn-nextday" onClick={() => nextDay()}>Следующий день →</button>
       </header>
       <nav className="tabs">
         {TABS.map(([k, t]) => (
@@ -50,7 +52,7 @@ export default function App() {
           <Production />
         </div>
       )}
-      {tab === 'tree' && <SkillTree />}
+      {tab === 'tree' && <SkillTreeRF />}
       {tab === 'shop' && <Shop />}
       {tab === 'wh' && <Warehouse />}
       {tab === 'mkt' && <Market />}
