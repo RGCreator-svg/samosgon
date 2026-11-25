@@ -137,6 +137,17 @@ export const SKILL_BRANCHES = [
     ]
   },
   {
+    id: "winemaking",
+    name: "🍇 Виноделие и медоварение",
+    skills: [
+      { id: "wine_basics", name: "Основы виноделия", description: "Открывает развитие виноградника и винодельни.", cost: 1 },
+      { id: "wine_pressing", name: "Прессование и сусло", description: "Открывает винный пресс и подготовку винных партий.", cost: 1, requires: "wine_basics" },
+      { id: "cellar_aging", name: "Погребное дело", description: "Открывает выдержку и улучшение качества вина.", cost: 2, requires: "wine_pressing" },
+      { id: "mead_brewing", name: "Медоварение", description: "Открывает отдельную линию медовухи и медовой браги.", cost: 1, requires: "wine_basics" },
+      { id: "honey_distillation", name: "Медовый дистиллят", description: "Открывает медовую брагу как сырьё для игровой перегонки.", cost: 2, requires: "mead_brewing" }
+    ]
+  },
+  {
     id: "engineering",
     name: "🔧 Механика",
     skills: [
