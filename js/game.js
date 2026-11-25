@@ -375,8 +375,8 @@ $("#sleepButton")?.addEventListener("click", () => {
     advanceOrdersDay(state, notify);
   advanceDeliveries(state, notify);
   advanceExpansionDay(state, notify);
-  advanceFeaturePackDay(state, notify);
   advanceWorldDay(state, notify);
+  advanceFeaturePackDay(state, notify);
 
   const hungerLoss = state.skills.includes("country_life") ? 5 : 10;
   const warmthLoss = (state.skills.includes("country_life") ? 2 : 5) + getWorldColdPenalty(state);
