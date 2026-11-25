@@ -92,6 +92,44 @@ function addCard(parent, title, description, details, buttonText, action, disabl
   button.disabled = disabled;
   card.append(button);
   parent.append(card);
+  return card;
+}
+
+function cartTotal(state) {
+  return Object.entries(state.materialCart || {}).reduce((sum, [id, qty]) => sum + (PARTS.find(part => part.id === id)?.price || 0) * Math.max(0, Number(qty) || 0), 0);
+}
+
+function renderMaterialCart(state) {
+  const root = $("#materialCart");
+  if (!root) return;
+  root.replaceChildren();
+  state.materialCart ??= {};
+  const entries = Object.entries(state.materialCart).filter(([id, qty]) => PARTS.some(part => part.id === id) && Number(qty) > 0);
+  if (!entries.length) {
+    root.append(element("p", "economy-empty", "Корзина пока пуста. Добавьте материалы из карточки нужной постройки."));
+    return;
+  }
+  entries.forEach(([id, quantity]) => {
+    const part = PARTS.find(item => item.id === id);
+    const row = element("div", "material-cart-row");
+    const info = element("div", "material-cart-info");
+    info.append(element("b", "", `${part.emoji} ${part.name}`), element("small", "", `${part.price} монет за шт. · ${part.price * quantity} монет`));
+    const controls = element("div", "material-cart-controls");
+    const minus = element("button", "", "−"); minus.dataset.cartAction = `dec:${id}`; minus.setAttribute("aria-label", `Уменьшить ${part.name}`);
+    const count = element("b", "material-cart-quantity", String(quantity));
+    const plus = element("button", "", "+"); plus.dataset.cartAction = `inc:${id}`; plus.setAttribute("aria-label", `Увеличить ${part.name}`);
+    const remove = element("button", "cart-remove", "Убрать"); remove.dataset.cartAction = `remove:${id}`;
+    controls.append(minus, count, plus, remove); row.append(info, controls); root.append(row);
+  });
+  const total = cartTotal(state);
+  const footer = element("div", "material-cart-footer");
+  footer.append(element("b", "", `Итого: ${total} монет`));
+  const pay = element("button", "primary-button", "Оплатить корзину");
+  pay.dataset.cartAction = "pay"; pay.disabled = (Number(state.money) || 0) < total;
+  const clear = element("button", "", "Очистить"); clear.dataset.cartAction = "clear";
+  footer.append(pay, clear);
+  if ((Number(state.money) || 0) < total) footer.append(element("small", "cart-warning", `Не хватает ${total - (Number(state.money) || 0)} монет.`));
+  root.append(footer);
 }
 
 export function renderEconomy(state) {
@@ -105,6 +143,7 @@ export function renderEconomy(state) {
   partsRoot.replaceChildren();
   stockRoot.replaceChildren();
   deliveriesRoot.replaceChildren();
+  state.materialCart ??= {};
 
   BUILDINGS.forEach(building => {
     const level = state.buildings[building.id] || 0;
@@ -118,12 +157,23 @@ export function renderEconomy(state) {
     } else {
       lines.push("Максимальный уровень достигнут.");
     }
-    addCard(buildingsRoot, `${building.emoji} ${building.name}`, building.description, lines,
+    const buildingCard = addCard(buildingsRoot, `${building.emoji} ${building.name}`, building.description, lines,
       next ? "Построить / улучшить" : "Максимальный уровень",
       `build:${building.id}`,
       !next || state.money < next.cost ||
       Object.entries(next.parts).some(([id, qty]) => (state.parts[id] || 0) < qty)
     );
+    if (next) {
+      const detail = [...buildingCard.querySelectorAll(".economy-detail")].find(node => node.textContent.startsWith("Детали:"));
+      if (detail) {
+        const row = element("div", "building-material-action");
+        detail.replaceWith(row); row.append(detail);
+        const missing = Object.entries(next.parts).reduce((sum, [partId, qty]) => sum + Math.max(0, qty - (Number(state.parts[partId]) || 0) - (Number(state.materialCart[partId]) || 0)), 0);
+        const add = element("button", "", missing ? "Добавить необходимые материалы в корзину" : "Материалы уже учтены");
+        add.dataset.cartAction = `add:${building.id}`; add.disabled = missing === 0;
+        row.append(add);
+      }
+    }
   });
 
   PARTS.forEach(part => {
@@ -244,6 +294,42 @@ export function initEconomy(state, { render, notify }) {
     const button = event.target.closest("[data-economy-action]");
     if (!button) return;
     const [action, id] = button.dataset.economyAction.split(":");
+
+    if (action === "add") {
+      const building = BUILDINGS.find(item => item.id === id);
+      const upgrade = building?.levels[state.buildings[id] || 0];
+      if (!upgrade) return;
+      state.materialCart ??= {};
+      Object.entries(upgrade.parts).forEach(([partId, required]) => {
+        const missing = Math.max(0, required - (Number(state.parts[partId]) || 0) - (Number(state.materialCart[partId]) || 0));
+        if (missing) state.materialCart[partId] = (Number(state.materialCart[partId]) || 0) + missing;
+      });
+      notify(`Материалы для «${building.name}» добавлены в корзину.`);
+    }
+
+    if (action === "inc" || action === "dec" || action === "remove") {
+      state.materialCart ??= {};
+      const current = Math.max(0, Number(state.materialCart[id]) || 0);
+      if (!PARTS.some(part => part.id === id)) return;
+      if (action === "inc") state.materialCart[id] = current + 1;
+      if (action === "dec") state.materialCart[id] = Math.max(0, current - 1);
+      if (action === "remove" || state.materialCart[id] === 0) delete state.materialCart[id];
+    }
+
+    if (action === "clear") state.materialCart = {};
+
+    if (action === "pay") {
+      const entries = Object.entries(state.materialCart || {}).filter(([partId, qty]) => PARTS.some(part => part.id === partId) && Number(qty) > 0);
+      const total = entries.reduce((sum, [partId, qty]) => sum + PARTS.find(part => part.id === partId).price * Math.floor(Number(qty)), 0);
+      if (!entries.length || (Number(state.money) || 0) < total) {
+        notify("Не хватает денег для оплаты корзины.");
+        renderEconomy(state); return;
+      }
+      state.money -= total;
+      entries.forEach(([partId, qty]) => { state.parts[partId] = (Number(state.parts[partId]) || 0) + Math.floor(Number(qty)); });
+      state.materialCart = {};
+      notify(`Корзина оплачена: материалы закуплены на ${total} монет и добавлены в комплектующие.`);
+    }
 
     if (action === "order") {
       const part = PARTS.find(item => item.id === id);
