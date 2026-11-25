@@ -27,6 +27,8 @@ function ensure(state) {
   state.advancedProduction.lines ??= [];
   state.advancedProduction.queue ??= [];
   state.advancedProduction.nextId ??= 1;
+  state.advancedProduction.lines.forEach(line => { line.quality = Math.max(25, Math.min(100, Number(line.quality) || 55)); });
+  state.advancedProduction.queue.forEach(job => { job.quality = Math.max(25, Math.min(100, Number(job.quality) || 55)); });
   state.maintenance ??= 100;
   state.bragaQuality = Math.max(0, Math.min(100, Number(state.bragaQuality ?? 55)));
   state.story ??= { unlocked: [] };
@@ -258,13 +260,13 @@ export function initExpansion(state, { render, notify, earnExperience }) {
       const line = state.advancedProduction.lines[index];
       if (!line?.ready) return;
       const expected = line.output;
+      const oldQty = Math.max(0, Number(state.inventory.braga) || 0);
       const received = addInventory(state, "braga", expected);
+      if (received > 0) state.bragaQuality = Math.round(((state.bragaQuality * oldQty) + (line.quality * received)) / Math.max(1, oldQty + received));
       if (received < expected) {
         line.output = expected - received;
         notify(`На склад помещено ${received}. Остаток партии (${line.output}) ждёт свободного места.`);
       } else {
-        const oldQty = Math.max(0, Number(state.inventory.braga) || 0);
-        state.bragaQuality = Math.round(((state.bragaQuality * oldQty) + (line.quality * received)) / Math.max(1, oldQty + received));
         state.advancedProduction.lines.splice(index, 1);
         notify(`Партия собрана: ${received} ед. браги, качество ${line.quality}/100. Среднее качество запаса: ${state.bragaQuality}/100.`);
         startQueued(state);
