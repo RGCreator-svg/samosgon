@@ -70,6 +70,23 @@ export const ITEMS = [
     price: 68,
     description: "Продукт, созревший в игровой бочке."
   }
+  ,{ id:"grapes", name:"Виноград", emoji:"🍇", price:18, description:"Сырьё для винодельни; можно вырастить или купить." }
+  ,{ id:"honey", name:"Мёд", emoji:"🍯", price:28, description:"Сырьё пасеки для медовухи и медового дистиллята." }
+  ,{ id:"yeast", name:"Винные дрожжи", emoji:"🧫", price:16, description:"Игровой ингредиент для винных и медовых партий." }
+  ,{ id:"bottles", name:"Пустые бутылки", emoji:"🍾", price:7, description:"Тара для готовой продукции." }
+  ,{ id:"corks", name:"Пробки", emoji:"🪵", price:3, description:"Тара и укупорка для вина." }
+  ,{ id:"wine", name:"Вино", emoji:"🍷", price:62, description:"Игровой продукт винодельни." }
+  ,{ id:"mead", name:"Медовуха", emoji:"🍯", price:58, description:"Игровой медовый напиток." }
+  ,{ id:"honey_braga", name:"Медовая брага", emoji:"🫙", price:38, description:"Игровое сырьё для медового дистиллята." }
+  ,{ id:"honey_spirit", name:"Медовый дистиллят", emoji:"🥃", price:78, description:"Игровой продукт условной перегонки медовой браги." }
+
+  ,{ id:"water", name:"Подготовленная вода", emoji:"💧", price:2, description:"Игровое сырьё для медовых партий." }
+  ,{ id:"yeast_nutrient", name:"Питательная добавка", emoji:"🧪", price:12, description:"Вспомогательный ингредиент для игровых партий брожения." }
+
+  ,{ id:"aged_honey_spirit", name:"Выдержанный медовый дистиллят", emoji:"🥃", price:96, description:"Игровой медовый дистиллят после выдержки в бочке." }
+
+  ,{ id:"labels", name:"Этикетки", emoji:"🏷️", price:2, description:"Маркировка для готовой продукции винодельни." }
+
 ];
 
 export const SKILL_BRANCHES = [
@@ -123,6 +140,17 @@ export const SKILL_BRANCHES = [
         cost: 1,
         requires: "clean_barrel"
       }
+    ]
+  },
+  {
+    id: "winemaking",
+    name: "🍇 Виноделие и медоварение",
+    skills: [
+      { id: "wine_basics", name: "Основы виноделия", description: "Открывает развитие виноградника и винодельни.", cost: 1 },
+      { id: "wine_pressing", name: "Прессование и сусло", description: "Открывает винный пресс и подготовку винных партий.", cost: 1, requires: "wine_basics" },
+      { id: "cellar_aging", name: "Погребное дело", description: "Открывает выдержку и улучшение качества вина.", cost: 2, requires: "wine_pressing" },
+      { id: "mead_brewing", name: "Медоварение", description: "Открывает отдельную линию медовухи и медовой браги.", cost: 1, requires: "wine_basics" },
+      { id: "honey_distillation", name: "Медовый дистиллят", description: "Открывает медовую брагу как сырьё для игровой перегонки.", cost: 2, requires: "mead_brewing" }
     ]
   },
   {

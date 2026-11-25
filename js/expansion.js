@@ -1,4 +1,4 @@
-import { addInventory, getStorageCapacity } from "./economy.js";
+import { queuePurchase, registerCartHandler, addInventory, getStorageCapacity } from "./economy.js";
 import { getEquipmentProfile } from "./equipment.js";
 
 const RECIPES = [
@@ -96,7 +96,7 @@ function renderProduction(state) {
       el("p", "", `Сырьё: ${{sugar:"сахар",fruit:"фрукты",grain:"зерно"}[recipe.mashType]} · Требуется ступень аппарата: ${recipe.tier}`));
     const button = el("button", "", "Добавить в очередь");
     button.dataset.productionRecipe = recipe.id;
-    button.disabled = state.equipmentTier < recipe.tier || state.money < recipe.cost || state.advancedProduction.queue.length >= 12;
+    button.disabled = state.equipmentTier < recipe.tier || state.advancedProduction.queue.length >= 12;
     card.append(button);
     recipes.append(card);
   });
@@ -237,24 +237,16 @@ export function initExpansion(state, { render, notify, earnExperience }) {
     nav.querySelectorAll("[data-tab]").forEach(item => item.classList.toggle("active", item.dataset.tab === "expansion"));
   });
 
+  registerCartHandler("productionRecipe",(current,item)=>{const recipe=RECIPES.find(entry=>entry.id===item.payload?.id);if(!recipe||current.equipmentTier<recipe.tier||current.advancedProduction.queue.length+item.quantity>12)return;for(let i=0;i<item.quantity;i++)current.advancedProduction.queue.push({id:current.advancedProduction.nextId++,recipeId:recipe.id,name:recipe.name,mashType:recipe.mashType,outputItem:recipe.outputItem,days:recipe.days,remaining:recipe.days,output:recipe.output,quality:batchQuality(current,recipe),ready:false});startQueued(current);});
   $("#expansion").addEventListener("click", event => {
     const recipeButton = event.target.closest("[data-production-recipe]");
     if (recipeButton) {
       const recipe = RECIPES.find(item => item.id === recipeButton.dataset.productionRecipe);
-      if (!recipe || state.money < recipe.cost || state.equipmentTier < recipe.tier) return;
-      if (state.advancedProduction.queue.length >= 12) {
-        notify("Очередь заполнена. Даже у железа есть предел терпения.");
-        return;
-      }
-      state.money -= recipe.cost;
-      state.advancedProduction.queue.push({
-        id: state.advancedProduction.nextId++,
-        recipeId: recipe.id, name: recipe.name, mashType: recipe.mashType, outputItem: recipe.outputItem,
-        days: recipe.days, remaining: recipe.days, output: recipe.output,
-        quality: batchQuality(state, recipe), ready: false
-      });
-      startQueued(state);
-      notify(`В очередь добавлено: «${recipe.name}». Прогноз качества — ${batchQuality(state, recipe)}/100.`);
+      if (!recipe || state.equipmentTier < recipe.tier) return;
+      const pendingBatches=(state.purchaseCart||[]).filter(item=>item.kind==="productionRecipe").reduce((sum,item)=>sum+item.quantity,0);
+      if (state.advancedProduction.queue.length + pendingBatches >= 12) { notify("Очередь заполнена."); return; }
+      queuePurchase(state,{key:"recipe:"+recipe.id,kind:"productionRecipe",name:"Производство: "+recipe.name,cost:recipe.cost,parts:{},payload:{id:recipe.id},stackable:true});
+      notify("Запуск производства добавлен в общую корзину: "+recipe.name+".");
       render(); return;
     }
 

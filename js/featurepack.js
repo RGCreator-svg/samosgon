@@ -1,4 +1,4 @@
-import { addInventory } from "./economy.js";
+import { queuePurchase, registerCartHandler, addInventory } from "./economy.js";
 import { getEquipmentProfile } from "./equipment.js";
 import { getWorldYieldMultiplier } from "./world.js";
 
@@ -18,7 +18,7 @@ const EVENTS = [
 const FARMS = [
   { id:"greenhouse", name:"Теплица", icon:"🏡", cost:260, desc:"Каждый новый день даёт овощи.", yields:{potato:2,carrot:1} },
   { id:"irrigation", name:"Поливочная система", icon:"💧", cost:340, desc:"Улучшает урожай огорода и снижает износ.", yields:{potato:2,cabbage:1} },
-  { id:"apiary", name:"Пасека", icon:"🐝", cost:300, desc:"Приносит регулярный доход и помогает саду.", yields:{apple:1,pear:1} }
+  { id:"apiary", name:"Пасека", icon:"🐝", cost:300, desc:"Приносит регулярный доход и помогает саду.", yields:{apple:1,pear:1,honey:1} }
 ];
 
 function ensure(s) {
@@ -37,11 +37,11 @@ function card(parent,title,desc) { const c=el("article","feature-card"); c.appen
 function renderDistillation(s, root) {
   const c=card(root,"⚗️ Перегонка и контроль качества","Переведи готовую брагу в игровую категорию «спирт-сырец». Выбор режима влияет только на условные игровые показатели качества и выхода.");
   const profile=getEquipmentProfile(s,s.mashType);
-  const mashItem={sugar:"braga",fruit:"fruit_braga",grain:"grain_braga"}[s.mashType]||"braga";
+  const mashItem={sugar:"braga",fruit:"fruit_braga",grain:"grain_braga",honey:"honey_braga"}[s.mashType]||"braga";
   const mashCount=s.inventory[mashItem]||0;
-  c.append(el("p","feature-meta",`Сырьевой профиль: ${({sugar:"Сахарная",fruit:"Фруктовая",grain:"Зерновая"})[s.mashType]} · На складе: ${mashCount} ед. · Качество: ${s.distillation.quality||0}/100`));
+  c.append(el("p","feature-meta",`Сырьевой профиль: ${({sugar:"Сахарная",fruit:"Фруктовая",grain:"Зерновая",honey:"Медовая"})[s.mashType]} · На складе: ${mashCount} ед. · Качество: ${s.distillation.quality||0}/100`));
   const mashPicker=el("div","mash-picker");
-  [["sugar","🍬 Сахарная"],["fruit","🍎 Фруктовая"],["grain","🌾 Зерновая"]].forEach(([id,label])=>{const b=btn(label,"mashType",id,s.distillation.active);if(s.mashType===id)b.classList.add("selected");mashPicker.append(b);});c.append(mashPicker);
+  [["sugar","🍬 Сахарная"],["fruit","🍎 Фруктовая"],["grain","🌾 Зерновая"],["honey","🍯 Медовая"]].forEach(([id,label])=>{const b=btn(label,"mashType",id,s.distillation.active || (id==="honey" && !s.skills.includes("honey_distillation")));if(s.mashType===id)b.classList.add("selected");mashPicker.append(b);});c.append(mashPicker);
   c.append(el("p","module-meta",`Конфигурация: ${{pot:"Перегонный аппарат",hybrid:"Гибридная колонна",rectification:"Ректификационная колонна"}[profile.mode]} · Бонус модулей к качеству: +${profile.quality}`));
   if (s.distillation.active) {
     c.append(el("p","","Выбери стиль отсечения начальной фракции:"));
@@ -75,16 +75,17 @@ function renderMarket(s,root) {
   } else c.append(el("p","","Особых предложений сейчас нет. Следующее событие может появиться при смене дня."));
 }
 function renderAging(s,root) {
-  const c=card(root,"🪵 Выдержка в бочках","Положи игровой спирт-сырец на выдержку. Через несколько дней получишь товар с повышенной ценой. Это условная игровая механика.");
-  const raw=s.inventory.spirit||0;
-  c.append(el("p","feature-meta",`Спирт-сырец: ${raw} · Бочек на выдержке: ${s.barrelAging.length}/3`));
-  c.append(btn("Заложить 2 ед. на выдержку (20 монет)","age-start","yes",raw<2 || s.money<20 || s.barrelAging.length>=3));
+  const c=card(root,"🪵 Выдержка в бочках","Обычный и медовый дистиллят можно выдерживать отдельно. Это игровая абстракция созревания продукта.");
+  const raw=s.inventory.spirit||0, honey=s.inventory.honey_spirit||0;
+  c.append(el("p","feature-meta",`Спирт-сырец: ${raw} · Медовый дистиллят: ${honey} · Бочек на выдержке: ${s.barrelAging.length}/3`));
+  c.append(btn("Заложить 2 ед. спирта на выдержку (20 монет)","age-start","spirit",raw<2||s.barrelAging.length>=3));
+  c.append(btn("Заложить 2 ед. медового дистиллята (20 монет)","age-start","honey",honey<2||s.barrelAging.length>=3));
   if(!s.barrelAging.length)c.append(el("p","", "Бочки пока пусты."));
-  s.barrelAging.forEach((b,i)=>{const line=el("div","aging-row",`Бочка ${i+1}: ${b.remaining} дн. · качество ${b.quality}/100 · ${b.ready?"готова":"созревает"}`); if(b.ready)line.append(btn("Забрать выдержанный продукт","age-collect",String(i))); c.append(line);});
+  s.barrelAging.forEach((b,i)=>{const line=el("div","aging-row",`Бочка ${i+1}: ${b.remaining} дн. · качество ${b.quality}/100 · ${b.ready?"готова":"созревает"}`);if(b.ready)line.append(btn("Забрать выдержанный продукт","age-collect",String(i)));c.append(line);});
 }
 function renderFarms(s,root) {
   const c=card(root,"🌱 Расширение хозяйства","Постройки дают регулярный урожай при переходе дня. Их можно развивать независимо от основного огорода.");
-  FARMS.forEach(f=>{const owned=s.farmUpgrades.includes(f.id);const item=el("div","farm-upgrade",`${f.icon} ${f.name} — ${owned?"построено":f.cost+" монет"}`);item.append(el("p","",f.desc));if(!owned)item.append(btn("Построить","farm-build",f.id,s.money<f.cost));c.append(item);});
+  FARMS.forEach(f=>{const owned=s.farmUpgrades.includes(f.id);const item=el("div","farm-upgrade",`${f.icon} ${f.name} — ${owned?"построено":f.cost+" монет"}`);item.append(el("p","",f.desc));if(!owned)item.append(btn("Добавить в общую корзину","farm-build",f.id));c.append(item);});
   c.append(el("p","feature-meta",`Построек: ${s.farmUpgrades.length}/3`));
 }
 export function renderFeaturePack(s) {
@@ -100,17 +101,19 @@ export function initFeaturePack(s,{render,notify,earnExperience}) {
     const section=el("section","tab-content panel hidden");section.id="featurePack";game.append(section);
   }
   nav.addEventListener("click",e=>{if(!e.target.closest('[data-tab="featurePack"]'))return;document.querySelectorAll(".tab-content").forEach(x=>x.classList.toggle("hidden",x.id!=="featurePack"));nav.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x.dataset.tab==="featurePack"));});
+  registerCartHandler("farmUpgrade",(current,item)=>{const farm=FARMS.find(x=>x.id===item.payload?.id);if(farm&&!current.farmUpgrades.includes(farm.id)){current.farmUpgrades.push(farm.id);earnExperience(20);}});
+  registerCartHandler("barrelAging",(current,item)=>{if((current.barrelAging||[]).length<3){const input=item.payload?.inputItem||"spirit";current.barrelAging.push({remaining:3,quality:Math.max(45,Number(current.distillation.quality)||65),ready:false,inputItem:input,outputItem:input==="honey_spirit"?"aged_honey_spirit":"aged_spirit"});}});
   $("#featurePack").addEventListener("click",e=>{
     const b=e.target.closest("button");if(!b)return;
     if(b.dataset.mashType){s.mashType=b.dataset.mashType;}
-    if(b.dataset.distillStart){const item={sugar:"braga",fruit:"fruit_braga",grain:"grain_braga"}[s.mashType]||"braga";if((s.inventory[item]||0)<3||s.distillation.result>0)return;s.inventory[item]-=3;s.distillation.active=true;s.distillation.mashType=s.mashType;notify("Игровая перегонка запущена. Выбери режим контроля качества.");}
-    if(b.dataset.distillCut){if(!s.distillation.active)return;const mode=b.dataset.distillCut;const bonus=s.specialization==="artisan"?8:0;const values={careful:{quality:24,output:2},balanced:{quality:8,output:3},yield:{quality:-12,output:4}};const v=values[mode];const profile=getEquipmentProfile(s,s.mashType);const equipmentBonus=(Number(s.equipmentTier)||0)*4;const baseQuality=Number(s.bragaQuality)||55;s.distillation={active:false,quality:Math.max(20,Math.min(100,Math.round(baseQuality+v.quality+bonus+equipmentBonus+profile.quality))),result:Math.max(1,v.output+profile.output),mashType:s.mashType,stillMode:profile.mode,flavour:profile.flavour};notify(`Перегонка завершена: ${s.distillation.result} ед., качество ${s.distillation.quality}/100.`);earnExperience(14);}
-    if(b.dataset.distillCollect){const n=s.distillation.result;const got=addInventory(s,"spirit",n);if(got===n)s.distillation.result=0;else s.distillation.result-=got;if(got)notify(`На склад помещено ${got} ед. спирта-сырца.`);}
+    if(b.dataset.distillStart){const item={sugar:"braga",fruit:"fruit_braga",grain:"grain_braga",honey:"honey_braga"}[s.mashType]||"braga";if((s.inventory[item]||0)<3||s.distillation.result>0)return;s.inventory[item]-=3;s.distillation.active=true;s.distillation.mashType=s.mashType;s.distillation.resultItem=s.mashType==="honey"?"honey_spirit":"spirit";notify("Игровая перегонка запущена. Выбери режим контроля качества.");}
+    if(b.dataset.distillCut){if(!s.distillation.active)return;const mode=b.dataset.distillCut;const bonus=s.specialization==="artisan"?8:0;const values={careful:{quality:24,output:2},balanced:{quality:8,output:3},yield:{quality:-12,output:4}};const v=values[mode];const profile=getEquipmentProfile(s,s.mashType);const equipmentBonus=(Number(s.equipmentTier)||0)*4;const baseQuality=Number(s.bragaQuality)||55;s.distillation={active:false,quality:Math.max(20,Math.min(100,Math.round(baseQuality+v.quality+bonus+equipmentBonus+profile.quality))),result:Math.max(1,v.output+profile.output),mashType:s.mashType,resultItem:s.mashType==="honey"?"honey_spirit":"spirit",stillMode:profile.mode,flavour:profile.flavour};notify(`Перегонка завершена: ${s.distillation.result} ед., качество ${s.distillation.quality}/100.`);earnExperience(14);}
+    if(b.dataset.distillCollect){const n=s.distillation.result;const got=addInventory(s,s.distillation.resultItem||"spirit",n);if(got===n)s.distillation.result=0;else s.distillation.result-=got;if(got)notify(`На склад помещено ${got} ед. спирта-сырца.`);}
     if(b.dataset.specialize){if(s.specialization||(s.skillPoints||0)<3)return;s.skillPoints-=3;s.specialization=b.dataset.specialize;notify(`Выбрана специализация: ${SPECIALIZATIONS.find(x=>x.id===s.specialization).name}.`);}
     if(b.dataset.eventChoice!==undefined){const event=EVENTS.find(x=>x.id===s.featureEvent?.id);const choice=event?.choices[Number(b.dataset.eventChoice)];if(!choice || ((choice.money||0)<0 && s.money<Math.abs(choice.money)))return;s.money=Math.max(0,s.money+(choice.money||0));s.reputation=Math.max(0,Math.min(100,(s.reputation||0)+(choice.reputation||0)));s.market.multiplier=Math.max(.75,Math.min(1.35,s.market.multiplier+(choice.market||0)));s.maintenance=Math.max(0,Math.min(100,(s.maintenance||100)+(choice.maintenance||0)));if(choice.xp)earnExperience(choice.xp);notify(`Решение принято: «${event.title}».`);s.featureEvent=null;}
-    if(b.dataset.ageStart){if((s.inventory.spirit||0)<2||s.money<20||s.barrelAging.length>=3)return;s.inventory.spirit-=2;s.money-=20;s.barrelAging.push({remaining:3,quality:Math.max(45,Number(s.distillation.quality)||65),ready:false});notify("Две единицы заложены в бочку. Теперь потребуется терпение.");}
-    if(b.dataset.ageCollect!==undefined){const i=Number(b.dataset.ageCollect);const barrel=s.barrelAging[i];if(!barrel?.ready)return;const got=addInventory(s,"aged_spirit",2);if(got===2){s.barrelAging.splice(i,1);s.money+=Math.round(2*18*(1+barrel.quality/100));notify("Выдержанный продукт принят на склад. Цена выше обычной.");}}
-    if(b.dataset.farmBuild){const farm=FARMS.find(x=>x.id===b.dataset.farmBuild);if(!farm||s.farmUpgrades.includes(farm.id)||s.money<farm.cost)return;s.money-=farm.cost;s.farmUpgrades.push(farm.id);notify(`Построено: ${farm.name}. Хозяйство становится самостоятельнее.`);earnExperience(20);}
+    if(b.dataset.ageStart){const input=b.dataset.ageStart==="honey"?"honey_spirit":"spirit";if((s.inventory[input]||0)<2||s.barrelAging.length>=3)return;queuePurchase(s,{key:"barrel-aging:"+input,kind:"barrelAging",name:input==="honey_spirit"?"Выдержка медового дистиллята":"Выдержка спирта-сырца",cost:20,consume:{[input]:2},payload:{inputItem:input}});notify("Закладка бочки добавлена в общую корзину.");}
+    if(b.dataset.ageCollect!==undefined){const i=Number(b.dataset.ageCollect);const barrel=s.barrelAging[i];if(!barrel?.ready)return;const got=addInventory(s,barrel.outputItem||"aged_spirit",2);if(got===2){s.barrelAging.splice(i,1);s.money+=Math.round(2*(barrel.outputItem==="aged_honey_spirit"?34:18)*(1+barrel.quality/100));notify("Выдержанный продукт принят на склад. Цена выше обычной.");}}
+    if(b.dataset.farmBuild){const farm=FARMS.find(x=>x.id===b.dataset.farmBuild);if(!farm||s.farmUpgrades.includes(farm.id))return;queuePurchase(s,{key:"farm:"+farm.id,kind:"farmUpgrade",name:farm.name,cost:farm.cost,payload:{id:farm.id}});notify(farm.name+" добавлено в общую корзину.");}
     render();renderFeaturePack(s);
   });
   renderFeaturePack(s);

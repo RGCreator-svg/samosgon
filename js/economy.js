@@ -95,8 +95,52 @@ function addCard(parent, title, description, details, buttonText, action, disabl
   return card;
 }
 
-function cartTotal(state) {
-  return Object.entries(state.materialCart || {}).reduce((sum, [id, qty]) => sum + (PARTS.find(part => part.id === id)?.price || 0) * Math.max(0, Number(qty) || 0), 0);
+const CART_HANDLERS = new Map();
+export function registerCartHandler(kind, handler) { CART_HANDLERS.set(kind, handler); }
+export function queuePurchase(state, purchase) {
+  state.purchaseCart ??= [];
+  const item = state.purchaseCart.find(entry => entry.key === purchase.key);
+  if (item) { if (purchase.stackable) item.quantity += Math.max(1, Number(purchase.quantity) || 1); }
+  else state.purchaseCart.push({ ...purchase, quantity: Math.max(1, Number(purchase.quantity) || 1) });
+  if (purchase.parts) queueMaterials(state, purchase.parts, true);
+  renderMaterialCart(state);
+}
+
+function cartTotals(state) {
+  const purchases = state.purchaseCart || [];
+  const parts = {};
+  const inventory = {};
+  const incoming = {};
+  purchases.forEach(item => {
+    Object.entries(item.parts || {}).forEach(([id, qty]) => { parts[id] = (parts[id] || 0) + qty * item.quantity; });
+    Object.entries(item.consume || {}).forEach(([id, qty]) => { inventory[id] = (inventory[id] || 0) + qty * item.quantity; });
+    Object.entries(item.output || {}).forEach(([id, qty]) => { incoming[id] = (incoming[id] || 0) + qty * item.quantity; });
+  });
+  const goodsCost = purchases.reduce((sum, item) => sum + item.cost * item.quantity, 0);
+  const partsCost = Object.entries(state.materialCart || {}).reduce((sum, [id, qty]) => sum + (PARTS.find(part => part.id === id)?.price || 0) * qty, 0);
+  return { purchases, parts, inventory, incoming, money: goodsCost + partsCost };
+}
+export function queuePart(state, id, quantity = 1) {
+  if (!PARTS.some(part => part.id === id)) return;
+  state.materialCart ??= {};
+  state.materialCart[id] = Math.max(0, Number(state.materialCart[id]) || 0) + Math.max(1, Math.floor(Number(quantity) || 1));
+  renderMaterialCart(state);
+}
+
+export function queueMaterials(state, requirements, purchaseAlreadyQueued = false) {
+  state.materialCart ??= {};
+  const committed = {};
+  (state.purchaseCart || []).forEach(item => Object.entries(item.parts || {}).forEach(([id, qty]) => { committed[id] = (committed[id] || 0) + qty * item.quantity; }));
+  const targets = { ...committed };
+  Object.entries(requirements || {}).forEach(([id, qty]) => { targets[id] = (targets[id] || 0) + (purchaseAlreadyQueued ? 0 : Math.floor(Number(qty) || 0)); });
+  const added = {};
+  Object.entries(targets).forEach(([id, required]) => {
+    if (!PARTS.some(part => part.id === id)) return;
+    const missing = Math.max(0, required - (Number(state.parts[id]) || 0) - (Number(state.materialCart[id]) || 0));
+    if (missing) { state.materialCart[id] = (Number(state.materialCart[id]) || 0) + missing; added[id] = missing; }
+  });
+  renderMaterialCart(state);
+  return added;
 }
 
 function renderMaterialCart(state) {
@@ -104,11 +148,25 @@ function renderMaterialCart(state) {
   if (!root) return;
   root.replaceChildren();
   state.materialCart ??= {};
+  state.purchaseCart ??= [];
+  const totals = cartTotals(state);
   const entries = Object.entries(state.materialCart).filter(([id, qty]) => PARTS.some(part => part.id === id) && Number(qty) > 0);
-  if (!entries.length) {
-    root.append(element("p", "economy-empty", "Корзина пока пуста. Добавьте материалы из карточки нужной постройки."));
+  if (!entries.length && !totals.purchases.length) {
+    root.append(element("p", "economy-empty", "Корзина пока пуста. Добавляйте товары и улучшения из разных вкладок."));
     return;
   }
+  totals.purchases.forEach(item => {
+    const row = element("div", "material-cart-row");
+    row.append(element("div", "material-cart-info", item.name + " × " + item.quantity + " · " + (item.cost * item.quantity) + " монет"));
+    const controls = element("div", "material-cart-controls");
+    if (item.stackable) {
+      const minus = element("button", "", "−"); minus.dataset.economyAction = "purchaseDec:" + item.key;
+      const plus = element("button", "", "+"); plus.dataset.economyAction = "purchaseInc:" + item.key;
+      controls.append(minus, plus);
+    }
+    const remove = element("button", "cart-remove", "Убрать"); remove.dataset.economyAction = "purchaseRemove:" + item.key;
+    controls.append(remove); row.append(controls); root.append(row);
+  });
   entries.forEach(([id, quantity]) => {
     const part = PARTS.find(item => item.id === id);
     const row = element("div", "material-cart-row");
@@ -121,14 +179,19 @@ function renderMaterialCart(state) {
     const remove = element("button", "cart-remove", "Убрать"); remove.dataset.economyAction = `remove:${id}`;
     controls.append(minus, count, plus, remove); row.append(info, controls); root.append(row);
   });
-  const total = cartTotal(state);
+  const total = totals.money;
   const footer = element("div", "material-cart-footer");
   footer.append(element("b", "", `Итого: ${total} монет`));
   const pay = element("button", "primary-button", "Оплатить корзину");
-  pay.dataset.economyAction = "pay"; pay.disabled = (Number(state.money) || 0) < total;
+  pay.dataset.economyAction = "pay";
+  const missingParts = Object.entries(totals.parts).some(([id, qty]) => (Number(state.parts[id]) || 0) + (Number(state.materialCart[id]) || 0) < qty);
+  const missingGoods = Object.entries(totals.inventory).some(([id, qty]) => (Number(state.inventory[id]) || 0) + (Number(totals.incoming[id]) || 0) < qty);
+  pay.disabled = (Number(state.money) || 0) < total || missingParts || missingGoods;
   const clear = element("button", "", "Очистить"); clear.dataset.economyAction = "clear";
   footer.append(pay, clear);
   if ((Number(state.money) || 0) < total) footer.append(element("small", "cart-warning", `Не хватает ${total - (Number(state.money) || 0)} монет.`));
+  if (missingParts) footer.append(element("small", "cart-warning", "Не хватает комплектующих на складе. Добавьте нужные позиции в корзину."));
+  if (missingGoods) footer.append(element("small", "cart-warning", "Не хватает производственного сырья. Его можно заказать у поставщика в соответствующей вкладке."));
   root.append(footer);
 }
 
@@ -144,6 +207,7 @@ export function renderEconomy(state) {
   stockRoot.replaceChildren();
   deliveriesRoot.replaceChildren();
   state.materialCart ??= {};
+  state.purchaseCart ??= [];
 
   BUILDINGS.forEach(building => {
     const level = state.buildings[building.id] || 0;
@@ -158,10 +222,9 @@ export function renderEconomy(state) {
       lines.push("Максимальный уровень достигнут.");
     }
     const buildingCard = addCard(buildingsRoot, `${building.emoji} ${building.name}`, building.description, lines,
-      next ? "Построить / улучшить" : "Максимальный уровень",
-      `build:${building.id}`,
-      !next || state.money < next.cost ||
-      Object.entries(next.parts).some(([id, qty]) => (state.parts[id] || 0) < qty)
+      next ? "Добавить улучшение в общую корзину" : "Максимальный уровень",
+      `queueBuild:${building.id}`,
+      !next
     );
     if (next) {
       const detail = [...buildingCard.querySelectorAll(".economy-detail")].find(node => node.textContent.startsWith("Детали:"));
@@ -191,9 +254,12 @@ export function renderEconomy(state) {
     const card = element("article", "economy-card");
     card.append(element("h3", "", `${part.emoji} ${part.name}`), element("p", "", part.description));
     lines.forEach(line => card.append(element("p", "economy-detail", line)));
-    const orderButton = element("button", "", "Заказать 1 шт.");
+    const cartButton = element("button", "", "Добавить 1 шт. в общую корзину");
+    cartButton.dataset.economyAction = `cartOrder:${part.id}`;
+    card.append(cartButton);
+    const orderButton = element("button", "", "Добавить доставку в общую корзину");
     orderButton.dataset.economyAction = `order:${part.id}`;
-    orderButton.disabled = state.money < part.price;
+    orderButton.disabled = false;
     card.append(orderButton);
     if (arrived > 0) {
       const collectButton = element("button", "collect-all-button", `Забрать всё доставленное (${arrived})`);
@@ -266,6 +332,15 @@ export function initEconomy(state, { render, notify }) {
   const game = $("#game");
   if (!nav || !game) return;
 
+  if (!$("#sharedPurchaseCart")) {
+    const cartSection = element("section", "panel shared-purchase-cart");
+    cartSection.id = "sharedPurchaseCart";
+    cartSection.append(element("h2", "", "🛒 Единая корзина закупок"), element("p", "economy-detail", "Здесь объединяются товары, сырьё, комплектующие, строительство, услуги и технологические улучшения из всех вкладок. Одинаковые позиции суммируются, а недостающие детали автоматически добавляются к заказу."));
+    const cartRoot = element("div", "material-cart"); cartRoot.id = "materialCart"; cartSection.append(cartRoot);
+    const eventPanel = $("#notifications")?.closest(".event-console");
+    if (eventPanel?.parentElement === game) game.insertBefore(cartSection, eventPanel); else game.append(cartSection);
+  }
+
   if (!$("#economy")) {
     const tab = element("button", "", "🏗️ Стройка");
     tab.dataset.tab = "economy";
@@ -277,7 +352,7 @@ export function initEconomy(state, { render, notify }) {
       <h2>🏗️ Строительство и снабжение</h2>
       <p>Хозяйство растёт. Теперь даже гвозди требуют финансового планирования.</p>
       <h3>Постройки</h3><div id="buildingCards" class="economy-grid"></div>
-      <h3>🛒 Корзина строительных материалов</h3><p class="economy-detail">Добавляйте недостающие детали из карточек построек, меняйте количество и оплачивайте весь заказ сразу. Материалы поступят на склад комплектующих.</p><div id="materialCart" class="material-cart"></div>
+      
       <h3>Магазин «СельхозТехСнаб»</h3><div id="partsCatalog" class="economy-grid"></div>
       <h3>Мои комплектующие</h3><div id="partsStock" class="parts-stock"></div>
       <h3>Доставка</h3><div id="partsDeliveries" class="parts-stock"></div>`;
@@ -293,20 +368,47 @@ export function initEconomy(state, { render, notify }) {
     nav.querySelectorAll("[data-tab]").forEach(item => item.classList.toggle("active", item === button));
   });
 
+  registerCartHandler("partDelivery", (current, item) => {
+    const part = PARTS.find(entry => entry.id === item.payload?.id);
+    if (!part) return;
+    current.deliveries.push({ id: "delivery_" + Date.now() + "_" + Math.random().toString(16).slice(2), partId: part.id, name: part.name, quantity: item.quantity, arrivalDay: current.day + part.delivery });
+  });
+
+  registerCartHandler("building", (current, item) => {
+    const building = BUILDINGS.find(entry => entry.id === item.payload?.id);
+    const level = current.buildings[item.payload?.id] || 0;
+    if (!building || level !== item.payload?.level || !building.levels[level]) return;
+    current.buildings[building.id] = level + item.quantity;
+    notify(building.name + " улучшен до уровня " + current.buildings[building.id] + ".");
+  });
+
   $("#economy")?.addEventListener("click", event => {
     const button = event.target.closest("[data-economy-action]");
     if (!button) return;
-    const [action, id] = button.dataset.economyAction.split(":");
+    const [action, ...idParts] = button.dataset.economyAction.split(":");
+    const id = idParts.join(":");
+
+    if (action === "cartOrder") {
+      const part = PARTS.find(item => item.id === id);
+      if (!part) return;
+      queuePart(state, id, 1);
+      notify(`${part.name} добавлены в общую корзину. Повторные добавления суммируются.`);
+    }
+
+    if (action === "queueBuild") {
+      const building = BUILDINGS.find(item => item.id === id);
+      const level = state.buildings[id] || 0;
+      const upgrade = building?.levels[level];
+      if (!upgrade) return;
+      queuePurchase(state, { key: "building:" + id + ":" + level, kind: "building", name: building.name + " · уровень " + (level + 1), cost: upgrade.cost, parts: upgrade.parts, payload: { id, level } });
+    }
 
     if (action === "add") {
       const building = BUILDINGS.find(item => item.id === id);
       const upgrade = building?.levels[state.buildings[id] || 0];
       if (!upgrade) return;
       state.materialCart ??= {};
-      Object.entries(upgrade.parts).forEach(([partId, required]) => {
-        const missing = Math.max(0, required - (Number(state.parts[partId]) || 0) - (Number(state.materialCart[partId]) || 0));
-        if (missing) state.materialCart[partId] = (Number(state.materialCart[partId]) || 0) + missing;
-      });
+      queueMaterials(state, upgrade.parts);
       notify(`Материалы для «${building.name}» добавлены в корзину.`);
     }
 
@@ -319,48 +421,39 @@ export function initEconomy(state, { render, notify }) {
       if (action === "remove" || state.materialCart[id] === 0) delete state.materialCart[id];
     }
 
-    if (action === "clear") state.materialCart = {};
+    if (action === "clear") { state.materialCart = {}; state.purchaseCart = []; }
+
+    if (action === "purchaseInc" || action === "purchaseDec" || action === "purchaseRemove") {
+      const item = (state.purchaseCart || []).find(entry => entry.key === id);
+      if (item && item.stackable && action === "purchaseInc") item.quantity += 1;
+      if (item && item.stackable && action === "purchaseDec") item.quantity -= 1;
+      if (item && (action === "purchaseRemove" || item.quantity <= 0)) state.purchaseCart = state.purchaseCart.filter(entry => entry !== item);
+    }
 
     if (action === "pay") {
-      const entries = Object.entries(state.materialCart || {}).filter(([partId, qty]) => PARTS.some(part => part.id === partId) && Number(qty) > 0);
-      const total = entries.reduce((sum, [partId, qty]) => sum + PARTS.find(part => part.id === partId).price * Math.floor(Number(qty)), 0);
-      if (!entries.length || (Number(state.money) || 0) < total) {
-        notify("Не хватает денег для оплаты корзины.");
+      const totals = cartTotals(state);
+      const shortages = Object.entries(totals.parts).filter(([partId, qty]) => (Number(state.parts[partId]) || 0) + (Number(state.materialCart[partId]) || 0) < qty);
+      const inventoryShortages = Object.entries(totals.inventory).filter(([itemId, qty]) => (Number(state.inventory[itemId]) || 0) + (Number(totals.incoming[itemId]) || 0) < qty);
+      if ((!totals.purchases.length && !Object.keys(state.materialCart || {}).length) || (Number(state.money) || 0) < totals.money || shortages.length || inventoryShortages.length) {
+        notify("Невозможно оплатить корзину: проверьте деньги и комплектующие.");
         renderEconomy(state); return;
       }
-      state.money -= total;
-      entries.forEach(([partId, qty]) => { state.parts[partId] = (Number(state.parts[partId]) || 0) + Math.floor(Number(qty)); });
+      state.money -= totals.money;
+      Object.entries(totals.parts).forEach(([partId, qty]) => { state.parts[partId] = (Number(state.parts[partId]) || 0) - qty; });
+      Object.entries(totals.inventory).forEach(([itemId, qty]) => { state.inventory[itemId] = (Number(state.inventory[itemId]) || 0) - qty; });
+      Object.entries(state.materialCart || {}).forEach(([partId, qty]) => { state.parts[partId] = (Number(state.parts[partId]) || 0) + qty; });
+      const purchases = [...totals.purchases];
       state.materialCart = {};
-      notify(`Корзина оплачена: материалы закуплены на ${total} монет и добавлены в комплектующие.`);
+      state.purchaseCart = [];
+      purchases.forEach(item => CART_HANDLERS.get(item.kind)?.(state, item));
+      notify("Общая корзина оплачена. Все покупки проведены одним платежом.");
     }
 
     if (action === "order") {
       const part = PARTS.find(item => item.id === id);
-      if (!part || state.money < part.price) return;
-      state.money -= part.price;
-      state.deliveries.push({
-        id: `delivery_${Date.now()}_${Math.random().toString(16).slice(2)}`,
-        partId: part.id,
-        name: part.name,
-        quantity: 1,
-        arrivalDay: state.day + part.delivery
-      });
-      notify(`Заказ оформлен: ${part.name}. Почта обещает доставить через ${part.delivery} дн. Почта — оптимист.`);
-    }
-
-    if (action === "build") {
-      const building = BUILDINGS.find(item => item.id === id);
-      const level = state.buildings[id] || 0;
-      const upgrade = building?.levels[level];
-      if (!upgrade || state.money < upgrade.cost) return;
-      if (Object.entries(upgrade.parts).some(([partId, qty]) => (state.parts[partId] || 0) < qty)) {
-        notify("Не хватает комплектующих. Стройка пока на паузе.");
-        return;
-      }
-      state.money -= upgrade.cost;
-      Object.entries(upgrade.parts).forEach(([partId, qty]) => state.parts[partId] -= qty);
-      state.buildings[id] = level + 1;
-      notify(`${building.name} улучшен до уровня ${level + 1}! Соседи уже считают, что вы олигарх.`);
+      if (!part) return;
+      queuePurchase(state,{key:"delivery:"+id,kind:"partDelivery",name:"Доставка: "+part.name,cost:part.price,payload:{id},stackable:true});
+      notify("Заказ на доставку добавлен в общую корзину.");
     }
 
     if (action === "collectAll") {
