@@ -41,6 +41,20 @@ export const ITEMS = [
     emoji: "🫙",
     price: 25,
     description: "Пока не напиток, но уже предмет разговоров."
+  },
+  {
+    id: "spirit",
+    name: "Спирт-сырец",
+    emoji: "⚗️",
+    price: 42,
+    description: "Игровой продукт после условной перегонки."
+  },
+  {
+    id: "aged_spirit",
+    name: "Выдержанный продукт",
+    emoji: "🪵",
+    price: 68,
+    description: "Продукт, созревший в игровой бочке."
   }
 ];
 
