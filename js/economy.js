@@ -204,10 +204,9 @@ export function renderEconomy(state) {
       lines.push("Максимальный уровень достигнут.");
     }
     const buildingCard = addCard(buildingsRoot, `${building.emoji} ${building.name}`, building.description, lines,
-      next ? "Построить / улучшить" : "Максимальный уровень",
-      `build:${building.id}`,
-      !next || state.money < next.cost ||
-      Object.entries(next.parts).some(([id, qty]) => (state.parts[id] || 0) < qty)
+      next ? "Добавить улучшение в общую корзину" : "Максимальный уровень",
+      `queueBuild:${building.id}`,
+      !next
     );
     if (next) {
       const detail = [...buildingCard.querySelectorAll(".economy-detail")].find(node => node.textContent.startsWith("Детали:"));
@@ -351,6 +350,14 @@ export function initEconomy(state, { render, notify }) {
     nav.querySelectorAll("[data-tab]").forEach(item => item.classList.toggle("active", item === button));
   });
 
+  registerCartHandler("building", (current, item) => {
+    const building = BUILDINGS.find(entry => entry.id === item.payload?.id);
+    const level = current.buildings[item.payload?.id] || 0;
+    if (!building || level !== item.payload?.level || !building.levels[level]) return;
+    current.buildings[building.id] = level + item.quantity;
+    notify(building.name + " улучшен до уровня " + current.buildings[building.id] + ".");
+  });
+
   $("#economy")?.addEventListener("click", event => {
     const button = event.target.closest("[data-economy-action]");
     if (!button) return;
@@ -361,6 +368,14 @@ export function initEconomy(state, { render, notify }) {
       if (!part) return;
       queuePart(state, id, 1);
       notify(`${part.name} добавлены в общую корзину. Повторные добавления суммируются.`);
+    }
+
+    if (action === "queueBuild") {
+      const building = BUILDINGS.find(item => item.id === id);
+      const level = state.buildings[id] || 0;
+      const upgrade = building?.levels[level];
+      if (!upgrade) return;
+      queuePurchase(state, { key: "building:" + id + ":" + level, kind: "building", name: building.name + " · уровень " + (level + 1), cost: upgrade.cost, parts: upgrade.parts, payload: { id, level } });
     }
 
     if (action === "add") {
@@ -383,17 +398,28 @@ export function initEconomy(state, { render, notify }) {
 
     if (action === "clear") state.materialCart = {};
 
+    if (action === "purchaseInc" || action === "purchaseDec" || action === "purchaseRemove") {
+      const item = (state.purchaseCart || []).find(entry => entry.key === id);
+      if (item && action === "purchaseInc") item.quantity += 1;
+      if (item && action === "purchaseDec") item.quantity -= 1;
+      if (item && (action === "purchaseRemove" || item.quantity <= 0)) state.purchaseCart = state.purchaseCart.filter(entry => entry !== item);
+    }
+
     if (action === "pay") {
-      const entries = Object.entries(state.materialCart || {}).filter(([partId, qty]) => PARTS.some(part => part.id === partId) && Number(qty) > 0);
-      const total = entries.reduce((sum, [partId, qty]) => sum + PARTS.find(part => part.id === partId).price * Math.floor(Number(qty)), 0);
-      if (!entries.length || (Number(state.money) || 0) < total) {
-        notify("Не хватает денег для оплаты корзины.");
+      const totals = cartTotals(state);
+      const shortages = Object.entries(totals.parts).filter(([partId, qty]) => (Number(state.parts[partId]) || 0) < qty);
+      if ((!totals.purchases.length && !Object.keys(state.materialCart || {}).length) || (Number(state.money) || 0) < totals.money || shortages.length) {
+        notify("Невозможно оплатить корзину: проверьте деньги и комплектующие.");
         renderEconomy(state); return;
       }
-      state.money -= total;
-      entries.forEach(([partId, qty]) => { state.parts[partId] = (Number(state.parts[partId]) || 0) + Math.floor(Number(qty)); });
+      state.money -= totals.money;
+      Object.entries(totals.parts).forEach(([partId, qty]) => { state.parts[partId] = (Number(state.parts[partId]) || 0) - qty; });
+      Object.entries(state.materialCart || {}).forEach(([partId, qty]) => { state.parts[partId] = (Number(state.parts[partId]) || 0) + qty; });
+      const purchases = [...totals.purchases];
       state.materialCart = {};
-      notify(`Корзина оплачена: материалы закуплены на ${total} монет и добавлены в комплектующие.`);
+      state.purchaseCart = [];
+      purchases.forEach(item => CART_HANDLERS.get(item.kind)?.(state, item));
+      notify("Общая корзина оплачена. Все покупки проведены одним платежом.");
     }
 
     if (action === "order") {
