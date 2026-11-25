@@ -66,8 +66,8 @@ function render(s) {
   const prod=card(root,"🍷 Производственные линии","Игровые циклы условны и не являются реальными технологическими инструкциями. Сырьё списывается при оплате заказа, а готовая партия появляется через несколько игровых дней.");
   const recipes=[
     {id:"wine",name:"Виноградное вино",desc:"5 винограда + дрожжи + бутылки и пробки. Требуется виноградник, пресс и погреб.",consume:{grapes:5,yeast:1,yeast_nutrient:1,bottles:2,corks:2},days:3,output:"wine",amount:2,needs:["vineyard","winePress","wineCellar"],skill:"cellar_aging"},
-    {id:"mead",name:"Медовуха",desc:"4 мёда + дрожжи + сахар. Требуется медоварня.",consume:{honey:4,water:2,yeast:1,yeast_nutrient:1,bottles:3,corks:3},days:3,output:"mead",amount:3,needs:["meadery"],skill:"mead_brewing"},
-    {id:"honeyMash",name:"Медовая брага",desc:"6 мёда + дрожжи + сахар. После созревания её можно выбрать в игровой перегонке.",consume:{honey:6,water:2,yeast:1,yeast_nutrient:1},days:3,output:"honey_braga",amount:3,needs:["meadery"],skill:"honey_distillation"}
+    {id:"mead",name:"Медовуха",desc:"Мёд, подготовленная вода, дрожжи и питательная добавка. Требуется навык медоварения и медоварня.",consume:{honey:4,water:2,yeast:1,yeast_nutrient:1,bottles:3,corks:3},days:3,output:"mead",amount:3,needs:["meadery"],skill:"mead_brewing"},
+    {id:"honeyMash",name:"Медовая брага",desc:"Мёд, подготовленная вода, дрожжи и питательная добавка. После созревания брагу можно выбрать в игровой перегонке.",consume:{honey:6,water:2,yeast:1,yeast_nutrient:1},days:3,output:"honey_braga",amount:3,needs:["meadery"],skill:"honey_distillation"}
   ];
   recipes.forEach(recipe=>{
     const missing=recipe.needs.filter(id=>!s.viticulture.buildings.includes(id));
@@ -75,8 +75,8 @@ function render(s) {
     c.append(el("h4","",recipe.name),el("p","",recipe.desc),el("p","feature-meta","Сырьё: "+Object.entries(recipe.consume).map(([id,n])=>id+" × "+n).join(", ")+" · Срок: "+recipe.days+" дн. · Выход: "+recipe.amount));
     const button=el("button","","Поставить партию в общую корзину");
     button.dataset.vitiBatch=recipe.id;
-    button.disabled=missing.length>0;
-    if(missing.length)c.append(el("small","tech-locked","Нужны постройки: "+missing.join(", ")));
+    button.disabled=missing.length>0||!s.skills.includes(recipe.skill);
+    if(missing.length)c.append(el("small","tech-locked","Нужны постройки: "+missing.join(", ")));if(!s.skills.includes(recipe.skill))c.append(el("small","tech-locked","Нужен навык: "+recipe.skill));
     c.append(button);prod.append(c);
   });
 
@@ -84,7 +84,7 @@ function render(s) {
   if(!s.viticulture.batches.length)batches.append(el("p","economy-empty","Пока нет активных партий."));
   s.viticulture.batches.forEach(job=>{const row=el("div","aging-row",job.name+" · "+(job.ready?"готово к сбору":"осталось "+job.remaining+" дн."));if(job.ready){const collect=el("button","","Забрать продукцию");collect.dataset.vitiCollect=String(job.id);row.append(collect);}batches.append(row);});
   const stock=card(root,"📦 Запасы винодельни","Виноград и мёд с собственных хозяйств попадают сюда же, что и купленные партии.");
-  ["grapes","honey","yeast","yeast_nutrient","water","bottles","corks","wine","mead","honey_braga","honey_spirit"].forEach(id=>stock.append(el("p","economy-detail",id+": "+(s.inventory[id]||0))));
+  const stockNames={grapes:"Виноград",honey:"Мёд",yeast:"Дрожжи",yeast_nutrient:"Питательная добавка",water:"Вода",bottles:"Бутылки",corks:"Пробки",wine:"Вино",mead:"Медовуха",honey_braga:"Медовая брага",honey_spirit:"Медовый дистиллят"};Object.entries(stockNames).forEach(([id,name])=>stock.append(el("p","economy-detail",name+": "+(s.inventory[id]||0))));
 }
 
 export function initViticulture(s,{render:renderGame,notify}) {
@@ -137,7 +137,7 @@ export function initViticulture(s,{render:renderGame,notify}) {
       };
       const recipe=recipes[batch.dataset.vitiBatch];
       if(!recipe||recipe.needs.some(id=>!s.viticulture.buildings.includes(id))||!s.skills.includes(recipe.skill))return;
-      queuePurchase(s,{key:"viti-batch:"+recipe.id,kind:"viticultureBatch",name:"Партия: "+recipe.name,cost:0,consume:recipe.consume,payload:{recipe}});
+      queuePurchase(s,{key:"viti-batch:"+recipe.id,kind:"viticultureBatch",name:"Партия: "+recipe.name,cost:0,consume:recipe.consume,payload:{recipe},stackable:true});
       notify("Производственная партия добавлена в общую корзину.");renderGame();return;
     }
   });
