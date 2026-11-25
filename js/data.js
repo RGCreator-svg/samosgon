@@ -85,6 +85,8 @@ export const ITEMS = [
 
   ,{ id:"aged_honey_spirit", name:"Выдержанный медовый дистиллят", emoji:"🥃", price:96, description:"Игровой медовый дистиллят после выдержки в бочке." }
 
+  ,{ id:"labels", name:"Этикетки", emoji:"🏷️", price:2, description:"Маркировка для готовой продукции винодельни." }
+
 ];
 
 export const SKILL_BRANCHES = [
