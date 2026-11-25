@@ -32,6 +32,124 @@ export function renderNeeds(state) {
   setBar("#warmthBar", state.warmth);
 }
 
+const GRISHKA_ADVICE = [
+  {
+    id: "low-energy",
+    when: state => Number(state.energy) <= 20,
+    text: "Внучок, присядь. С таким запасом сил ты даже сорняк не напугаешь. Передохни."
+  },
+  {
+    id: "low-hunger",
+    when: state => Number(state.hunger) <= 20,
+    text: "Живот урчит громче старого трактора. Найди, чем подкрепиться, а то скоро сам себя съешь."
+  },
+  {
+    id: "cold",
+    when: state => Number(state.warmth) <= 20,
+    text: "У тебя в доме тепла меньше, чем в сердце налогового инспектора. Займись хозяйством и утеплением."
+  },
+  {
+    id: "poor",
+    when: state => Number(state.money) < 20,
+    text: "Кошелёк опять похудел? Не трать последнее на блестящие железки — сначала продай урожай."
+  },
+  {
+    id: "ready-braga",
+    when: state => Boolean(state.production?.ready),
+    text: "Эй, мастер! Бочка уже своё отработала. Забирай брагу, пока она не решила стать уксусом."
+  },
+  {
+    id: "fermenting",
+    when: state => Boolean(state.production?.active),
+    text: "Пусть бочка спокойно булькает. А ты пока займись огородом или проверь заказы."
+  },
+  {
+    id: "repair-still",
+    when: state => Number(state.still) < 35,
+    text: "Аппарат выглядит так, будто пережил три свадьбы и один пожар. Подлатай его до следующей партии."
+  },
+  {
+    id: "repair-barn",
+    when: state => Number(state.barn) < 35,
+    text: "Сарай держится на честном слове и паутине. Чуть ремонта — и работать станет спокойнее."
+  },
+  {
+    id: "repair-house",
+    when: state => Number(state.house) < 30,
+    text: "Дом у тебя пока больше похож на декорацию к фильму про зиму. Не забудь про ремонт."
+  },
+  {
+    id: "garden",
+    when: state => Number(state.garden) < 20,
+    text: "Грядки заросли так, что картошку пора искать с компасом. Расчисти огород — будет урожай."
+  },
+  {
+    id: "orchard",
+    when: state => !state.orchardRestored && Number(state.day) >= 3 && Number(state.money) >= 40,
+    text: "За домом сад пропадает. Сорок монет — и яблони снова начнут приносить пользу. Я бы сам расчистил, да спина."
+  },
+  {
+    id: "full-warehouse",
+    when: state => {
+      const total = Object.values(state.inventory || {}).reduce((sum, value) => sum + Math.max(0, Number(value) || 0), 0);
+      return total >= getStorageCapacity(state) * 0.9;
+    },
+    text: "На складе уже яблоку негде упасть. Продай лишнее или расширь хранилище, а то урожай пойдёт жить на улицу."
+  },
+  {
+    id: "unspent-points",
+    when: state => Number(state.skillPoints) >= 2,
+    text: "У тебя очки навыков копятся, а ты всё тянешь. Загляни в дерево умений — знания сами в голову не заползут."
+  },
+  {
+    id: "automation",
+    when: state => Number(state.automationTier) > 0,
+    text: "Вот это я понимаю — хозяйство работает само! Только не забывай поглядывать на оборудование. Железо обидчивое."
+  },
+  {
+    id: "equipment",
+    when: state => Number(state.equipmentTier) > 0,
+    text: "Новое оборудование — это хорошо. Теперь бы научиться выжимать из него толк, а не только хвастаться соседям."
+  },
+  {
+    id: "orchard-restored",
+    when: state => Boolean(state.orchardRestored) && Number(state.trees) > 0,
+    text: "Сад ожил — красота! Не забывай собирать фрукты. Деревья, конечно, терпеливые, но не до бесконечности."
+  },
+  {
+    id: "first-skills",
+    when: state => (state.skills || []).length >= 5,
+    text: "Гляжу, мастер растёт! Пять навыков — уже не просто деревенский турист. Скоро и мне советовать будет нечего."
+  },
+  {
+    id: "day-progress",
+    when: state => Number(state.day) >= 10,
+    text: "Десятый день пошёл, а хозяйство ещё стоит! Бабушка бы сказала: «Главное — не зазнавайся и крышу проверь»."
+  }
+];
+
+const GRISHKA_DEFAULT_LINES = [
+  "Не суетись, внучок. Сначала одно дело доведи до ума, потом хватайся за три следующих.",
+  "Хорошее хозяйство строится не за день. Хотя сарай у соседа рухнул за минуту — рекорд, между прочим.",
+  "Запомни: если план не сработал, это не провал. Это бесплатный урок с дымом и запахом палёного.",
+  "Деньги любят счёт, а деревенские слухи — скорость. Смотри, чтобы второе не обогнало первое.",
+  "Бабушка говорила: инструмент держи сухим, запасы — полными, а обещания соседям — осторожными.",
+  "Вон сколько дел вокруг. Выбери самое полезное, а не то, которое громче скрипит."
+];
+
+export function renderAdvisor(state) {
+  const tip = $("#grishkaTip");
+  if (!tip) return;
+
+  const advice = GRISHKA_ADVICE.find(entry => entry.when(state));
+  const line = advice
+    ? advice.text
+    : GRISHKA_DEFAULT_LINES[Math.abs(Number(state.day) || 1) % GRISHKA_DEFAULT_LINES.length];
+
+  tip.textContent = `«${line}»`;
+  tip.dataset.advice = advice?.id || "general";
+}
+
 export function renderXP(state) {
   const xpNeeded = 100;
   const currentXP = Math.max(0, Number(state.xp) || 0);
