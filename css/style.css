@@ -1274,3 +1274,17 @@ button:disabled {
 .milestone-card.unlocked .milestone-status { color:#d9c58e; }
 .milestone-card.claimed .milestone-status { color:#b9d19d; }
 .milestone-card button { display:block; width:100%; margin:8px 0 0; }
+
+/* Модульное оборудование */
+.module-group-title{margin:22px 0 10px;color:#dfc58e}
+.module-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:11px}
+.module-card{padding:13px;border:1px solid #554f3c;border-radius:11px;background:linear-gradient(145deg,#30352b,#20241e)}
+.module-card.installed{border-color:#71865a;background:linear-gradient(145deg,#303b2d,#20251f)}
+.module-card h4{margin:0 0 7px;color:#e5d2a5}
+.module-card p{margin:6px 0;color:#c9c1af;font-size:.9rem}
+.module-meta{color:#d6bd80!important;font-size:.86rem}
+.module-parts{display:block;color:#aaa18d;margin:6px 0 10px}
+.module-card button{width:100%}
+.mash-picker{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.mash-picker button.selected{border-color:#d6bd80;background:#675638;box-shadow:0 0 0 1px #d6bd80}
+@media(max-width:560px){.mash-picker button{flex:1 1 100%}}
