@@ -1123,3 +1123,14 @@ button:disabled {
   font-weight: bold;
   letter-spacing: .12em;
 }
+
+/* Короткая эмоциональная реакция на игровые события. */
+.game-advisor.reaction-pop img {
+  animation: grishka-reaction-pop .55s ease-out 1;
+}
+@keyframes grishka-reaction-pop {
+  0% { transform: scale(1) rotate(0); }
+  35% { transform: scale(1.055) rotate(-2deg); }
+  70% { transform: scale(.99) rotate(1deg); }
+  100% { transform: scale(1) rotate(0); }
+}
