@@ -67,13 +67,13 @@ const root=$("#moduleCatalog");if(!root)return;root.replaceChildren();
 const groups=[...new Set(EQUIPMENT_MODULES.map(m=>m.group))];
 groups.forEach(group=>{root.append(node("h3","module-group-title",group));const grid=node("div","module-grid");
 EQUIPMENT_MODULES.filter(m=>m.group===group).forEach(m=>{
-const owned=s.equipmentModules.includes(m.id);const slot=slotForModule(m.id);const occupant=slot?moduleInSlot(s,slot):null;
+const owned=s.equipmentModules.includes(m.id);const slot=slotForModule(m.id);const occupant=slot?moduleInSlot(s,slot):null;const pending=slot?(s.purchaseCart||[]).find(item=>item.kind==="equipmentModule"&&slotForModule(item.payload?.id)?.id===slot.id):null;
 const c=node("article","module-card"+(owned?" installed":""));
 c.append(node("h4","",m.name),node("p","",m.desc),node("p","module-meta","Ступень аппарата: "+m.tier+" · "+m.cost+" монет"));
 const parts=Object.entries(m.parts).map(([id,n])=>id+": "+n).join(" · ");c.append(node("small","module-parts",parts||"Без деталей"));
 if(owned){c.append(node("span","tech-status","Установлен в слот: "+(slot?slot.name:"вспомогательный")));}
-else{const stored=(s.equipmentModuleInventory||[]).includes(m.id);const b=node("button","",stored?"Установить со склада":"В корзину: купить модуль");b.dataset.installModule=m.id;const eligible=canInstallModule(s,m);const slotFree=!slot||!occupant;b.disabled=!eligible||!slotFree;c.append(b);if(stored)c.append(node("small","tech-status","Уже приобретён · повторная установка бесплатна"));
-if(slot&&!slotFree)c.append(node("small","tech-locked","Слот занят: "+(EQUIPMENT_MODULES.find(x=>x.id===occupant)?.name||occupant)));
+else{const stored=(s.equipmentModuleInventory||[]).includes(m.id);const b=node("button","",stored?"Установить со склада":"В корзину: купить модуль");b.dataset.installModule=m.id;const eligible=canInstallModule(s,m);const slotFree=!slot||(!occupant&&!pending);b.disabled=!eligible||!slotFree;c.append(b);if(stored)c.append(node("small","tech-status","Уже приобретён · повторная установка бесплатна"));
+if(slot&&!slotFree)c.append(node("small","tech-locked",pending?"В корзине уже есть модуль для этого слота.":"Слот занят: "+(EQUIPMENT_MODULES.find(x=>x.id===occupant)?.name||occupant)));
 else if(s.equipmentTier<m.tier)c.append(node("small","tech-locked","Сначала улучшите аппарат до нужной ступени."));}
 grid.append(c);});root.append(grid);});
 }
