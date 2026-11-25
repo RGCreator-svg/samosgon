@@ -7,7 +7,6 @@ const SUPPLIES = [
   { id:"grapes", name:"Виноград", emoji:"🍇", price:18, desc:"Свежее винодельческое сырьё." },
   { id:"honey", name:"Мёд", emoji:"🍯", price:28, desc:"Для медовухи и медовой браги." },
   { id:"yeast", name:"Винные дрожжи", emoji:"🧫", price:16, desc:"Игровой ингредиент для брожения." },
-  { id:"sugar", name:"Сахар", emoji:"🧂", price:9, desc:"Дополнительное сырьё для рецептур." },
   { id:"bottles", name:"Пустые бутылки", emoji:"🍾", price:7, desc:"Тара для готовой продукции." },
   { id:"corks", name:"Пробки", emoji:"🪵", price:3, desc:"Укупорка бутылок." },
   { id:"water", name:"Подготовленная вода", emoji:"💧", price:2, desc:"Игровой ингредиент для медовых партий." },
