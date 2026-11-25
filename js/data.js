@@ -150,7 +150,10 @@ export const SKILL_BRANCHES = [
       { id: "wine_pressing", name: "Прессование и сусло", description: "Открывает винный пресс и подготовку винных партий.", cost: 1, requires: "wine_basics" },
       { id: "cellar_aging", name: "Погребное дело", description: "Открывает выдержку и улучшение качества вина.", cost: 2, requires: "wine_pressing" },
       { id: "mead_brewing", name: "Медоварение", description: "Открывает отдельную линию медовухи и медовой браги.", cost: 1, requires: "wine_basics" },
-      { id: "honey_distillation", name: "Медовый дистиллят", description: "Открывает медовую брагу как сырьё для игровой перегонки.", cost: 2, requires: "mead_brewing" }
+      { id: "honey_distillation", name: "Медовый дистиллят", description: "Открывает медовую брагу как сырьё для игровой перегонки.", cost: 2, requires: "mead_brewing" },
+      { id: "cider_making", name: "Сидроделие", description: "Открывает производство яблочного сидра.", cost: 1, requires: "cellar_aging" },
+      { id: "pear_wine", name: "Грушевое виноделие", description: "Открывает отдельные партии грушевого вина.", cost: 1, requires: "cellar_aging" },
+      { id: "fruit_winemaking", name: "Фруктовые купажи", description: "Открывает производство купажированного вина из яблок и груш.", cost: 2, requires: "pear_wine" }
     ]
   },
   {
