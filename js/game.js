@@ -1,13 +1,15 @@
 
 import { loadGame, saveGame, addXP } from "./engine.js";
 import { ITEMS, SKILL_BRANCHES } from "./data.js";
-import { renderAll } from "./ui.js";
+import { renderAll, renderAdvisor, reactGrishkaToEvent } from "./ui.js";
 import { initOrders, advanceOrdersDay } from "./orders.js";
 import { initDevTools } from "./dev.js";
 import { startNewDay } from "./events.js";
 import { initEconomy, renderEconomy, advanceDeliveries, addInventory } from "./economy.js";
 import { initEquipment, renderEquipment } from "./equipment.js";
 import { initExpansion, renderExpansion, advanceExpansionDay } from "./expansion.js";
+import { initFeaturePack, renderFeaturePack, advanceFeaturePackDay, getMarketMultiplier } from "./featurepack.js";
+import { initMilestones, renderMilestones } from "./progression.js";
 
 let state = loadGame();
 
@@ -34,6 +36,7 @@ function save() {
 }
 
 function notify(message) {
+  reactGrishkaToEvent(message);
   const container = $("#notifications");
   if (!container) return;
 
@@ -52,6 +55,9 @@ function render() {
   renderEconomy(state);
   renderEquipment(state);
   renderExpansion(state);
+  renderFeaturePack(state);
+  renderMilestones(state);
+  renderAdvisor(state);
   save();
 }
 
@@ -117,6 +123,8 @@ initDevTools(state, { render, notify });
 initEconomy(state, { render, notify });
 initEquipment(state, { render, notify });
 initExpansion(state, { render, notify, earnExperience });
+initFeaturePack(state, { render, notify, earnExperience });
+initMilestones(state, { renderGame: render, notify, earnExperience });
 
 // Продажа товаров — кнопки создаются в ui.js
 $("#marketItems")?.addEventListener("click", (event) => {
@@ -135,7 +143,7 @@ $("#marketItems")?.addEventListener("click", (event) => {
     return;
   }
 
-  const multiplier = state.skills.includes("bargain") ? 1.2 : 1;
+  const multiplier = (state.skills.includes("bargain") ? 1.2 : 1) * getMarketMultiplier(state);
   const price = Math.round(item.price * multiplier);
 
   state.inventory[itemId] -= 1;
@@ -362,6 +370,7 @@ $("#sleepButton")?.addEventListener("click", () => {
     advanceOrdersDay(state, notify);
   advanceDeliveries(state, notify);
   advanceExpansionDay(state, notify);
+  advanceFeaturePackDay(state, notify);
 
   const hungerLoss = state.skills.includes("country_life") ? 5 : 10;
   const warmthLoss = state.skills.includes("country_life") ? 2 : 5;

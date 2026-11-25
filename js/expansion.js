@@ -1,9 +1,12 @@
 import { addInventory, getStorageCapacity } from "./economy.js";
+import { getEquipmentProfile } from "./equipment.js";
 
 const RECIPES = [
-  { id: "basic", name: "Обычная партия браги", cost: 10, days: 2, output: 3, tier: 0, description: "Небольшая партия на старом оборудовании." },
-  { id: "refined", name: "Улучшенная партия", cost: 35, days: 2, output: 5, tier: 2, description: "Технологическая партия для модернизированной установки." },
-  { id: "precision", name: "Точная партия", cost: 75, days: 1, output: 7, tier: 3, description: "Партия для оборудования высокого класса." }
+  { id: "basic", name: "Сахарная брага", mashType: "sugar", outputItem: "braga", cost: 10, days: 2, output: 3, tier: 0, description: "Простая базовая партия из сахара." },
+  { id: "fruit", name: "Фруктовая брага", mashType: "fruit", outputItem: "fruit_braga", cost: 35, days: 2, output: 5, tier: 1, qualityBonus: 5, description: "Ароматная партия из яблок и других фруктов." },
+  { id: "grain", name: "Зерновая брага", mashType: "grain", outputItem: "grain_braga", cost: 55, days: 3, output: 5, tier: 2, qualityBonus: 8, description: "Зерновая партия для более сложной производственной ветки." },
+  { id: "precision", name: "Точная зерновая партия", mashType: "grain", outputItem: "grain_braga", cost: 95, days: 2, output: 7, tier: 3, qualityBonus: 16, description: "Улучшенная партия с повышенным качеством." },
+  { id: "master", name: "Мастерская сахарная партия", mashType: "sugar", outputItem: "braga", cost: 140, days: 2, output: 9, tier: 4, qualityBonus: 22, description: "Премиальная партия для полностью развитой установки."}
 ];
 
 const CHAPTERS = [
@@ -26,11 +29,29 @@ function ensure(state) {
   state.advancedProduction.lines ??= [];
   state.advancedProduction.queue ??= [];
   state.advancedProduction.nextId ??= 1;
+  state.advancedProduction.lines.forEach(line => { line.quality = Math.max(25, Math.min(100, Number(line.quality) || 55)); });
+  state.advancedProduction.queue.forEach(job => { job.quality = Math.max(25, Math.min(100, Number(job.quality) || 55)); });
   state.maintenance ??= 100;
+  state.bragaQuality = Math.max(0, Math.min(100, Number(state.bragaQuality ?? 55)));
   state.story ??= { unlocked: [] };
   state.story.unlocked ??= [];
   state.advancedContracts ??= { offer: null, completed: 0 };
   state.advancedContracts.completed ??= 0;
+}
+
+function qualityLabel(value) {
+  if (value >= 90) return "превосходное";
+  if (value >= 75) return "высокое";
+  if (value >= 60) return "хорошее";
+  if (value >= 45) return "обычное";
+  return "низкое";
+}
+
+function batchQuality(state, recipe) {
+  const tierBonus = Math.max(0, Number(state.equipmentTier) || 0) * 6;
+  const maintenanceEffect = ((Number(state.maintenance) || 0) - 60) * 0.22;
+  const moduleBonus = getEquipmentProfile(state, recipe.mashType || "sugar").quality;
+  return Math.max(25, Math.min(100, Math.round(48 + tierBonus + maintenanceEffect + moduleBonus + (recipe.qualityBonus || 0))));
 }
 
 function lineCapacity(state) {
@@ -64,15 +85,15 @@ function renderProduction(state) {
   root.replaceChildren();
 
   const summary = el("p", "expansion-summary",
-    `Линий: ${state.advancedProduction.lines.length}/${lineCapacity(state)} · В очереди: ${state.advancedProduction.queue.length} · Уровень аппарата: ${state.equipmentTier}/4`);
+    `Линий: ${state.advancedProduction.lines.length}/${lineCapacity(state)} · В очереди: ${state.advancedProduction.queue.length} · Аппарат: ${state.equipmentTier}/4 · Среднее качество браги: ${state.bragaQuality}/100`);
   root.append(summary);
 
   const recipes = el("div", "expansion-grid");
   RECIPES.forEach(recipe => {
     const card = el("article", "expansion-card");
     card.append(el("h3", "", recipe.name), el("p", "", recipe.description),
-      el("p", "", `Стоимость: ${recipe.cost} монет · Срок: ${recipe.days} дн. · Выход: ${recipe.output} ед.`),
-      el("p", "", `Требуется ступень аппарата: ${recipe.tier}`));
+      el("p", "", `Стоимость: ${recipe.cost} монет · Срок: ${recipe.days} дн. · Выход: ${recipe.output} ед. · Ожидаемое качество: ${batchQuality(state, recipe)}/100`),
+      el("p", "", `Сырьё: ${{sugar:"сахар",fruit:"фрукты",grain:"зерно"}[recipe.mashType]} · Требуется ступень аппарата: ${recipe.tier}`));
     const button = el("button", "", "Добавить в очередь");
     button.dataset.productionRecipe = recipe.id;
     button.disabled = state.equipmentTier < recipe.tier || state.money < recipe.cost || state.advancedProduction.queue.length >= 12;
@@ -86,7 +107,7 @@ function renderProduction(state) {
   state.advancedProduction.lines.forEach(line => {
     const card = el("article", `production-line${line.ready ? " ready" : ""}`);
     card.append(el("h4", "", line.name));
-    card.append(el("p", "", line.ready ? `Готово к сбору: ${line.output} ед.` : `Осталось дней: ${line.remaining}`));
+    card.append(el("p", "", line.ready ? `Готово: ${line.output} ед. · качество ${line.quality}/100 (${qualityLabel(line.quality)})` : `Осталось дней: ${line.remaining} · качество ${line.quality}/100`));
     const progress = el("div", "production-progress");
     const fill = el("span");
     fill.style.width = line.ready ? "100%" : `${Math.max(0, 100 * (line.days - line.remaining) / line.days)}%`;
@@ -228,11 +249,12 @@ export function initExpansion(state, { render, notify, earnExperience }) {
       state.money -= recipe.cost;
       state.advancedProduction.queue.push({
         id: state.advancedProduction.nextId++,
-        recipeId: recipe.id, name: recipe.name, days: recipe.days,
-        remaining: recipe.days, output: recipe.output, ready: false
+        recipeId: recipe.id, name: recipe.name, mashType: recipe.mashType, outputItem: recipe.outputItem,
+        days: recipe.days, remaining: recipe.days, output: recipe.output,
+        quality: batchQuality(state, recipe), ready: false
       });
       startQueued(state);
-      notify(`В очередь добавлено: «${recipe.name}».`);
+      notify(`В очередь добавлено: «${recipe.name}». Прогноз качества — ${batchQuality(state, recipe)}/100.`);
       render(); return;
     }
 
@@ -242,13 +264,15 @@ export function initExpansion(state, { render, notify, earnExperience }) {
       const line = state.advancedProduction.lines[index];
       if (!line?.ready) return;
       const expected = line.output;
-      const received = addInventory(state, "braga", expected);
+      const oldQty = Math.max(0, Number(state.inventory.braga) || 0);
+      const received = addInventory(state, line.outputItem || "braga", expected);
+      if (received > 0) state.bragaQuality = Math.round(((state.bragaQuality * oldQty) + (line.quality * received)) / Math.max(1, oldQty + received));
       if (received < expected) {
         line.output = expected - received;
         notify(`На склад помещено ${received}. Остаток партии (${line.output}) ждёт свободного места.`);
       } else {
         state.advancedProduction.lines.splice(index, 1);
-        notify(`Партия собрана: ${received} ед. продукции.`);
+        notify(`Партия собрана: ${received} ед. браги, качество ${line.quality}/100. Среднее качество запаса: ${state.bragaQuality}/100.`);
         startQueued(state);
         earnExperience(12);
       }
@@ -302,10 +326,12 @@ export function advanceExpansionDay(state, notify) {
       const line = state.advancedProduction.lines[index];
       if (!line.ready) continue;
       const expected = line.output;
-      const received = addInventory(state, "braga", expected);
+      const oldQty = Math.max(0, Number(state.inventory.braga) || 0);
+      const received = addInventory(state, line.outputItem || "braga", expected);
+      if (received > 0) state.bragaQuality = Math.round(((state.bragaQuality * oldQty) + (line.quality * received)) / Math.max(1, oldQty + received));
       if (received === expected) {
         state.advancedProduction.lines.splice(index, 1);
-        notify(`Автоматика собрала партию: ${received} ед. продукции.`);
+        notify(`Автоматика собрала ${received} ед. браги качества ${line.quality}/100.`);
       } else if (received > 0) {
         line.output = expected - received;
         notify(`Автоматика перенесла на склад ${received}; остаток ждёт свободного места.`);

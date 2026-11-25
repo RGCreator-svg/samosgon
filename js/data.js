@@ -37,10 +37,38 @@ export const ITEMS = [
   },
   {
     id: "braga",
-    name: "Брага",
+    name: "Сахарная брага",
     emoji: "🫙",
     price: 25,
-    description: "Пока не напиток, но уже предмет разговоров."
+    description: "Базовая сахарная партия."
+  },
+  {
+    id: "fruit_braga",
+    name: "Фруктовая брага",
+    emoji: "🍎",
+    price: 34,
+    description: "Ароматный игровой продукт из фруктового сырья."
+  },
+  {
+    id: "grain_braga",
+    name: "Зерновая брага",
+    emoji: "🌾",
+    price: 38,
+    description: "Игровая зерновая партия с насыщенным профилем."
+  },
+  {
+    id: "spirit",
+    name: "Спирт-сырец",
+    emoji: "⚗️",
+    price: 42,
+    description: "Игровой продукт после условной перегонки."
+  },
+  {
+    id: "aged_spirit",
+    name: "Выдержанный продукт",
+    emoji: "🪵",
+    price: 68,
+    description: "Продукт, созревший в игровой бочке."
   }
 ];
 

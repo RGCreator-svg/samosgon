@@ -26,7 +26,7 @@ export function createInitialState() {
     orchardRestored: false,
     trees: 0,
 
-    inventory: { ...GAME_CONFIG.startingInventory },
+    inventory: { ...GAME_CONFIG.startingInventory, spirit: 0, aged_spirit: 0 },
     buildings: { warehouse: 0, workshop: 0, production: 0, laboratory: 0 },
     parts: { timber: 0, metal: 0, fasteners: 0, tools: 0, pump: 0, controller: 0 },
     deliveries: [],
