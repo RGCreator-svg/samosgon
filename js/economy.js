@@ -115,18 +115,18 @@ function renderMaterialCart(state) {
     const info = element("div", "material-cart-info");
     info.append(element("b", "", `${part.emoji} ${part.name}`), element("small", "", `${part.price} монет за шт. · ${part.price * quantity} монет`));
     const controls = element("div", "material-cart-controls");
-    const minus = element("button", "", "−"); minus.dataset.cartAction = `dec:${id}`; minus.setAttribute("aria-label", `Уменьшить ${part.name}`);
+    const minus = element("button", "", "−"); minus.dataset.economyAction = `dec:${id}`; minus.setAttribute("aria-label", `Уменьшить ${part.name}`);
     const count = element("b", "material-cart-quantity", String(quantity));
-    const plus = element("button", "", "+"); plus.dataset.cartAction = `inc:${id}`; plus.setAttribute("aria-label", `Увеличить ${part.name}`);
-    const remove = element("button", "cart-remove", "Убрать"); remove.dataset.cartAction = `remove:${id}`;
+    const plus = element("button", "", "+"); plus.dataset.economyAction = `inc:${id}`; plus.setAttribute("aria-label", `Увеличить ${part.name}`);
+    const remove = element("button", "cart-remove", "Убрать"); remove.dataset.economyAction = `remove:${id}`;
     controls.append(minus, count, plus, remove); row.append(info, controls); root.append(row);
   });
   const total = cartTotal(state);
   const footer = element("div", "material-cart-footer");
   footer.append(element("b", "", `Итого: ${total} монет`));
   const pay = element("button", "primary-button", "Оплатить корзину");
-  pay.dataset.cartAction = "pay"; pay.disabled = (Number(state.money) || 0) < total;
-  const clear = element("button", "", "Очистить"); clear.dataset.cartAction = "clear";
+  pay.dataset.economyAction = "pay"; pay.disabled = (Number(state.money) || 0) < total;
+  const clear = element("button", "", "Очистить"); clear.dataset.economyAction = "clear";
   footer.append(pay, clear);
   if ((Number(state.money) || 0) < total) footer.append(element("small", "cart-warning", `Не хватает ${total - (Number(state.money) || 0)} монет.`));
   root.append(footer);
@@ -170,7 +170,7 @@ export function renderEconomy(state) {
         detail.replaceWith(row); row.append(detail);
         const missing = Object.entries(next.parts).reduce((sum, [partId, qty]) => sum + Math.max(0, qty - (Number(state.parts[partId]) || 0) - (Number(state.materialCart[partId]) || 0)), 0);
         const add = element("button", "", missing ? "Добавить необходимые материалы в корзину" : "Материалы уже учтены");
-        add.dataset.cartAction = `add:${building.id}`; add.disabled = missing === 0;
+        add.dataset.economyAction = `add:${building.id}`; add.disabled = missing === 0;
         row.append(add);
       }
     }
@@ -202,6 +202,8 @@ export function renderEconomy(state) {
     }
     partsRoot.append(card);
   });
+
+  renderMaterialCart(state);
 
   PARTS.forEach(part => {
     const row = element("div", "parts-stock-row");
@@ -275,6 +277,7 @@ export function initEconomy(state, { render, notify }) {
       <h2>🏗️ Строительство и снабжение</h2>
       <p>Хозяйство растёт. Теперь даже гвозди требуют финансового планирования.</p>
       <h3>Постройки</h3><div id="buildingCards" class="economy-grid"></div>
+      <h3>🛒 Корзина строительных материалов</h3><p class="economy-detail">Добавляйте недостающие детали из карточек построек, меняйте количество и оплачивайте весь заказ сразу. Материалы поступят на склад комплектующих.</p><div id="materialCart" class="material-cart"></div>
       <h3>Магазин «СельхозТехСнаб»</h3><div id="partsCatalog" class="economy-grid"></div>
       <h3>Мои комплектующие</h3><div id="partsStock" class="parts-stock"></div>
       <h3>Доставка</h3><div id="partsDeliveries" class="parts-stock"></div>`;
