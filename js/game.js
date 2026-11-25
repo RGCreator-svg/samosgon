@@ -11,6 +11,7 @@ import { initExpansion, renderExpansion, advanceExpansionDay } from "./expansion
 import { initFeaturePack, renderFeaturePack, advanceFeaturePackDay, getMarketMultiplier } from "./featurepack.js";
 import { initMilestones, renderMilestones } from "./progression.js";
 import { initWorld, renderWorld, advanceWorldDay, getWorldYieldMultiplier, getWorldColdPenalty } from "./world.js";
+import { initViticulture, renderViticulture, advanceViticultureDay } from "./viticulture.js";
 
 let state = loadGame();
 
@@ -59,6 +60,7 @@ function render() {
   renderFeaturePack(state);
   renderMilestones(state);
   renderWorld(state);
+  renderViticulture(state);
   renderAdvisor(state);
   save();
 }
@@ -128,6 +130,7 @@ initExpansion(state, { render, notify, earnExperience });
 initFeaturePack(state, { render, notify, earnExperience });
 initMilestones(state, { renderGame: render, notify, earnExperience });
 initWorld(state, { render, notify });
+initViticulture(state, { render, notify });
 
 // Журнал событий всегда находится внизу игрового экрана, после динамических вкладок.
 const eventConsole = $("#notifications")?.closest(".event-console");
@@ -397,6 +400,7 @@ $("#sleepButton")?.addEventListener("click", (event) => {
     advanceExpansionDay(state, notify);
     advanceWorldDay(state, notify);
     advanceFeaturePackDay(state, notify);
+    advanceViticultureDay(state, notify);
 
     const hungerLoss = state.skills.includes("country_life") ? 5 : 10;
     const warmthLoss = (state.skills.includes("country_life") ? 2 : 5) + getWorldColdPenalty(state);
