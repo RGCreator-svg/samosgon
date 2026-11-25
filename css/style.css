@@ -1548,3 +1548,18 @@ button:disabled {
 .still-scene-2d[data-finish="copper"] .still-boiler,.still-scene-2d[data-finish="copper"] .still-head{filter:saturate(1.2)}
 @media(max-width:560px){.still-scene-2d .still-workbench{min-height:300px}.still-unit{width:98%;height:72%}.still-workbench-label{font-size:.48rem}.still-condenser{width:24%}}
 @media(prefers-reduced-motion:reduce){.still-scene-2d *{animation:none!important;transition:none!important}}
+
+/* Монтаж модулей: вспышка, подъём и фиксация в посадочном месте. */
+.still-module-rack{position:absolute;z-index:14;left:3%;top:8%;display:flex;flex-direction:column;gap:5px;max-width:31%;max-height:66%;overflow:hidden}
+.still-mounted-module{display:flex;align-items:center;gap:6px;min-height:23px;padding:4px 7px;border:1px solid #8c7957;border-radius:6px;color:#e1d4b8;background:linear-gradient(100deg,#242b25ef,#151b17ef);box-shadow:0 3px 7px #0007;font-size:.62rem;line-height:1.1}
+.still-mounted-module i{display:grid;place-items:center;flex:0 0 19px;width:19px;height:19px;border:1px solid #a78b5d;border-radius:4px;color:#f0d39a;background:#4b3d2a;font-style:normal;font-size:.78rem}
+.still-mounted-module b{font-weight:600}
+.module-arrive{transform-origin:center;animation:module-install-pop .82s cubic-bezier(.18,.85,.25,1.25) both!important}
+.module-arrive::after{content:"";position:absolute;inset:-5px;border:2px solid #f4d58f;border-radius:inherit;pointer-events:none;animation:module-install-flash .82s ease-out both}
+.still-mounted-module.module-arrive{position:relative}
+.slot-release{animation:slot-release-pulse .72s ease-out both}
+@keyframes module-install-pop{0%{opacity:0;filter:brightness(2.2);transform:translateY(-22px) scale(.72)}48%{opacity:1;filter:brightness(1.55);transform:translateY(3px) scale(1.08)}72%{transform:translateY(-2px) scale(.98)}100%{opacity:1;filter:none;transform:translateY(0) scale(1)}}
+@keyframes module-install-flash{0%{opacity:0;transform:scale(.8)}35%{opacity:.9}100%{opacity:0;transform:scale(1.16)}}
+@keyframes slot-release-pulse{0%{border-color:#e6c47e;box-shadow:0 0 0 4px #e6c47e44}100%{border-color:#777052;box-shadow:none}}
+@media(max-width:560px){.still-module-rack{left:2%;top:5%;max-width:35%;gap:3px}.still-mounted-module{font-size:.5rem;padding:3px 4px;min-height:19px}.still-mounted-module i{width:16px;height:16px;flex-basis:16px}}
+@media(prefers-reduced-motion:reduce){.module-arrive,.slot-release{animation:none!important}.module-arrive::after{animation:none!important}}
