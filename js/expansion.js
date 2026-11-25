@@ -322,10 +322,10 @@ export function advanceExpansionDay(state, notify) {
       const line = state.advancedProduction.lines[index];
       if (!line.ready) continue;
       const expected = line.output;
+      const oldQty = Math.max(0, Number(state.inventory.braga) || 0);
       const received = addInventory(state, "braga", expected);
+      if (received > 0) state.bragaQuality = Math.round(((state.bragaQuality * oldQty) + (line.quality * received)) / Math.max(1, oldQty + received));
       if (received === expected) {
-        const oldQty = Math.max(0, (Number(state.inventory.braga) || 0) - received);
-        state.bragaQuality = Math.round(((state.bragaQuality * oldQty) + (line.quality * received)) / Math.max(1, oldQty + received));
         state.advancedProduction.lines.splice(index, 1);
         notify(`Автоматика собрала ${received} ед. браги качества ${line.quality}/100.`);
       } else if (received > 0) {
