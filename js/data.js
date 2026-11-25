@@ -81,6 +81,9 @@ export const ITEMS = [
   ,{ id:"honey_braga", name:"Медовая брага", emoji:"🫙", price:38, description:"Игровое сырьё для медового дистиллята." }
   ,{ id:"honey_spirit", name:"Медовый дистиллят", emoji:"🥃", price:78, description:"Игровой продукт условной перегонки медовой браги." }
 
+  ,{ id:"water", name:"Подготовленная вода", emoji:"💧", price:2, description:"Игровое сырьё для медовых партий." }
+  ,{ id:"yeast_nutrient", name:"Питательная добавка", emoji:"🧪", price:12, description:"Вспомогательный ингредиент для игровых партий брожения." }
+
 ];
 
 export const SKILL_BRANCHES = [
