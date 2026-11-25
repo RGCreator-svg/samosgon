@@ -1067,6 +1067,42 @@ button:disabled {
 }
 
 
+/* Настроение Дядьки Гришки зависит от состояния хозяйства. */
+.game-advisor img {
+  transform-origin: 50% 90%;
+  transition: transform .35s ease, filter .35s ease;
+}
+.game-advisor.mood-worried img {
+  animation: grishka-worry 1.8s ease-in-out infinite;
+  filter: saturate(.78) contrast(1.04);
+}
+.game-advisor.mood-happy img {
+  animation: grishka-cheer 2.4s ease-in-out infinite;
+  filter: saturate(1.18) brightness(1.06);
+}
+.game-advisor.mood-thinking img {
+  animation: grishka-think 3.2s ease-in-out infinite;
+  filter: sepia(.12);
+}
+.game-advisor.mood-neutral img { transform: rotate(0deg); }
+
+@keyframes grishka-worry {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  25% { transform: rotate(-1.5deg) translateY(1px); }
+  75% { transform: rotate(1.5deg) translateY(1px); }
+}
+@keyframes grishka-cheer {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(-5px) rotate(1deg); }
+}
+@keyframes grishka-think {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-2deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .game-advisor img { animation: none !important; transition: none; }
+}
+
 /* Реплики Дядьки Гришки */
 .game-advisor-tip {
   position: relative;
