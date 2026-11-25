@@ -21,7 +21,7 @@ function renderTrack(root,tiers,current,s,action){root.replaceChildren();tiers.f
 function canInstallModule(s,m){return (s.equipmentModules||[]).includes(m.id)||s.equipmentTier>=m.tier&&s.money>=m.cost&&Object.entries(m.parts).every(([id,n])=>(s.parts[id]||0)>=n);}
 const EQUIPMENT_SLOTS=[
 {id:"fermenter",name:"Ферментер",modules:["airlock","ferment_thermo","cooling_jacket"]},
-{id:"boiler",name:"Куб и подготовка сырья",modules:["sugar_tank","grain_screen","false_bottom","mixer"]},
+{id:"boiler",name:"Куб и подготовка сырья",modules:["sugar_tank","fruit_filter","grain_screen","false_bottom","mixer"]},
 {id:"head",name:"Шлем аппарата",modules:["copper_head"]},
 {id:"vapor",name:"Паропровод",modules:["lyne_arm"]},
 {id:"column",name:"Колонна",modules:["plate_column","packed_column"]},
@@ -34,14 +34,17 @@ const EQUIPMENT_SLOTS=[
 ];
 function slotForModule(id){return EQUIPMENT_SLOTS.find(slot=>slot.modules.includes(id))||null;}
 function moduleInSlot(s,slot){return (s.equipmentModules||[]).find(id=>slot.modules.includes(id))||null;}
+let lastAssemblyModules=null;
+let lastRemovedModule=null;
 function renderEquipmentSlots(s){
 const root=$("#equipmentSlots");if(!root)return;root.replaceChildren();
 EQUIPMENT_SLOTS.forEach(slot=>{
-const installed=moduleInSlot(s,slot);const card=node("article","equipment-slot"+(installed?" occupied":""));
+const installed=moduleInSlot(s,slot);const released=lastRemovedModule&&slot.modules.includes(lastRemovedModule);const card=node("article","equipment-slot"+(installed?" occupied":"")+(released?" slot-release":""));card.dataset.slotId=slot.id;
 card.append(node("h4","",slot.name));
 if(installed){const mod=EQUIPMENT_MODULES.find(m=>m.id===installed);card.append(node("p","slot-installed",mod?mod.name:installed));const remove=node("button","module-remove","Освободить слот");remove.dataset.removeModule=installed;card.append(remove);}
 else{card.append(node("p","slot-empty","Свободно"));const options=EQUIPMENT_MODULES.filter(m=>slot.modules.includes(m.id));const hint=node("small","slot-options",options.map(m=>m.name).join(" · "));card.append(hint);}
 root.append(card);});
+lastRemovedModule=null;
 }
 function renderModules(s){
 const root=$("#moduleCatalog");if(!root)return;root.replaceChildren();
@@ -84,26 +87,30 @@ function renderVisualAssembly(s){
   if(has("dephlegmator"))labels.push("дефлегматор");
   if(condenser)labels.push("холодильник");
   if(receiver)labels.push("приёмник");
+  const peripheralModules={airlock:["◉","Гидрозатвор"],ferment_thermo:["🌡","Термометр"],cooling_jacket:["❄","Рубашка охлаждения"],mixer:["⟳","Мешалка"],sugar_tank:["▤","Смесительный бак"],fruit_filter:["◈","Фильтр сусла"],grain_screen:["▦","Зерновая корзина"],false_bottom:["▥","Фальшдно"],carbon_filter:["✧","Финишный фильтр"],oak_module:["▰","Бочка выдержки"]};
+  const peripheralMarkup=[...owned].filter(id=>peripheralModules[id]).map(id=>`<span class="still-mounted-module" data-module-visual="${id}"><i>${peripheralModules[id][0]}</i><b>${peripheralModules[id][1]}</b></span>`).join("");
+  const previousModules=lastAssemblyModules;
   root.innerHTML=`<div class="still-scene still-scene-2d" data-mode="${rect?"rectification":hybrid?"hybrid":"pot"}" data-finish="${s.equipmentFinish||"rustic"}">
     <div class="still-scene-heading"><div><span class="still-kicker">МАСТЕРСКАЯ · КОНСТРУКТОР</span><h3>${stage}</h3></div><span class="still-mode">${status}</span></div>
     <div class="still-workbench" role="img" aria-label="Анимированная 2D-модель аппарата с установленными модулями">
       <div class="workbench-wall"><span class="wall-pipe wall-pipe-one"></span><span class="wall-pipe wall-pipe-two"></span><span class="wall-hook"></span><span class="wall-shelf"></span></div>
       <div class="still-floor-shadow"></div>
       <div class="still-unit">
-        ${column?`<div class="still-column ${rect?"packed":"plate"}"><i></i><i></i><i></i><i></i><span class="column-cap"></span></div>`:""}
-        ${has("dephlegmator")?'<div class="still-dephlegmator"><span></span><i></i></div>':""}
-        ${copper?'<div class="still-head"><span class="head-neck"></span><i class="head-rivet"></i></div>':'<div class="still-lid"></div>'}
+        ${column?`<div class="still-column ${rect?"packed":"plate"}" data-module-visual="${rect?"packed_column":"plate_column"}"><i></i><i></i><i></i><i></i><span class="column-cap"></span></div>`:""}
+        ${has("dephlegmator")?'<div class="still-dephlegmator" data-module-visual="dephlegmator"><span></span><i></i></div>':""}
+        ${copper?'<div class="still-head" data-module-visual="copper_head"><span class="head-neck"></span><i class="head-rivet"></i></div>':'<div class="still-lid"></div>'}
         <div class="still-neck"></div>
-        ${arm?'<div class="still-vapor-arm"><i></i><b></b></div>':""}
-        ${condenser?'<div class="still-condenser"><i></i><i></i><i></i><i></i><i></i><span class="cool-water"></span></div>':""}
-        <div class="still-boiler"><div class="boiler-rim"></div><div class="boiler-highlight"></div><div class="boiler-window ${glass?"active":""}"><i></i></div><div class="boiler-seam"></div><div class="boiler-leg leg-left"></div><div class="boiler-leg leg-right"></div><div class="boiler-tap"></div></div>
-        ${sensor?'<div class="still-control"><i></i><b></b></div>':""}
-        ${receiver?'<div class="still-receiver"><span></span><i></i></div>':""}
+        ${arm?'<div class="still-vapor-arm" data-module-visual="lyne_arm"><i></i><b></b></div>':""}
+        ${condenser?'<div class="still-condenser" data-module-visual="basic_condenser"><i></i><i></i><i></i><i></i><i></i><span class="cool-water"></span></div>':""}
+        <div class="still-boiler"><div class="boiler-rim"></div><div class="boiler-highlight"></div><div class="boiler-window ${glass?"active":""}" ${glass?'data-module-visual="sight_glass"':""}><i></i></div><div class="boiler-seam"></div><div class="boiler-leg leg-left"></div><div class="boiler-leg leg-right"></div><div class="boiler-tap"></div></div>
+        ${sensor?'<div class="still-control" data-module-visual="safety_monitor"><i></i><b></b></div>':""}
+        ${receiver?'<div class="still-receiver" data-module-visual="fraction_receiver"><span></span><i></i></div>':""}
         <div class="still-hose hose-left"></div><div class="still-hose hose-right"></div>
         <div class="still-steam steam-one"></div><div class="still-steam steam-two"></div><div class="still-steam steam-three"></div>
-        ${cooling?'<div class="cooling-indicator"><i></i> ОХЛАЖДЕНИЕ</div>':""}
+        ${cooling?'<div class="cooling-indicator" data-module-visual="auto_cooling"><i></i> ОХЛАЖДЕНИЕ</div>':""}
       </div>
       <div class="still-bench"></div>
+      <div class="still-module-rack">${peripheralMarkup}</div>
       <div class="still-workbench-label"><span>УЗЕЛ № 01</span><b>${(s.equipmentModules||[]).length} МОДУЛЕЙ УСТАНОВЛЕНО</b><span>СИСТЕМА ${rect?"R-04":hybrid?"H-02":"P-01"}</span></div>
     </div>
     <div class="still-installed"><b>Конфигурация:</b><span>${labels.length?labels.join(" · "):"Базовый куб — установите модули, чтобы достроить аппарат."}</span></div>
@@ -111,8 +118,15 @@ function renderVisualAssembly(s){
     <div class="still-progress"><span>Развитие оборудования</span><b>${tier+1} / 5 ступеней · ${(s.equipmentModules||[]).length} модулей</b></div>
     <div class="still-progress-track"><i style="width:${(tier+1)*20}%"></i></div>
   </div>`;
+  if(previousModules){
+    const added=[...owned].filter(id=>!previousModules.has(id));
+    const removed=[...previousModules].filter(id=>!owned.has(id));
+    added.forEach(id=>root.querySelectorAll(`[data-module-visual="${id}"]`).forEach(el=>el.classList.add("module-arrive")));
+    if(removed.length)lastRemovedModule=removed[0];
+  }
+  lastAssemblyModules=new Set(owned);
 }
 export function renderEquipment(s){const equipment=$("#equipmentTrack"),automation=$("#automationTrack"),summary=$("#equipmentSummary");if(!equipment||!automation||!summary)return;renderVisualAssembly(s);renderEquipmentSlots(s);renderTrack(equipment,EQUIPMENT_TIERS,s.equipmentTier,s,"equipment");renderTrack(automation,AUTOMATION_TIERS,s.automationTier,s,"automation");summary.textContent="Оборудование: "+(EQUIPMENT_TIERS[s.equipmentTier]?.name||"неизвестно")+" · Автоматика: "+(AUTOMATION_TIERS[s.automationTier]?.name||"неизвестно")+" · Модулей: "+s.equipmentModules.length;renderModules(s);}
 export function initEquipment(s,{render,notify}){ensureState(s);const nav=$(".navigation"),game=$("#game");if(!nav||!game)return;if(!$("#equipment")){const tab=node("button","","⚙️ Оборудование");tab.dataset.tab="equipment";nav.append(tab);const section=node("section","tab-content panel hidden");section.id="equipment";section.innerHTML='<h2>⚙️ Мастерская оборудования</h2><div id="equipmentVisual"></div><p>Собирай конфигурацию из модулей. Все эффекты ниже — игровые характеристики, а не инструкция по сборке реального оборудования.</p><div id="equipmentSummary" class="equipment-summary"></div><h3>Базовые ступени аппарата</h3><div id="equipmentTrack" class="tech-track"></div><h3>Автоматизация</h3><div id="automationTrack" class="tech-track"></div><h3>Посадочные места аппарата</h3><p>Каждый слот принимает только совместимые узлы. Чтобы заменить модуль, сначала освободи его место.</p><div id="equipmentSlots" class="equipment-slots"></div><h3>Каталог модулей и аксессуаров</h3><div id="moduleCatalog"></div>';game.append(section);}
 nav.addEventListener("click",e=>{const b=e.target.closest('[data-tab="equipment"]');if(!b)return;document.querySelectorAll(".tab-content").forEach(x=>x.classList.toggle("hidden",x.id!=="equipment"));nav.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x===b));});
-$("#equipment").addEventListener("click",e=>{const finish=e.target.closest("[data-set-finish]");if(finish){s.equipmentFinish=finish.dataset.setFinish;render();return;}const remove=e.target.closest("[data-remove-module]");if(remove){const id=remove.dataset.removeModule;const index=s.equipmentModules.indexOf(id);if(index<0)return;s.equipmentModules.splice(index,1);notify("Модуль снят и возвращён в каталог. Деньги и детали не возвращены.");render();return;}const tech=e.target.closest("[data-tech-action]");if(tech){const isEq=tech.dataset.techAction==="equipment",tiers=isEq?EQUIPMENT_TIERS:AUTOMATION_TIERS,current=isEq?s.equipmentTier:s.automationTier,next=tiers[current+1];if(!next||!canAfford(s,next)){notify("Не выполнены требования для улучшения.");return;}s.money-=next.cost;Object.entries(next.parts).forEach(([id,n])=>s.parts[id]-=n);if(isEq)s.equipmentTier++;else s.automationTier++;notify("Открыта ступень: "+next.name);render();return;}const install=e.target.closest("[data-install-module]");if(install){const m=EQUIPMENT_MODULES.find(x=>x.id===install.dataset.installModule);if(!m||s.equipmentModules.includes(m.id)||s.equipmentTier<m.tier||s.money<m.cost||!Object.entries(m.parts).every(([id,n])=>(s.parts[id]||0)>=n))return;const slot=slotForModule(m.id);if(slot&&moduleInSlot(s,slot))return;s.money-=m.cost;Object.entries(m.parts).forEach(([id,n])=>s.parts[id]-=n);s.equipmentModules.push(m.id);notify("Установлен модуль: "+m.name);render();return;}});renderEquipment(s);}
+$("#equipment").addEventListener("click",e=>{const finish=e.target.closest("[data-set-finish]");if(finish){s.equipmentFinish=finish.dataset.setFinish;render();return;}const remove=e.target.closest("[data-remove-module]");if(remove){const id=remove.dataset.removeModule;const index=s.equipmentModules.indexOf(id);if(index<0)return;s.equipmentModules.splice(index,1);lastRemovedModule=id;notify("Модуль снят и возвращён в каталог. Деньги и детали не возвращены.");render();return;}const tech=e.target.closest("[data-tech-action]");if(tech){const isEq=tech.dataset.techAction==="equipment",tiers=isEq?EQUIPMENT_TIERS:AUTOMATION_TIERS,current=isEq?s.equipmentTier:s.automationTier,next=tiers[current+1];if(!next||!canAfford(s,next)){notify("Не выполнены требования для улучшения.");return;}s.money-=next.cost;Object.entries(next.parts).forEach(([id,n])=>s.parts[id]-=n);if(isEq)s.equipmentTier++;else s.automationTier++;notify("Открыта ступень: "+next.name);render();return;}const install=e.target.closest("[data-install-module]");if(install){const m=EQUIPMENT_MODULES.find(x=>x.id===install.dataset.installModule);if(!m||s.equipmentModules.includes(m.id)||s.equipmentTier<m.tier||s.money<m.cost||!Object.entries(m.parts).every(([id,n])=>(s.parts[id]||0)>=n))return;const slot=slotForModule(m.id);if(slot&&moduleInSlot(s,slot))return;s.money-=m.cost;Object.entries(m.parts).forEach(([id,n])=>s.parts[id]-=n);s.equipmentModules.push(m.id);notify("Установлен модуль: "+m.name);render();return;}});renderEquipment(s);}
