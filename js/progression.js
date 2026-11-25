@@ -17,7 +17,7 @@ function ensure(s){s.milestones??={claimed:[]};s.milestones.claimed=Array.isArra
 function make(tag,cls,txt){const n=document.createElement(tag);if(cls)n.className=cls;if(txt!==undefined)n.textContent=txt;return n;}
 function render(s){
  ensure(s);
- const root=$("#milestones");if(!root)return;
+ const root=$("#milestoneContent");if(!root)return;
  root.replaceChildren();
  const done=GOALS.filter(g=>g.test(s));
  const claimed=done.filter(g=>s.milestones.claimed.includes(g.id)).length;
@@ -44,6 +44,7 @@ export function initMilestones(s,{renderGame,notify,earnExperience}){
   const tab=make("button","","🏆 Цели");tab.dataset.tab="milestones";nav.append(tab);
   const section=make("section","tab-content panel hidden");section.id="milestones";
   const h=make("h2","","🏆 Долгосрочные цели");section.append(h,make("p","","Небольшие и большие достижения помогают планировать развитие хозяйства. Награды выдаются один раз и сохраняются в вашей партии."));
+  const content=make("div","","");content.id="milestoneContent";section.append(content);
   game.append(section);
  }
  $("#milestones").addEventListener("click",e=>{
