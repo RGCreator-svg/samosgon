@@ -568,6 +568,39 @@ export function renderWorld(state) {
   setText("#orchardValue", state.orchardRestored ? 100 : 0);
   setText("#treeCount", state.trees);
 
+  // Сцены отражают состояние хозяйства и обновляются вместе с обычным рендером.
+  const farmScene = $(".farm-scene");
+  if (farmScene) {
+    const garden = Math.max(0, Math.min(100, Number(state.garden) || 0));
+    const farmStage = garden < 20 ? "overgrown" : garden < 60 ? "cleared" : garden < 90 ? "cultivated" : "lush";
+    farmScene.dataset.stage = farmStage;
+    const farmSign = farmScene.querySelector(".loc-sign span");
+    if (farmSign) farmSign.textContent = ({overgrown:"Сорняки захватили грядки",cleared:"Участок расчищен",cultivated:"Пошли первые всходы",lush:"Зелёный урожайный огород"})[farmStage];
+    const farmTag = $("#farm .location-tag");
+    if (farmTag) farmTag.textContent = ({overgrown:"🌿 Требует расчистки",cleared:"🪴 Земля подготовлена",cultivated:"🌱 Посадки растут",lush:"🥕 Огород процветает"})[farmStage];
+  }
+
+  const orchardScene = $(".orchard-scene");
+  if (orchardScene) {
+    const orchardStage = state.orchardRestored ? "restored" : "wild";
+    orchardScene.dataset.stage = orchardStage;
+    const orchardSign = orchardScene.querySelector(".loc-sign span");
+    if (orchardSign) orchardSign.textContent = state.orchardRestored ? "Яблони и груши снова плодоносят" : "Заросли скрывают старые деревья";
+    const orchardTag = $("#orchard .location-tag");
+    if (orchardTag) orchardTag.textContent = state.orchardRestored ? "🍎 Сад цветёт и плодоносит" : "🌳 Заброшенные деревья";
+  }
+
+  const barnScene = $(".barn-scene");
+  if (barnScene) {
+    const barn = Math.max(0, Math.min(100, Number(state.barn) || 0));
+    const barnStage = barn < 35 ? "ruined" : barn < 70 ? "repairing" : "workshop";
+    barnScene.dataset.stage = barnStage;
+    const barnSign = barnScene.querySelector(".loc-sign span");
+    if (barnSign) barnSign.textContent = ({ruined:"Нужен серьёзный ремонт",repairing:"Постепенно приводим в порядок",workshop:"Чистая и оборудованная мастерская"})[barnStage];
+    const barnTag = $("#barn .location-tag");
+    if (barnTag) barnTag.textContent = ({ruined:"🪚 Требует ремонта",repairing:"🔧 Идёт восстановление",workshop:"🛠 Мастерская готова"})[barnStage];
+  }
+
   setText(
     "#homeDescription",
     state.house >= 70
