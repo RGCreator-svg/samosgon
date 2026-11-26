@@ -1,4 +1,5 @@
 import { queuePurchase, registerCartHandler, addInventory } from "./economy.js";
+import { recordProduction } from "./productionhub.js";
 
 const $ = selector => document.querySelector(selector);
 const el = (tag, cls, text) => { const node = document.createElement(tag); if (cls) node.className = cls; if (text !== undefined) node.textContent = text; return node; };
@@ -132,7 +133,7 @@ export function initViticulture(s,{render:renderGame,notify}) {
   });
   $("#viticulture").addEventListener("click",event=>{
     const collect=event.target.closest("[data-viti-collect]");
-    if(collect){const index=s.viticulture.batches.findIndex(job=>String(job.id)===collect.dataset.vitiCollect);const job=s.viticulture.batches[index];if(!job?.ready)return;const received=addInventory(s,job.outputItem,job.output);job.output-=received;if(job.output<=0)s.viticulture.batches.splice(index,1);notify("На склад помещено: "+received+" ед. продукции.");renderGame();return;}
+    if(collect){const index=s.viticulture.batches.findIndex(job=>String(job.id)===collect.dataset.vitiCollect);const job=s.viticulture.batches[index];if(!job?.ready)return;const received=addInventory(s,job.outputItem,job.output);job.output-=received;if(received>0)recordProduction(s,{name:job.name,amount:received,item:job.outputItem,process:"Винодельня / медоварня"});if(job.output<=0)s.viticulture.batches.splice(index,1);notify("На склад помещено: "+received+" ед. продукции.");renderGame();return;}
     const build=event.target.closest("[data-viti-build]");
     if(build){
       const item=BUILDINGS.find(x=>x.id===build.dataset.vitiBuild);
