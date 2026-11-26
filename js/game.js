@@ -1,3 +1,4 @@
+import { consumeQualityForSale } from "./quality.js";
 
 import { loadGame, saveGame, addXP } from "./engine.js";
 import { ITEMS, SKILL_BRANCHES } from "./data.js";
@@ -169,14 +170,15 @@ $("#marketItems")?.addEventListener("click", (event) => {
   }
 
   const multiplier = (state.skills.includes("bargain") ? 1.2 : 1) * getMarketMultiplier(state);
-  const price = Math.round(item.price * multiplier);
+  const quality = consumeQualityForSale(state,itemId,1);
+  const price = Math.round(item.price * multiplier * quality.multiplier);
 
   state.inventory[itemId] -= 1;
   state.money += price;
 
   earnExperience(state.skills.includes("regulars") ? 8 : 5);
 
-  notify(`${item.emoji} Продано: ${item.name}. Получено ${price} монет.`);
+  notify(`${item.emoji} Продано: ${item.name}. Получено ${price} монет${quality.hasPassport? " · качество "+quality.quality+"/100 ("+quality.grade.label+")":""}.`);
   render();
 });
 
