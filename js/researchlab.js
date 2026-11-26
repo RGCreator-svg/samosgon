@@ -62,5 +62,5 @@ export function initResearchLab(s,{render:renderGame,notify,earnExperience}){
  render(s);
 }
 function complete(s,notify,earnExperience){const job=s.lab.active;if(!job)return;s.lab.unlocked.push(job.id);s.lab.completed.push(job.id);s.lab.qualityBonus=Math.min(30,s.lab.qualityBonus+(Number(job.bonus)||0));s.lab.active=null;earnExperience(12);notify("Технология «"+job.name+"» изучена. Бонус качества увеличен.");}
-export function advanceResearchLabDay(s,notify){ensure(s);if(!s.lab.active)return;s.lab.active.remaining=Math.max(0,s.lab.active.remaining-1);if(!s.lab.active.remaining)complete(s,notify,()=>{});}
+export function advanceResearchLabDay(s,notify,earnExperience=()=>{}){ensure(s);if(!s.lab.active)return;s.lab.active.remaining=Math.max(0,s.lab.active.remaining-1);if(!s.lab.active.remaining)complete(s,notify,earnExperience);}
 export function renderResearchLab(s){render(s);}
