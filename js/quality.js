@@ -33,21 +33,25 @@ export function assessBatchQuality(state,entry={}){
 }
 export function consumeQualityForSale(state,itemId,quantity=1){
   const need=Math.max(1,Math.floor(Number(quantity)||1));
-  const records=(state.productionLog||[]).filter(x=>x.item===itemId&&x.passport);
-  let remaining=need,weighted=0,covered=0;
-  // FIFO: старые партии продаются раньше новых.
-  for(const record of [...records].reverse()){
-    const p=record.passport;
-    if(p.remaining==null)p.remaining=Math.max(0,Number(p.amount)||0);
-    const take=Math.min(remaining,p.remaining);
-    if(take<=0)continue;
-    weighted+=take*(Number(p.quality)||60);covered+=take;remaining-=take;p.remaining-=take;p.sold=(Number(p.sold)||0)+take;
-    if(!remaining)break;
+  if(!Array.isArray(state.qualityLots))state.qualityLots=[];
+  let remaining=need,weighted=0,tracked=0;
+  // Склад продаётся по FIFO: старые (в том числе без паспорта) остатки уходят первыми.
+  for(const lot of state.qualityLots){
+    if(lot.item!==itemId||remaining<=0)continue;
+    const available=Math.max(0,Number(lot.remaining)||0),take=Math.min(remaining,available);
+    if(!take)continue;
+    if(lot.quality!==null&&lot.quality!==undefined&&Number.isFinite(Number(lot.quality))){
+      weighted+=take*Number(lot.quality);tracked+=take;
+      const passport=state.productionLog?.find(entry=>entry.passport?.id===lot.passportId)?.passport;
+      if(passport){passport.remaining=Math.max(0,(Number(passport.remaining??passport.amount)||0)-take);passport.sold=(Number(passport.sold)||0)+take;}
+    }
+    lot.remaining-=take;remaining-=take;
   }
-  if(!covered)return {hasPassport:false,quality:null,multiplier:1,reputationDelta:0,grade:null};
-  const quality=Math.round(weighted/covered),grade=qualityGrade(quality);
+  state.qualityLots=state.qualityLots.filter(lot=>Number(lot.remaining)>0);
+  if(!tracked)return {hasPassport:false,quality:null,multiplier:1,reputationDelta:0,grade:null,untracked:need};
+  const quality=Math.round(weighted/tracked),grade=qualityGrade(quality);
   const multiplier=.8+quality*.0045;
   const reputationDelta=quality>=92?1:quality>=82?.5:quality<35?-1:0;
   if(reputationDelta)state.reputation=Math.max(-100,Math.min(100,(Number(state.reputation)||0)+reputationDelta));
-  return {hasPassport:true,quality,multiplier,covered,untracked:remaining,grade,reputationDelta};
+  return {hasPassport:true,quality,multiplier,covered:tracked,untracked:need-tracked,grade,reputationDelta};
 }

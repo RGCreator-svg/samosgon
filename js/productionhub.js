@@ -21,6 +21,9 @@ function makePassport(entry, s, type = "production") {
 function ensure(s) {
   s.productionLog ??= [];
   if (!Array.isArray(s.productionLog)) s.productionLog = [];
+  if (!Array.isArray(s.qualityLots)) {
+    s.qualityLots = Object.entries(s.inventory||{}).filter(([,amount])=>Number(amount)>0).map(([item,amount])=>({item,remaining:Number(amount),quality:null,passportId:null,legacy:true}));
+  }
   s.productionLog.forEach(entry => { if (!entry.passport) entry.passport = makePassport(entry, s, "legacy"); });
 }
 
@@ -36,6 +39,10 @@ export function recordProduction(s, entry) {
   record.passport = makePassport({...entry, ...record}, s, entry.passportType || "production");
   record.quality=record.passport.quality;
   s.productionLog.unshift(record);
+  if ((entry.passportType||"production")!=="experiment" && record.amount>0) {
+    s.qualityLots ??= [];
+    s.qualityLots.push({item:record.item,remaining:record.amount,quality:record.passport.quality,passportId:record.passport.id});
+  }
   s.productionLog = s.productionLog.slice(0, 60);
   return record.passport.id;
 }
