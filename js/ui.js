@@ -349,9 +349,15 @@ export function renderWarehouse(state) {
     const card = document.createElement("div");
     card.className = "warehouse-item";
 
-    const icon = document.createElement("span");
+    const iconFile = ({
+      braga: "flaticon-filter.png", fruit_braga: "flaticon-filter.png", grain_braga: "flaticon-filter.png", honey_braga: "flaticon-filter.png",
+      spirit: "flaticon-distillation.png", honey_spirit: "flaticon-distillation.png", aged_spirit: "icon_barrel.png", aged_honey_spirit: "icon_barrel.png",
+      water: "flaticon-kettle.png"
+    })[item.id];
+    const icon = iconFile ? document.createElement("img") : document.createElement("span");
     icon.className = "warehouse-icon";
-    icon.textContent = item.emoji;
+    if (iconFile) { icon.src = "assets/images/ui/" + iconFile; icon.alt = ""; icon.loading = "lazy"; }
+    else icon.textContent = item.emoji;
 
     const name = document.createElement("span");
     name.className = "warehouse-name";

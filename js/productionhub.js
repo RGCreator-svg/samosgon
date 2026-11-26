@@ -22,7 +22,11 @@ export function recordProduction(s, entry) {
 
 function stageCard(parent, icon, title, detail, status) {
   const node = el("article", "production-stage " + status);
-  node.append(el("span", "production-stage-icon", icon), el("h4", "", title), el("p", "", detail));
+  const image = el("img", "production-stage-icon");
+  image.src = "assets/images/ui/" + icon;
+  image.alt = "";
+  image.loading = "lazy";
+  node.append(image, el("h4", "", title), el("p", "", detail));
   node.append(el("small", "production-stage-state", status === "stage-done" ? "Есть результат" : status === "stage-active" ? "В работе" : "Ожидает"));
   parent.append(node);
 }
@@ -48,11 +52,11 @@ function render(s) {
   root.append(summary);
 
   const flow = el("div","production-flow");
-  stageCard(flow,"🌾","Сырьё","Урожай, закупки и склад",Object.keys(s.inventory||{}).some(k=>(s.inventory[k]||0)>0)?"stage-done":"stage-wait");
-  stageCard(flow,"🫙","Брожение","Базовая брага и винные партии",batches.some(x=>x.stage==="Брожение")?"stage-active":batches.some(x=>x.done)?"stage-done":"stage-wait");
-  stageCard(flow,"⚗️","Перегонка","Игровая перегонка и оценка качества",s.distillation?.active?"stage-active":(s.distillation?.result||0)>0?"stage-done":"stage-wait");
-  stageCard(flow,"🪵","Выдержка","Созревание в бочках и погребе",(s.barrelAging||[]).some(x=>!x.ready)||(s.viticulture?.batches||[]).some(x=>x.stage==="aging"&&!x.ready)?"stage-active":(s.barrelAging||[]).some(x=>x.ready)?"stage-done":"stage-wait");
-  stageCard(flow,"🍾","Готовая продукция","Склад, рынок и заказы",Object.entries(s.inventory||{}).some(([id,n])=>n>0&&["wine","mead","apple_cider","pear_wine","fruit_wine","spirit","aged_spirit","honey_spirit","aged_honey_spirit"].includes(id))?"stage-done":"stage-wait");
+  stageCard(flow,"flaticon-kettle.png","Сырьё","Урожай, закупки и склад",Object.keys(s.inventory||{}).some(k=>(s.inventory[k]||0)>0)?"stage-done":"stage-wait");
+  stageCard(flow,"flaticon-filter.png","Брожение","Базовая брага и винные партии",batches.some(x=>x.stage==="Брожение")?"stage-active":batches.some(x=>x.done)?"stage-done":"stage-wait");
+  stageCard(flow,"flaticon-distillation.png","Перегонка","Игровая перегонка и оценка качества",s.distillation?.active?"stage-active":(s.distillation?.result||0)>0?"stage-done":"stage-wait");
+  stageCard(flow,"icon_barrel.png","Выдержка","Созревание в бочках и погребе",(s.barrelAging||[]).some(x=>!x.ready)||(s.viticulture?.batches||[]).some(x=>x.stage==="aging"&&!x.ready)?"stage-active":(s.barrelAging||[]).some(x=>x.ready)?"stage-done":"stage-wait");
+  stageCard(flow,"flaticon-gauge.png","Готовая продукция","Склад, рынок и заказы",Object.entries(s.inventory||{}).some(([id,n])=>n>0&&["wine","mead","apple_cider","pear_wine","fruit_wine","spirit","aged_spirit","honey_spirit","aged_honey_spirit"].includes(id))?"stage-done":"stage-wait");
   root.append(el("h3","","Производственная цепочка"),flow);
 
   const list = el("div","production-batch-list");
