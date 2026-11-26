@@ -568,8 +568,43 @@ export function renderWorld(state) {
   setText("#orchardValue", state.orchardRestored ? 100 : 0);
   setText("#treeCount", state.trees);
 
+  // Сезон и погода берутся из того же календаря, что влияет на урожай.
+  const seasonIds = ["spring", "summer", "autumn", "winter"];
+  const seasonNames = {spring:"Весна",summer:"Лето",autumn:"Осень",winter:"Зима"};
+  const seasonIcons = {spring:"🌸",summer:"☀️",autumn:"🍂",winter:"❄️"};
+  const dayOfYear = ((Math.max(1, Number(state.day) || 1) - 1) % 28) + 1;
+  const seasonId = state.world?.season && seasonIds.includes(state.world.season)
+    ? state.world.season
+    : seasonIds[Math.floor((dayOfYear - 1) / 7)];
+  const weatherId = state.world?.weather || "sunny";
+  const seasonLabel = seasonIcons[seasonId] + " " + seasonNames[seasonId];
+
+  const applySeasonToScene = (scene) => {
+    if (!scene) return;
+    scene.dataset.season = seasonId;
+    scene.dataset.weather = weatherId;
+    let overlay = scene.querySelector(".location-season-overlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.className = "location-season-overlay";
+      overlay.setAttribute("aria-hidden", "true");
+      scene.append(overlay);
+    }
+    overlay.dataset.season = seasonId;
+    overlay.dataset.weather = weatherId;
+    let label = scene.querySelector(".location-season-label");
+    if (!label) {
+      label = document.createElement("span");
+      label.className = "location-season-label";
+      label.setAttribute("aria-hidden", "true");
+      scene.append(label);
+    }
+    label.textContent = seasonLabel;
+  };
+
   // Сцены отражают состояние хозяйства и обновляются вместе с обычным рендером.
   const farmScene = $(".farm-scene");
+  applySeasonToScene(farmScene);
   if (farmScene) {
     const garden = Math.max(0, Math.min(100, Number(state.garden) || 0));
     const farmStage = garden < 20 ? "overgrown" : garden < 60 ? "cleared" : garden < 90 ? "cultivated" : "lush";
@@ -581,6 +616,7 @@ export function renderWorld(state) {
   }
 
   const orchardScene = $(".orchard-scene");
+  applySeasonToScene(orchardScene);
   if (orchardScene) {
     const orchardStage = state.orchardRestored ? "restored" : "wild";
     orchardScene.dataset.stage = orchardStage;
@@ -591,6 +627,7 @@ export function renderWorld(state) {
   }
 
   const barnScene = $(".barn-scene");
+  applySeasonToScene(barnScene);
   if (barnScene) {
     const barn = Math.max(0, Math.min(100, Number(state.barn) || 0));
     const barnStage = barn < 35 ? "ruined" : barn < 70 ? "repairing" : "workshop";
