@@ -1,29 +1,25 @@
-import { assessBatchQuality } from "./quality.js";
 const $ = selector => document.querySelector(selector);
 const el = (tag, cls, text) => { const node = document.createElement(tag); if (cls) node.className = cls; if (text !== undefined) node.textContent = text; return node; };
 
 function makePassport(entry, s, type = "production") {
-  const assessment=assessBatchQuality(s,entry);
-  const standard=entry.recipeId?s.lab?.standards?.[entry.recipeId]:null;
+  const quality = entry.quality !== null && entry.quality !== undefined && Number.isFinite(Number(entry.quality)) ? Math.max(0, Math.min(100, Number(entry.quality))) : 60;
+  const metric = offset => Math.max(0, Math.min(100, Math.round(quality + offset)));
+  const standard = entry.recipeId ? s.lab?.standards?.[entry.recipeId] : null;
   return {
-    id:"passport-"+Date.now()+"-"+Math.floor(Math.random()*1e7),
-    type,day:Number(s.day)||1,product:String(entry.item||""),
-    productName:String(entry.name||"Партия"),amount:Math.max(0,Number(entry.amount)||0),
-    remaining:Math.max(0,Number(entry.amount)||0),sold:0,
-    process:String(entry.process||"Производство"),quality:assessment.score,grade:assessment.grade.label,
-    baseQuality:assessment.base,aroma:assessment.aroma,purity:assessment.purity,stability:assessment.stability,
-    factors:assessment.factors,standardDelta:assessment.standardDelta,
-    recipeId:entry.recipeId||null,recipeName:entry.recipeName||null,ratio:entry.ratio||null,
-    standardId:standard?.trialId||null,standardMatch:assessment.standardMatch
+    id: "passport-" + Date.now() + "-" + Math.floor(Math.random() * 1e7),
+    type, day: Number(s.day) || 1, product: String(entry.item || ""),
+    productName: String(entry.name || "Партия"), amount: Math.max(0, Number(entry.amount) || 0),
+    process: String(entry.process || "Производство"), quality,
+    aroma: metric(-2), purity: metric(1), stability: metric(3),
+    recipeId: entry.recipeId || null, recipeName: entry.recipeName || null, ratio: entry.ratio || null,
+    standardId: standard?.trialId || null,
+    standardMatch: !!(standard && standard.a + ":" + standard.b === entry.ratio)
   };
 }
 
 function ensure(s) {
   s.productionLog ??= [];
   if (!Array.isArray(s.productionLog)) s.productionLog = [];
-  if (!Array.isArray(s.qualityLots)) {
-    s.qualityLots = Object.entries(s.inventory||{}).filter(([,amount])=>Number(amount)>0).map(([item,amount])=>({item,remaining:Number(amount),quality:null,passportId:null,legacy:true}));
-  }
   s.productionLog.forEach(entry => { if (!entry.passport) entry.passport = makePassport(entry, s, "legacy"); });
 }
 
@@ -37,12 +33,7 @@ export function recordProduction(s, entry) {
     recipeId: entry.recipeId || null, recipeName: entry.recipeName || null, ratio: entry.ratio || null
   };
   record.passport = makePassport({...entry, ...record}, s, entry.passportType || "production");
-  record.quality=record.passport.quality;
   s.productionLog.unshift(record);
-  if ((entry.passportType||"production")!=="experiment" && record.amount>0) {
-    s.qualityLots ??= [];
-    s.qualityLots.push({item:record.item,remaining:record.amount,quality:record.passport.quality,passportId:record.passport.id});
-  }
   s.productionLog = s.productionLog.slice(0, 60);
   return record.passport.id;
 }
@@ -105,15 +96,11 @@ function render(s) {
     entry.passport = p;
     const card = el("article", "production-passport");
     const head = el("div", "passport-head");
-    head.append(el("b", "", p.productName), el("strong", "", p.quality + "/100 · "+(p.grade||"Обычное")) );
+    head.append(el("b", "", p.productName), el("strong", "", p.quality + "/100"));
     card.append(head, el("small", "", "№ " + p.id + " · день " + p.day + " · " + p.process));
     const metrics = el("div", "passport-metrics");
     [["Аромат",p.aroma],["Чистота",p.purity],["Стабильность",p.stability]].forEach(([label,value]) => metrics.append(el("span","",label+": "+value)));
     card.append(metrics);
-    const factors=el("details","passport-factors");factors.append(el("summary","","Разбор оценки качества"));
-    (p.factors||[]).forEach(f=>factors.append(el("p","",f.label+": "+(f.value>0?"+":"")+f.value+" · "+f.detail)));
-    card.append(factors);
-    card.append(el("small","passport-stock","На складе по паспорту: "+(p.remaining??p.amount??0)+" · продано: "+(p.sold||0)));
     if (p.ratio) card.append(el("small","passport-recipe","Рецепт: "+(p.recipeName||p.recipeId)+" · пропорция "+p.ratio));
     if (p.standardId) card.append(el("small","passport-standard",p.standardMatch?"✓ Соответствует стандарту":"Отклонение от стандарта"));
     passports.append(card);

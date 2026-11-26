@@ -31,6 +31,16 @@ export function assessBatchQuality(state,entry={}){
   ];
   return {score:total,grade,aroma,purity,stability,base,labBonus:lab,standardDelta,standardMatch,maintenance,equipmentDelta,sampleMatch,factors};
 }
+export function consumeQualityLots(state,itemId,quantity=1){
+  let remaining=Math.max(0,Math.floor(Number(quantity)||0));
+  if(!Array.isArray(state.qualityLots))state.qualityLots=[];
+  for(const lot of state.qualityLots){
+    if(lot.item!==itemId||remaining<=0)continue;
+    const take=Math.min(remaining,Math.max(0,Number(lot.remaining)||0));
+    lot.remaining-=take;remaining-=take;
+  }
+  state.qualityLots=state.qualityLots.filter(lot=>Number(lot.remaining)>0);
+}
 export function consumeQualityForSale(state,itemId,quantity=1){
   const need=Math.max(1,Math.floor(Number(quantity)||1));
   if(!Array.isArray(state.qualityLots))state.qualityLots=[];
