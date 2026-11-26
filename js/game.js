@@ -323,6 +323,7 @@ $("#sleepButton")?.addEventListener("click", (event) => {
     advanceDeliveries(state, notify);
     advanceExpansionDay(state, notify);
     advanceWorldDay(state, notify);
+    advanceResearchLabDay(state, notify, earnExperience);
     advanceFeaturePackDay(state, notify);
     advanceViticultureDay(state, notify);
 
