@@ -17,7 +17,9 @@ export function assessBatchQuality(state,entry={}){
   const analysis=state.lab?.lastAnalysis;
   const sampleMatch=!!(entry.rawItem&&analysis?.id===entry.rawItem);
   const sampleDelta=sampleMatch?3:0;
-  const total=clamp(base+lab+standardDelta+equipmentDelta+sampleDelta);
+  const processDelta=clamp(Number(state.processCenter?.qualityDelta)||0,-8,8);
+  const libraryBonus=Math.min(5,Object.keys(state.processCenter?.rawStudies||{}).length);
+  const total=clamp(base+lab+standardDelta+equipmentDelta+sampleDelta+processDelta+libraryBonus);
   const aroma=clamp(total+(entry.process==="Выдержка"?4:entry.process?.includes("Вин")?2:-2));
   const purity=clamp(total+(maintenance>=75?3:-4)+(standardMatch?2:0));
   const stability=clamp(total+(standardMatch?7:0)+(maintenance>=85?3:maintenance<40?-6:0));
@@ -27,7 +29,9 @@ export function assessBatchQuality(state,entry={}){
     {label:"Лаборатория",value:lab,detail:lab?"+ к качеству за исследования":"Нет дополнительного лабораторного бонуса"},
     {label:"Стандарт рецептуры",value:standardDelta,detail:!standard?"Стандарт не закреплён":standardMatch?"Точное совпадение с эталонной пропорцией":"Пропорция отличается от стандарта"},
     {label:"Состояние оборудования",value:equipmentDelta,detail:"Текущее обслуживание: "+maintenance+"%"},
-    {label:"Анализ сырья",value:sampleDelta,detail:sampleMatch?"Использован проанализированный тип сырья":"Нет совпадающего протокола сырья"}
+    {label:"Анализ сырья",value:sampleDelta,detail:sampleMatch?"Использован проанализированный тип сырья":"Нет совпадающего протокола сырья"},
+    {label:"Симуляция установки",value:processDelta,detail:state.processCenter?.lastSimulation?"Результат последней игровой симуляции":"Симуляция ещё не проводилась"},
+    {label:"Библиотека сырья",value:libraryBonus,detail:"Изучено профилей: "+Object.keys(state.processCenter?.rawStudies||{}).length}
   ];
   return {score:total,grade,aroma,purity,stability,base,labBonus:lab,standardDelta,standardMatch,maintenance,equipmentDelta,sampleMatch,factors};
 }

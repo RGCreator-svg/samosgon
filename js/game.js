@@ -15,6 +15,7 @@ import { initWorld, renderWorld, advanceWorldDay, getWorldYieldMultiplier, getWo
 import { initViticulture, renderViticulture, advanceViticultureDay } from "./viticulture.js";
 import { initProductionHub, renderProductionHub, recordProduction } from "./productionhub.js";
 import { initResearchLab, renderResearchLab, advanceResearchLabDay } from "./researchlab.js";
+import { initProcessCenter, renderProcessCenter } from "./processcenter.js";
 
 let state = loadGame();
 
@@ -66,6 +67,7 @@ function render() {
   renderViticulture(state);
   renderProductionHub(state);
   renderResearchLab(state);
+  renderProcessCenter(state);
   renderAdvisor(state);
   save();
 }
@@ -138,6 +140,7 @@ initWorld(state, { render, notify });
 initViticulture(state, { render, notify });
 initProductionHub(state);
 initResearchLab(state, { render, notify, earnExperience });
+initProcessCenter(state, { render, notify, earnExperience });
 registerCartHandler("homesteadRepair",(current,item)=>{
   const action=item.payload.action;
   if(action==="house"){current.house=Math.min(100,current.house+20*item.quantity);earnExperience(5*item.quantity);}
