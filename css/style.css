@@ -1704,3 +1704,26 @@ button:disabled {
 .lab-tech-card.is-locked{opacity:.72}.lab-tech-status{margin-top:auto}
 .lab-active-note{padding:11px 13px;border-left:3px solid #c59b5c;background:#ffffff08;color:#e2d0a5}
 @media(max-width:620px){.lab-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.lab-bench{display:grid;grid-template-columns:minmax(240px,.85fr) minmax(0,1.15fr);overflow:hidden;border:1px solid #675b40;border-radius:14px;background:linear-gradient(135deg,#2d332a,#1d241e);box-shadow:inset 0 1px #ffffff12}
+.lab-bench-visual{position:relative;min-height:245px;overflow:hidden;background:radial-gradient(ellipse at 48% 42%,#65705a66,transparent 56%),linear-gradient(180deg,#333b31,#20271f 75%);border-right:1px solid #6a624b}
+.lab-bench-lamp{position:absolute;top:18px;left:50%;width:100px;height:100px;transform:translateX(-50%);border-radius:50%;background:#d8c38b18;filter:blur(14px)}
+.lab-glassware{position:absolute;inset:35px 18px 45px;display:flex;align-items:flex-end;justify-content:center;gap:22px}
+.lab-flask{position:relative;width:70px;height:132px;border:3px solid #c5d4c0aa;border-top:0;border-radius:8px 8px 28px 28px;background:linear-gradient(90deg,#ffffff08,#d7e9d322,#ffffff08);clip-path:polygon(36% 0,64% 0,64% 36%,100% 76%,92% 100%,8% 100%,0 76%,36% 36%)}
+.lab-flask:before{content:"";position:absolute;top:0;left:24px;width:18px;height:40px;border:3px solid #c5d4c0aa;border-bottom:0}
+.lab-flask i,.lab-cylinder i,.lab-beaker i{position:absolute;bottom:0;left:0;right:0;height:42%;background:linear-gradient(90deg,#9eaa65aa,#d5bd6b99,#8f9c5b99);border-radius:0 0 22px 22px;animation:lab-liquid 4s ease-in-out infinite alternate}
+.lab-cylinder{position:relative;width:35px;height:116px;border:2px solid #c5d4c0aa;border-top:5px solid #c5d4c0aa;border-radius:4px 4px 9px 9px;background:#d9e8df12}
+.lab-cylinder i{height:35%;border-radius:0 0 7px 7px}
+.lab-beaker{position:relative;width:66px;height:72px;border:3px solid #c5d4c0aa;border-top:5px solid #c5d4c0aa;border-radius:3px 3px 12px 12px;background:#d9e8df12}
+.lab-beaker i{height:52%;border-radius:0 0 8px 8px}
+.lab-bench-instrument{position:absolute;right:14px;top:15px;display:grid;gap:3px;min-width:65px;padding:8px;border:1px solid #829078;border-radius:8px;background:#171e19;color:#b7d18f;text-align:center;font-family:monospace;box-shadow:0 4px 10px #0006}
+.lab-bench-instrument strong{font-size:1.25rem}.lab-bench-instrument small{font-size:.58rem;letter-spacing:.12em}
+.lab-bench-shelf{position:absolute;bottom:27px;left:8%;right:8%;height:10px;border-radius:4px;background:linear-gradient(#876d49,#493b2a);box-shadow:0 8px 0 #171c17,0 12px 14px #0008}
+.lab-bench-panel{display:flex;flex-direction:column;gap:10px;padding:17px}.lab-bench-panel h3,.lab-analysis-panel h3{margin:0;color:#e8d5a9}.lab-bench-panel p,.lab-analysis-caption{margin:0;color:#bdb6a4;font-size:.84rem;line-height:1.45}
+.lab-sample-choices{display:flex;flex-wrap:wrap;gap:6px}.lab-sample-choice{padding:7px 9px;font-size:.78rem}.lab-sample-choice.selected{border-color:#d2ad69;background:#55462c;color:#ffe3a8}.lab-sample-choice:disabled{opacity:.35;cursor:not-allowed}
+.lab-analyze-button{align-self:flex-start;margin-top:auto}
+.lab-analysis-panel{display:grid;gap:10px;padding:14px;border:1px solid #57513e;border-radius:12px;background:#262c24}
+.lab-meters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.lab-meter{display:grid;grid-template-columns:1fr auto;align-items:center;gap:6px}.lab-meter-head{color:#d8c79e;font-size:.82rem}.lab-meter-track{grid-column:1/-1;height:9px;overflow:hidden;border-radius:20px;background:#151a15;box-shadow:inset 0 1px 3px #0009}.lab-meter-fill{display:block;height:100%;border-radius:20px;background:linear-gradient(90deg,#718c58,#c5b46d);box-shadow:0 0 8px #b6c77b66;transition:width .5s ease}.lab-meter b{color:#c7d8a7;font-size:.78rem}
+@keyframes lab-liquid{from{transform:translateY(2px)}to{transform:translateY(-2px)}}
+@media(max-width:720px){.lab-bench{grid-template-columns:1fr}.lab-bench-visual{min-height:210px;border-right:0;border-bottom:1px solid #6a624b}.lab-meters{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){.lab-flask i,.lab-cylinder i,.lab-beaker i{animation:none}.lab-meter-fill{transition:none}}

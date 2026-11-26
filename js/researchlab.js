@@ -24,6 +24,7 @@ function ensure(s){
  s.lab.completed=Array.isArray(s.lab.completed)?s.lab.completed:[];
  s.lab.qualityBonus=Math.max(0,Number(s.lab.qualityBonus)||0);
  s.lab.experiments=Math.max(0,Number(s.lab.experiments)||0);
+ s.lab.selectedSample??="braga";s.lab.lastAnalysis??=null;
 }
 function hasItems(s,items){return Object.entries(items).every(([id,n])=>(Number(s.inventory?.[id])||0)>=n);}
 function render(s){
@@ -33,6 +34,19 @@ function render(s){
  const stats=el("div","lab-kpis");
  [[s.lab.points,"Исследовательские баллы"],[s.lab.completed.length+"/"+TECH.length,"Открыто технологий"],[s.lab.qualityBonus,"Бонус качества"],[s.lab.experiments,"Проведено опытов"]].forEach(([v,t])=>{const card=el("div","lab-kpi");card.append(el("b","",String(v)),el("span","",t));stats.append(card);});
  root.append(stats);
+
+ const bench=el("section","lab-bench");
+ const visual=el("div","lab-bench-visual");
+ visual.innerHTML='<div class="lab-bench-lamp"></div><div class="lab-glassware"><div class="lab-flask"><i></i><b></b></div><div class="lab-cylinder"><i></i><b></b></div><div class="lab-beaker"><i></i><b></b></div></div><div class="lab-bench-instrument"><span>pH</span><strong>6.8</strong><small>READY</small></div><div class="lab-bench-shelf"></div>';
+ const panel=el("div","lab-bench-panel");panel.append(el("h3","","Анализ образца"),el("p","","Выберите сырьё со склада. Лаборатория оценит его игровые свойства и сохранит протокол анализа."));
+ const samples=[["braga","Сахарная брага","🫙"],["fruit_braga","Фруктовая брага","🍎"],["grain_braga","Зерновая брага","🌾"],["honey_braga","Медовая брага","🍯"],["apple","Яблоки","🍏"],["pear","Груши","🍐"],["grapes","Виноград","🍇"],["honey","Мёд","🍯"]];
+ const choices=el("div","lab-sample-choices");
+ samples.forEach(([id,name,icon])=>{const b=el("button","lab-sample-choice"+(s.lab.selectedSample===id?" selected":""),icon+" "+name+" · "+(s.inventory?.[id]||0));b.dataset.labSample=id;b.disabled=(s.inventory?.[id]||0)<1;choices.append(b);});
+ panel.append(choices);const analyze=el("button","lab-analyze-button","🔬 Провести анализ · 8 монет и 1 образец");analyze.dataset.labAnalyze="true";analyze.disabled=!(s.inventory?.[s.lab.selectedSample]>0)||s.money<8;panel.append(analyze);
+ bench.append(visual,panel);root.append(bench);
+ const analysis=el("section","lab-analysis-panel");analysis.append(el("h3","","Последний протокол анализа"));
+ if(s.lab.lastAnalysis){const a=s.lab.lastAnalysis;analysis.append(el("p","lab-analysis-caption",a.name+" · День "+a.day+" · "+a.note));const meters=el("div","lab-meters");[["Аромат",a.aroma],["Чистота",a.purity],["Стабильность",a.stability]].forEach(([name,value])=>{const m=el("div","lab-meter");m.append(el("div","lab-meter-head",name),el("div","lab-meter-track"));const fill=el("i","lab-meter-fill");fill.style.width=value+"%";m.querySelector(".lab-meter-track").append(fill);m.append(el("b","",value+"/100"));meters.append(m);});analysis.append(meters);}else analysis.append(el("p","lab-analysis-caption","Протоколов пока нет. Выберите образец и проведите первый анализ."));
+ root.append(analysis);
  root.append(el("h3","","Экспериментальная лаборатория"));
  const expGrid=el("div","lab-experiments");
  EXPERIMENTS.forEach(exp=>{const card=el("article","lab-card");card.append(el("h4","",exp.name),el("p","",exp.desc),el("small","lab-cost","Реактивы: "+Object.entries(exp.items).map(([id,n])=>id+" × "+n).join(", ")+" · "+exp.money+" монет · +"+exp.points+" балла"));const b=el("button","","Провести опыт");b.dataset.labExperiment=exp.id;b.disabled=!hasItems(s,exp.items)||s.money<exp.money;card.append(b);expGrid.append(card);});
@@ -54,6 +68,10 @@ export function initResearchLab(s,{render:renderGame,notify,earnExperience}){
  if(!$("#researchLab")){const tab=el("button","","🧪 Лаборатория");tab.dataset.tab="researchLab";nav.append(tab);const section=el("section","tab-content panel hidden");section.id="researchLab";section.append(el("h2","","🧪 Лаборатория и исследования"));game.append(section);}
  nav.addEventListener("click",e=>{if(!e.target.closest('[data-tab="researchLab"]'))return;document.querySelectorAll(".tab-content").forEach(x=>x.classList.toggle("hidden",x.id!=="researchLab"));nav.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x.dataset.tab==="researchLab"));});
  $("#researchLab").addEventListener("click",e=>{
+
+  const sampleButton=e.target.closest("[data-lab-sample]");
+  if(sampleButton){const id=sampleButton.dataset.labSample;if((s.inventory?.[id]||0)<1)return;s.lab.selectedSample=id;renderGame();return;}
+  if(e.target.closest("[data-lab-analyze]")){const id=s.lab.selectedSample;if((s.inventory?.[id]||0)<1||s.money<8)return;const names={braga:"Сахарная брага",fruit_braga:"Фруктовая брага",grain_braga:"Зерновая брага",honey_braga:"Медовая брага",apple:"Яблоки",pear:"Груши",grapes:"Виноград",honey:"Мёд"};const base={braga:[68,72,74],fruit_braga:[82,64,68],grain_braga:[76,78,70],honey_braga:[88,70,66],apple:[84,76,82],pear:[80,72,78],grapes:[90,74,76],honey:[92,80,72]}[id]||[60,60,60];const jitter=()=>Math.floor(Math.random()*9)-4;const values=base.map(v=>Math.max(20,Math.min(100,v+jitter())));s.inventory[id]--;s.money-=8;s.lab.lastAnalysis={id,name:names[id]||id,day:s.day||1,aroma:values[0],purity:values[1],stability:values[2],note:"Показатели — игровые характеристики."};s.lab.points+=2;s.lab.experiments++;notify("Анализ завершён: получено 2 исследовательских балла.");earnExperience(4);renderGame();return;}
   const expButton=e.target.closest("[data-lab-experiment]");
   if(expButton){const exp=EXPERIMENTS.find(x=>x.id===expButton.dataset.labExperiment);if(!exp||!hasItems(s,exp.items)||s.money<exp.money)return;Object.entries(exp.items).forEach(([id,n])=>s.inventory[id]-=n);s.money-=exp.money;s.lab.points+=exp.points;s.lab.experiments++;earnExperience(exp.xp);notify("Опыт «"+exp.name+"» завершён: +"+exp.points+" исследовательских балла.");renderGame();return;}
   const techButton=e.target.closest("[data-lab-tech]");if(!techButton)return;const tech=TECH.find(x=>x.id===techButton.dataset.labTech);if(!tech||s.lab.unlocked.includes(tech.id)||s.lab.active||!tech.requires.every(id=>s.lab.unlocked.includes(id))||s.lab.points<tech.cost||s.money<tech.money)return;
