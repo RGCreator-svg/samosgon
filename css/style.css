@@ -1927,3 +1927,40 @@ button:disabled {
  .orchard-tree{width:19%}.orchard-one{left:1%}.orchard-two{left:24%}.orchard-three{right:23%}.orchard-four{right:0}
  .barn-scene .barn-wall{left:5%;right:5%}.barn-still{right:27%}
 }
+
+
+/* Состояния локаций меняются по реальному прогрессу сохранения. */
+.farm-scene[data-stage="overgrown"] .farm-bed{filter:saturate(.55) brightness(.78)}
+.farm-scene[data-stage="overgrown"] .farm-bed::after{content:"";position:absolute;inset:-12px -5px;background:repeating-linear-gradient(105deg,transparent 0 12px,#667343 13px 17px,transparent 18px 28px);opacity:.7;pointer-events:none}
+.farm-scene[data-stage="overgrown"] .farm-bed i{opacity:.18;transform:scale(.65) rotate(-28deg)}
+.farm-scene[data-stage="cleared"] .farm-bed{background:repeating-linear-gradient(0deg,#63452e 0 5px,#997348 6px 10px);box-shadow:0 0 0 2px #c1a06a55,0 8px 12px #1e2a1b66}
+.farm-scene[data-stage="cleared"] .farm-bed i{opacity:.55;height:16px;top:-8px}
+.farm-scene[data-stage="cultivated"] .farm-bed{background:repeating-linear-gradient(0deg,#59452d 0 4px,#987448 5px 10px)}
+.farm-scene[data-stage="cultivated"] .farm-bed i{height:32px;top:-17px;filter:saturate(1.35)}
+.farm-scene[data-stage="lush"] .farm-bed{background:repeating-linear-gradient(0deg,#4b5a32 0 5px,#80613a 6px 10px);box-shadow:0 0 15px #9bc66b55,0 8px 12px #1e2a1b66}
+.farm-scene[data-stage="lush"] .farm-bed i{height:42px;top:-24px;width:12px;background:#4f9b45;box-shadow:5px 5px 0 #91bd4e,-5px 8px 0 #6da943;filter:saturate(1.5)}
+.farm-scene[data-stage="lush"] .loc-hill{filter:saturate(1.25) brightness(1.08)}
+.farm-scene[data-stage="lush"]::after{content:"";position:absolute;left:4%;right:4%;bottom:11%;height:13%;background:radial-gradient(ellipse,#8fb85a66,transparent 70%);z-index:4;pointer-events:none}
+.orchard-scene[data-stage="wild"] .orchard-tree{filter:grayscale(.55) brightness(.65);opacity:.8}
+.orchard-scene[data-stage="wild"] .orchard-tree b{opacity:0}
+.orchard-scene[data-stage="wild"] .orchard-meadow{filter:grayscale(.45) brightness(.7)}
+.orchard-scene[data-stage="wild"]::after{content:"";position:absolute;inset:35% 0 12%;background:repeating-linear-gradient(105deg,transparent 0 17px,#53613c88 18px 22px,transparent 23px 34px);z-index:4;pointer-events:none}
+.orchard-scene[data-stage="restored"] .orchard-tree{filter:saturate(1.25) brightness(1.08);animation:orchard-sway 5s ease-in-out infinite alternate}
+.orchard-scene[data-stage="restored"] .orchard-tree b{opacity:1;transform:scale(1.12);filter:drop-shadow(0 2px 2px #412b1c88)}
+.orchard-scene[data-stage="restored"] .orchard-meadow{filter:saturate(1.25) brightness(1.1)}
+.orchard-scene[data-stage="restored"] .loc-sky{background:linear-gradient(#91c5b7,#e5d59e 75%,#9eaa69)}
+@keyframes orchard-sway{from{translate:-1px 0}to{translate:2px 0}}
+.barn-scene[data-stage="ruined"] .barn-wall{filter:brightness(.65) saturate(.55);background:repeating-linear-gradient(90deg,#59402f 0 13px,#705039 14px 18px)}
+.barn-scene[data-stage="ruined"] .barn-roof{filter:brightness(.65) drop-shadow(0 8px 5px #16120f);clip-path:polygon(50% 0,100% 100%,0 100%)}
+.barn-scene[data-stage="ruined"] .barn-window{background:#594c39;box-shadow:none}
+.barn-scene[data-stage="ruined"] .barn-floor{background:repeating-linear-gradient(110deg,#594832 0 9px,#4a3c2c 10px 15px)}
+.barn-scene[data-stage="repairing"] .barn-wall{filter:brightness(.88) saturate(.85);box-shadow:inset 0 0 18px #241b1466,10px 13px 25px #0006}
+.barn-scene[data-stage="repairing"] .barn-window{box-shadow:inset 0 0 0 3px #f1d49a,0 0 14px #f0d18a77}
+.barn-scene[data-stage="workshop"]{background:linear-gradient(#b5b69a,#8b986d 70%,#5e754c)}
+.barn-scene[data-stage="workshop"] .barn-wall{filter:brightness(1.18) saturate(1.1);background:repeating-linear-gradient(90deg,#946c48 0 13px,#b18a5c 14px 18px);box-shadow:inset 0 0 0 5px #d0a66b55,0 0 24px #e3c58b55}
+.barn-scene[data-stage="workshop"] .barn-roof{filter:brightness(1.15) drop-shadow(0 8px 5px #16120f)}
+.barn-scene[data-stage="workshop"] .barn-window{background:#f4d995;box-shadow:0 0 24px #ffe6a1,inset 0 0 0 3px #fff0bd}
+.barn-scene[data-stage="workshop"] .barn-floor{background:linear-gradient(#a58b60,#746044)}
+.barn-scene[data-stage="workshop"] .barn-tools{filter:brightness(1.3)}
+.barn-scene[data-stage="workshop"] .barn-still{filter:brightness(1.18);box-shadow:0 0 24px #e6b86a66}
+@media(prefers-reduced-motion:reduce){.orchard-scene[data-stage="restored"] .orchard-tree{animation:none}}
