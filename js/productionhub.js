@@ -11,7 +11,7 @@ function makePassport(entry, s, type = "production") {
     productName:String(entry.name||"Партия"),amount:Math.max(0,Number(entry.amount)||0),
     remaining:Math.max(0,Number(entry.amount)||0),sold:0,
     process:String(entry.process||"Производство"),quality:assessment.score,grade:assessment.grade.label,
-    baseQuality:assessment.base,aroma:assessment.aroma,purity:assessment.purity,stability:assessment.stability,
+    baseQuality:assessment.base,saleModifier:Math.round((1+(assessment.score-60)*.005)*100),aroma:assessment.aroma,purity:assessment.purity,stability:assessment.stability,
     factors:assessment.factors,standardDelta:assessment.standardDelta,
     recipeId:entry.recipeId||null,recipeName:entry.recipeName||null,ratio:entry.ratio||null,
     standardId:standard?.trialId||null,standardMatch:assessment.standardMatch
@@ -109,7 +109,7 @@ function render(s) {
     card.append(head, el("small", "", "№ " + p.id + " · день " + p.day + " · " + p.process));
     const metrics = el("div", "passport-metrics");
     [["Аромат",p.aroma],["Чистота",p.purity],["Стабильность",p.stability]].forEach(([label,value]) => metrics.append(el("span","",label+": "+value)));
-    card.append(metrics);
+    card.append(metrics,el("small","passport-sale","Влияние на цену: "+(p.saleModifier>=100?"+":"")+(p.saleModifier-100)+"%"));
     const factors=el("details","passport-factors");factors.append(el("summary","","Разбор оценки качества"));
     (p.factors||[]).forEach(f=>factors.append(el("p","",f.label+": "+(f.value>0?"+":"")+f.value+" · "+f.detail)));
     card.append(factors);

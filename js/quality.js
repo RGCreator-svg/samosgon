@@ -59,9 +59,10 @@ export function consumeQualityForSale(state,itemId,quantity=1){
   }
   state.qualityLots=state.qualityLots.filter(lot=>Number(lot.remaining)>0);
   if(!tracked)return {hasPassport:false,quality:null,multiplier:1,reputationDelta:0,grade:null,untracked:need};
-  const quality=Math.round(weighted/tracked),grade=qualityGrade(quality);
-  const multiplier=.8+quality*.0045;
-  const reputationDelta=quality>=92?1:quality>=82?.5:quality<35?-1:0;
+  const trackedQuality=Math.round(weighted/tracked);
+  const quality=Math.round((weighted+(need-tracked)*60)/need),grade=qualityGrade(quality);
+  const multiplier=Math.max(.8,Math.min(1.2,1+(quality-60)*.005));
+  const reputationDelta=trackedQuality>=92?1:trackedQuality>=82?.5:trackedQuality<35?-1:0;
   if(reputationDelta)state.reputation=Math.max(-100,Math.min(100,(Number(state.reputation)||0)+reputationDelta));
-  return {hasPassport:true,quality,multiplier,covered:tracked,untracked:need-tracked,grade,reputationDelta};
+  return {hasPassport:true,quality,trackedQuality,multiplier,covered:tracked,untracked:need-tracked,grade,reputationDelta};
 }
