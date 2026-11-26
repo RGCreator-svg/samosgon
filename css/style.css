@@ -1964,3 +1964,39 @@ button:disabled {
 .barn-scene[data-stage="workshop"] .barn-tools{filter:brightness(1.3)}
 .barn-scene[data-stage="workshop"] .barn-still{filter:brightness(1.18);box-shadow:0 0 24px #e6b86a66}
 @media(prefers-reduced-motion:reduce){.orchard-scene[data-stage="restored"] .orchard-tree{animation:none}}
+
+
+/* Единая сезонная палитра и погодные эффекты для всех игровых локаций. */
+.location-season-overlay{position:absolute;inset:0;z-index:7;pointer-events:none;overflow:hidden;transition:background .7s ease,opacity .7s ease}
+.location-season-label{position:absolute;right:12px;bottom:13px;z-index:8;padding:6px 9px;border:1px solid #fff5;border-radius:99px;background:#1b281ebd;color:#fff0ce;font-size:.72rem;font-weight:700;box-shadow:0 3px 10px #0003;backdrop-filter:blur(3px)}
+.location-scene[data-season="spring"] .location-season-overlay{background:radial-gradient(circle at 18% 28%,#f7d6c833 0 2px,transparent 3px),radial-gradient(circle at 72% 22%,#fff0d533 0 3px,transparent 4px),linear-gradient(180deg,#c9e5d022,transparent 55%)}
+.location-scene[data-season="summer"] .location-season-overlay{background:linear-gradient(115deg,#f8d67a18,transparent 40%,#fff0a018);box-shadow:inset 0 0 55px #f4d58a22}
+.location-scene[data-season="autumn"] .location-season-overlay{background:radial-gradient(ellipse at 15% 65%,#b96f2b22,transparent 45%),radial-gradient(ellipse at 85% 35%,#d18b3a22,transparent 48%),linear-gradient(180deg,#d59a4b18,transparent 65%)}
+.location-scene[data-season="winter"] .location-season-overlay{background:linear-gradient(180deg,#dcebf055 0%,#dcebf022 48%,transparent 72%),linear-gradient(0deg,#e8f1edcc 0%,#e8f1ed66 12%,transparent 33%)}
+.location-scene[data-season="spring"] .loc-sun{background:#f5dfac;box-shadow:0 0 42px #f5dfacbb}
+.location-scene[data-season="summer"] .loc-sun{background:#ffe28c;box-shadow:0 0 52px #ffe28ccc}
+.location-scene[data-season="autumn"] .loc-sun{background:#e9bd7c;box-shadow:0 0 35px #e9bd7c88}
+.location-scene[data-season="winter"] .loc-sun{background:#e2e9e8;box-shadow:0 0 28px #d9e8ee99}
+.orchard-scene[data-season="spring"] .orchard-tree i{background:radial-gradient(circle at 34% 26%,#c3c879,#789b58 67%,#4d7043)}
+.orchard-scene[data-season="spring"] .orchard-tree i::after{content:"";position:absolute;inset:8% 12%;border-radius:50%;background:radial-gradient(circle at 18% 22%,#fff0df 0 3px,transparent 4px),radial-gradient(circle at 72% 30%,#f6d5d4 0 4px,transparent 5px),radial-gradient(circle at 48% 72%,#fff1d9 0 3px,transparent 4px)}
+.orchard-scene[data-season="summer"] .orchard-tree i{filter:saturate(1.35) brightness(1.08)}
+.orchard-scene[data-season="autumn"] .orchard-tree i{background:radial-gradient(circle at 34% 26%,#d9a45d,#a56a3e 67%,#69452f)}
+.orchard-scene[data-season="autumn"] .orchard-tree b{background:#c65a32;box-shadow:25px 13px #e0a13e,46px -1px #bd4b2e,15px 35px #df8a35}
+.orchard-scene[data-season="winter"] .orchard-tree i{background:radial-gradient(circle at 34% 26%,#d8e1d4,#8b9c8a 67%,#607768)}
+.orchard-scene[data-season="winter"] .orchard-tree i::after{content:"";position:absolute;left:8%;right:8%;top:8%;height:22%;border-radius:50%;background:#edf4efcc;box-shadow:0 8px 0 -2px #edf4efaa}
+.orchard-scene[data-season="winter"] .orchard-tree b{opacity:0!important}
+.farm-scene[data-season="spring"] .farm-bed i{filter:hue-rotate(12deg) saturate(1.2)}
+.farm-scene[data-season="summer"] .farm-bed i{filter:saturate(1.45) brightness(1.08)}
+.farm-scene[data-season="autumn"] .farm-bed i{background:#a58b45;box-shadow:4px 4px 0 #c18a42}
+.farm-scene[data-season="winter"] .farm-bed{box-shadow:inset 0 0 0 3px #e9f0e8aa,0 8px 12px #1e2a1b66}
+.barn-scene[data-season="winter"] .barn-roof::after{content:"";position:absolute;left:8%;right:8%;top:40%;height:15%;border-radius:50%;background:#e7efeddd;filter:blur(2px)}
+.barn-scene[data-season="autumn"] .barn-floor{background:linear-gradient(#94704a,#57432f)}
+.location-scene[data-weather="rain"] .location-season-overlay::after,
+.location-scene[data-weather="storm"] .location-season-overlay::after{content:"";position:absolute;inset:-25%;background:repeating-linear-gradient(105deg,transparent 0 18px,#d9e8ed55 19px 21px,transparent 22px 38px);animation:location-rain .8s linear infinite}
+.location-scene[data-weather="snow"] .location-season-overlay::after,
+.location-scene[data-weather="frost"] .location-season-overlay::after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 12% 22%,#fff 0 2px,transparent 3px),radial-gradient(circle at 34% 65%,#fff 0 2px,transparent 3px),radial-gradient(circle at 57% 32%,#fff 0 2px,transparent 3px),radial-gradient(circle at 78% 73%,#fff 0 2px,transparent 3px),radial-gradient(circle at 91% 18%,#fff 0 2px,transparent 3px);background-size:100% 100%;animation:location-snow 4s ease-in-out infinite alternate}
+.location-scene[data-weather="wind"] .loc-cloud{animation:cloud-drift 2s ease-in-out infinite alternate}
+@keyframes location-rain{from{transform:translate3d(-8px,-12px,0)}to{transform:translate3d(8px,12px,0)}}
+@keyframes location-snow{from{transform:translateY(-4px);opacity:.45}to{transform:translateY(5px);opacity:.95}}
+@media(max-width:600px){.location-season-label{right:8px;bottom:9px;font-size:.65rem;padding:5px 7px}}
+@media(prefers-reduced-motion:reduce){.location-season-overlay::after{animation:none!important}.location-season-overlay{transition:none}}
