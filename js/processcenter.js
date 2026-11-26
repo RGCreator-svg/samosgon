@@ -1,5 +1,6 @@
 import { getEquipmentProfile } from "./equipment.js";
 import { queuePurchase, registerCartHandler } from "./economy.js";
+import { consumeQualityLots } from "./quality.js";
 
 const $ = selector => document.querySelector(selector);
 const el = (tag, cls, text) => {
@@ -158,7 +159,7 @@ export function initProcessCenter(s,{render:renderGame,notify,earnExperience}) {
     const buy=e.target.closest("[data-buy-instrument]");
     if(buy){const item=INSTRUMENTS.find(x=>x.id===buy.dataset.buyInstrument);if(!item||s.processCenter.instruments.includes(item.id))return;queuePurchase(s,{key:"process-instrument:"+item.id,kind:"processInstrument",name:item.name,cost:item.cost,payload:{id:item.id}});notify("Прибор добавлен в общую корзину: "+item.name);renderGame();return;}
     const study=e.target.closest("[data-study-raw]");
-    if(study){const raw=RAW.find(x=>x.id===study.dataset.studyRaw);if(!raw||s.processCenter.rawStudies[raw.id]||(s.inventory[raw.id]||0)<1||s.money<12)return;s.inventory[raw.id]--;s.money-=12;s.processCenter.rawStudies[raw.id]={day:s.day||1,base:raw.base};notify("Изучен профиль сырья: "+raw.name+". Данные добавлены в библиотеку.");earnExperience(5);renderGame();return;}
+    if(study){const raw=RAW.find(x=>x.id===study.dataset.studyRaw);if(!raw||s.processCenter.rawStudies[raw.id]||(s.inventory[raw.id]||0)<1||s.money<12)return;consumeQualityLots(s,raw.id,1);s.inventory[raw.id]--;s.money-=12;s.processCenter.rawStudies[raw.id]={day:s.day||1,base:raw.base};notify("Изучен профиль сырья: "+raw.name+". Данные добавлены в библиотеку.");earnExperience(5);renderGame();return;}
     if(e.target.closest("[data-process-simulate]")){
       if(s.money<5||s.energy<3)return;const c=s.processCenter.controls,profile=getEquipmentProfile(s,"sugar");
       const score=Math.max(25,Math.min(100,Math.round(100-Math.abs(c.heat-3)*11-Math.abs(c.cooling-3)*10-Math.abs(c.pace-3)*8+(profile.quality*.35)+(s.still>=80?3:-4))));
