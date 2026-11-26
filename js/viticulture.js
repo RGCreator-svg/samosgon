@@ -129,11 +129,11 @@ export function initViticulture(s,{render:renderGame,notify}) {
   registerCartHandler("viticultureBatch",(state,item)=>{
     const recipe=item.payload?.recipe;
     if(!recipe)return;
-    for(let i=0;i<item.quantity;i++)state.viticulture.batches.push({id:state.viticulture.nextId++,name:recipe.name,remaining:recipe.days,days:recipe.days,agingDays:recipe.agingDays||0,stage:"fermentation",output:recipe.amount,outputItem:recipe.output,ready:false});
+    for(let i=0;i<item.quantity;i++)state.viticulture.batches.push({id:state.viticulture.nextId++,name:recipe.name,remaining:recipe.days,days:recipe.days,agingDays:recipe.agingDays||0,stage:"fermentation",output:recipe.amount,outputItem:recipe.output,quality:Math.max(40,Math.min(96,(recipe.quality||66)+Math.round((Number(state.lab?.qualityBonus)||0)*.15)+(Math.random()*7-3))),recipeId:recipe.id,ready:false});
   });
   $("#viticulture").addEventListener("click",event=>{
     const collect=event.target.closest("[data-viti-collect]");
-    if(collect){const index=s.viticulture.batches.findIndex(job=>String(job.id)===collect.dataset.vitiCollect);const job=s.viticulture.batches[index];if(!job?.ready)return;const received=addInventory(s,job.outputItem,job.output);job.output-=received;if(received>0)recordProduction(s,{name:job.name,amount:received,item:job.outputItem,process:"Винодельня / медоварня"});if(job.output<=0)s.viticulture.batches.splice(index,1);notify("На склад помещено: "+received+" ед. продукции.");renderGame();return;}
+    if(collect){const index=s.viticulture.batches.findIndex(job=>String(job.id)===collect.dataset.vitiCollect);const job=s.viticulture.batches[index];if(!job?.ready)return;const received=addInventory(s,job.outputItem,job.output);job.output-=received;if(received>0)recordProduction(s,{name:job.name,amount:received,item:job.outputItem,process:"Винодельня / медоварня",quality:job.quality,recipeId:job.recipeId,recipeName:job.name});if(job.output<=0)s.viticulture.batches.splice(index,1);notify("На склад помещено: "+received+" ед. продукции.");renderGame();return;}
     const build=event.target.closest("[data-viti-build]");
     if(build){
       const item=BUILDINGS.find(x=>x.id===build.dataset.vitiBuild);
@@ -183,8 +183,8 @@ export function advanceViticultureDay(s,notify){
     job.remaining--;
     if(job.remaining<=0){
       job.remaining=0;
-      if(job.stage==="fermentation"&&job.agingDays>0){job.stage="aging";job.remaining=job.agingDays;notify("Партия "+job.name+" перешла на выдержку в погреб.");}
-      else{job.ready=true;notify("Партия готова: "+job.name+". Заберите её во вкладке «Винодельня».");}
+      if(job.stage==="fermentation"&&job.agingDays>0){job.stage="aging";job.remaining=job.agingDays;job.quality=Math.min(100,(Number(job.quality)||65)+2);notify("Партия "+job.name+" перешла на выдержку в погреб.");}
+      else{job.ready=true;job.quality=Math.min(100,(Number(job.quality)||65)+Math.round((Number(s.lab?.qualityBonus)||0)*.1));notify("Партия готова: "+job.name+" · предварительное качество "+job.quality+"/100. Заберите её во вкладке «Винодельня».");}
     }
   });
 }
