@@ -2,7 +2,7 @@ const $ = selector => document.querySelector(selector);
 const el = (tag, cls, text) => { const node = document.createElement(tag); if (cls) node.className = cls; if (text !== undefined) node.textContent = text; return node; };
 
 function makePassport(entry, s, type = "production") {
-  const quality = Number.isFinite(Number(entry.quality)) ? Math.max(0, Math.min(100, Number(entry.quality))) : 60;
+  const quality = entry.quality !== null && entry.quality !== undefined && Number.isFinite(Number(entry.quality)) ? Math.max(0, Math.min(100, Number(entry.quality))) : 60;
   const metric = offset => Math.max(0, Math.min(100, Math.round(quality + offset)));
   const standard = entry.recipeId ? s.lab?.standards?.[entry.recipeId] : null;
   return {
@@ -29,7 +29,7 @@ export function recordProduction(s, entry) {
     id: Date.now() + Math.random(), day: Number(s.day) || 1,
     name: String(entry.name || "Партия"), amount: Math.max(0, Number(entry.amount) || 0),
     item: String(entry.item || ""), process: String(entry.process || "Производство"),
-    quality: Number.isFinite(Number(entry.quality)) ? Number(entry.quality) : null,
+    quality: entry.quality !== null && entry.quality !== undefined && Number.isFinite(Number(entry.quality)) ? Number(entry.quality) : null,
     recipeId: entry.recipeId || null, recipeName: entry.recipeName || null, ratio: entry.ratio || null
   };
   record.passport = makePassport({...entry, ...record}, s, entry.passportType || "production");
