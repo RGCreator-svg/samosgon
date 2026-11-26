@@ -1,23 +1,41 @@
 const $ = selector => document.querySelector(selector);
 const el = (tag, cls, text) => { const node = document.createElement(tag); if (cls) node.className = cls; if (text !== undefined) node.textContent = text; return node; };
 
+function makePassport(entry, s, type = "production") {
+  const quality = Number.isFinite(Number(entry.quality)) ? Math.max(0, Math.min(100, Number(entry.quality))) : 60;
+  const metric = offset => Math.max(0, Math.min(100, Math.round(quality + offset)));
+  const standard = entry.recipeId ? s.lab?.standards?.[entry.recipeId] : null;
+  return {
+    id: "passport-" + Date.now() + "-" + Math.floor(Math.random() * 1e7),
+    type, day: Number(s.day) || 1, product: String(entry.item || ""),
+    productName: String(entry.name || "Партия"), amount: Math.max(0, Number(entry.amount) || 0),
+    process: String(entry.process || "Производство"), quality,
+    aroma: metric(-2), purity: metric(1), stability: metric(3),
+    recipeId: entry.recipeId || null, recipeName: entry.recipeName || null, ratio: entry.ratio || null,
+    standardId: standard?.trialId || null,
+    standardMatch: !!(standard && standard.a + ":" + standard.b === entry.ratio)
+  };
+}
+
 function ensure(s) {
   s.productionLog ??= [];
   if (!Array.isArray(s.productionLog)) s.productionLog = [];
+  s.productionLog.forEach(entry => { if (!entry.passport) entry.passport = makePassport(entry, s, "legacy"); });
 }
 
 export function recordProduction(s, entry) {
   ensure(s);
-  s.productionLog.unshift({
-    id: Date.now() + Math.random(),
-    day: Number(s.day) || 1,
-    name: String(entry.name || "Партия"),
-    amount: Math.max(0, Number(entry.amount) || 0),
-    item: String(entry.item || ""),
-    process: String(entry.process || "Производство"),
-    quality: Number.isFinite(Number(entry.quality)) ? Number(entry.quality) : null
-  });
-  s.productionLog = s.productionLog.slice(0, 30);
+  const record = {
+    id: Date.now() + Math.random(), day: Number(s.day) || 1,
+    name: String(entry.name || "Партия"), amount: Math.max(0, Number(entry.amount) || 0),
+    item: String(entry.item || ""), process: String(entry.process || "Производство"),
+    quality: Number.isFinite(Number(entry.quality)) ? Number(entry.quality) : null,
+    recipeId: entry.recipeId || null, recipeName: entry.recipeName || null, ratio: entry.ratio || null
+  };
+  record.passport = makePassport({...entry, ...record}, s, entry.passportType || "production");
+  s.productionLog.unshift(record);
+  s.productionLog = s.productionLog.slice(0, 60);
+  return record.passport.id;
 }
 
 function stageCard(parent, icon, title, detail, status) {
@@ -70,6 +88,36 @@ function render(s) {
   if (!s.productionLog.length) archive.append(el("p","economy-empty","Архив пополнится после сбора готовой продукции."));
   s.productionLog.slice(0,10).forEach(entry=>{const row=el("div","production-log-row");row.append(el("span","production-log-day","День "+entry.day),el("b","",entry.name),el("span","",entry.process+" · "+entry.amount+" ед."));if(entry.quality!==null)row.append(el("small","","Качество: "+entry.quality+"/100"));archive.append(row);});
   root.append(archive);
+
+  root.append(el("h3", "", "Паспорта качества партий"));
+  const passports = el("div", "production-passports");
+  s.productionLog.slice(0, 12).forEach(entry => {
+    const p = entry.passport || makePassport(entry, s, "legacy");
+    entry.passport = p;
+    const card = el("article", "production-passport");
+    const head = el("div", "passport-head");
+    head.append(el("b", "", p.productName), el("strong", "", p.quality + "/100"));
+    card.append(head, el("small", "", "№ " + p.id + " · день " + p.day + " · " + p.process));
+    const metrics = el("div", "passport-metrics");
+    [["Аромат",p.aroma],["Чистота",p.purity],["Стабильность",p.stability]].forEach(([label,value]) => metrics.append(el("span","",label+": "+value)));
+    card.append(metrics);
+    if (p.ratio) card.append(el("small","passport-recipe","Рецепт: "+(p.recipeName||p.recipeId)+" · пропорция "+p.ratio));
+    if (p.standardId) card.append(el("small","passport-standard",p.standardMatch?"✓ Соответствует стандарту":"Отклонение от стандарта"));
+    passports.append(card);
+  });
+  if (!passports.childElementCount) passports.append(el("p","economy-empty","Паспорта появятся после завершения первых партий."));
+  root.append(passports);
+
+  root.append(el("h3", "", "Стандарты лаборатории"));
+  const standards = el("div", "production-standards");
+  Object.entries(s.lab?.standards || {}).forEach(([id,st]) => {
+    const names={orchard:"Румянец старого сада",vineyard:"Золотой винтаж",pear:"Грушевый медовый резерв"};
+    const card=el("article","production-standard");
+    card.append(el("b","",names[id]||id),el("span","",st.a+":"+st.b+" · качество "+st.quality+"/100"),el("small","","Закреплён по паспорту "+(st.passportId||"—")));
+    standards.append(card);
+  });
+  if (!standards.childElementCount) standards.append(el("p","economy-empty","Пока нет закреплённых стандартов. Лучшие партии можно закрепить во вкладке «Лаборатория»."));
+  root.append(standards);
 }
 
 export function initProductionHub(s) {
