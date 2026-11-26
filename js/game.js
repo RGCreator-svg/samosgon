@@ -13,6 +13,7 @@ import { initMilestones, renderMilestones } from "./progression.js";
 import { initWorld, renderWorld, advanceWorldDay, getWorldYieldMultiplier, getWorldColdPenalty } from "./world.js";
 import { initViticulture, renderViticulture, advanceViticultureDay } from "./viticulture.js";
 import { initProductionHub, renderProductionHub, recordProduction } from "./productionhub.js";
+import { initResearchLab, renderResearchLab, advanceResearchLabDay } from "./researchlab.js";
 
 let state = loadGame();
 
@@ -63,6 +64,7 @@ function render() {
   renderWorld(state);
   renderViticulture(state);
   renderProductionHub(state);
+  renderResearchLab(state);
   renderAdvisor(state);
   save();
 }
@@ -134,6 +136,7 @@ initMilestones(state, { renderGame: render, notify, earnExperience });
 initWorld(state, { render, notify });
 initViticulture(state, { render, notify });
 initProductionHub(state);
+initResearchLab(state, { render, notify, earnExperience });
 registerCartHandler("homesteadRepair",(current,item)=>{
   const action=item.payload.action;
   if(action==="house"){current.house=Math.min(100,current.house+20*item.quantity);earnExperience(5*item.quantity);}

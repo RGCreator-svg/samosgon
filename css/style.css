@@ -1687,3 +1687,20 @@ button:disabled {
 .warehouse-icon{width:32px;height:32px;object-fit:contain;filter:drop-shadow(0 2px 3px #0005)}
 .production-stage-icon{display:block;width:54px;height:54px;object-fit:contain;filter:drop-shadow(0 3px 5px #0006)}
 @media(max-width:560px){.production-stage-icon{width:44px;height:44px}}
+
+/* Лаборатория и технологическое дерево исследований. */
+#researchLab{display:grid;gap:13px}
+.lab-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.lab-kpi{display:grid;gap:4px;padding:12px;border:1px solid #665d43;border-radius:10px;background:linear-gradient(145deg,#303329,#22271f)}
+.lab-kpi b{color:#f0d39a;font-size:1.4rem}.lab-kpi span{color:#bdb6a4;font-size:.8rem}
+.lab-experiments,.lab-tech-tree{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.lab-card,.lab-tech-card{display:flex;flex-direction:column;align-items:flex-start;gap:7px;padding:13px;border:1px solid #55513f;border-radius:11px;background:linear-gradient(145deg,#30352c,#20251f)}
+.lab-card h4,.lab-tech-card h4{margin:0;color:#e6d3a7}.lab-card p,.lab-tech-card p{margin:0;color:#bdb6a4;font-size:.86rem;line-height:1.4}
+.lab-card small,.lab-tech-status{color:#c7b88e;font-size:.76rem}.lab-card button,.lab-tech-card button{margin-top:auto}
+.lab-card button:disabled,.lab-tech-card button:disabled{opacity:.45;cursor:not-allowed}
+.lab-tech-icon{font-size:1.8rem}.lab-branch{color:#c6a96d;text-transform:uppercase;letter-spacing:.08em}
+.lab-effect{color:#a9c78f;font-size:.83rem}.lab-tech-card.is-unlocked{border-color:#718d5c;background:linear-gradient(145deg,#303c2b,#22271f)}
+.lab-tech-card.is-active{border-color:#bd9654;box-shadow:inset 0 0 0 1px #bd965455}
+.lab-tech-card.is-locked{opacity:.72}.lab-tech-status{margin-top:auto}
+.lab-active-note{padding:11px 13px;border-left:3px solid #c59b5c;background:#ffffff08;color:#e2d0a5}
+@media(max-width:620px){.lab-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
