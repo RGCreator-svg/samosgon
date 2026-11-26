@@ -131,8 +131,18 @@
       <button id="repairHouse">Починить дом — 30 монет</button>
     </section>
 
-    <section id="farm" class="tab-content panel hidden">
-      <h2>🥕 Огород</h2>
+    <section id="farm" class="tab-content panel hidden location-panel farm-panel">
+      <div class="location-scene farm-scene" role="img" aria-label="Огород с грядками, овощами и деревянным забором">
+        <div class="loc-sky"></div><div class="loc-sun"></div><div class="loc-hill"></div>
+        <div class="farm-shed"><i></i><b></b></div>
+        <div class="farm-bed bed-one"><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="farm-bed bed-two"><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="farm-bed bed-three"><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="farm-scarecrow"><b></b><i></i><span></span></div>
+        <div class="loc-fence"></div>
+        <div class="loc-sign"><small>УЧАСТОК № 1</small><strong>Огород</strong><span>Здесь начинается урожай</span></div>
+      </div>
+      <div class="location-heading"><div><span class="section-kicker">ЗЕМЛЯ И ТРУД</span><h2>🥕 Огород</h2></div><span class="location-tag">🌱 Сезонные посадки</span></div>
       <p>
         Земля плодородная. Сорняки тоже. Кажется, они здесь
         прописаны и платят налоги.
@@ -142,8 +152,17 @@
       <button id="repairGarden">Расчистить грядки — 20 монет</button>
     </section>
 
-    <section id="orchard" class="tab-content panel hidden">
-      <h2>🍎 Заброшенный сад</h2>
+    <section id="orchard" class="tab-content panel hidden location-panel orchard-panel">
+      <div class="location-scene orchard-scene" role="img" aria-label="Старый фруктовый сад с яблонями и грушами">
+        <div class="loc-sky"></div><div class="loc-sun"></div><div class="orchard-meadow"></div>
+        <div class="orchard-tree orchard-one"><i></i><b></b></div>
+        <div class="orchard-tree orchard-two"><i></i><b></b></div>
+        <div class="orchard-tree orchard-three"><i></i><b></b></div>
+        <div class="orchard-tree orchard-four"><i></i><b></b></div>
+        <div class="orchard-path"></div><div class="loc-fence"></div>
+        <div class="loc-sign"><small>СТАРЫЕ ДЕРЕВЬЯ</small><strong>Бабушкин сад</strong><span>Каждое дерево хранит историю</span></div>
+      </div>
+      <div class="location-heading"><div><span class="section-kicker">ПЛОДОВЫЕ ДЕРЕВЬЯ</span><h2>🍎 Заброшенный сад</h2></div><span class="location-tag">🍏 Яблоки и груши</span></div>
       <p id="orchardDescription"></p>
       <p>Состояние сада: <b id="orchardValue"></b>%</p>
       <p>Деревья: <b id="treeCount"></b></p>
@@ -151,8 +170,17 @@
       <button id="harvestFruit">Собрать фрукты</button>
     </section>
 
-    <section id="barn" class="tab-content panel hidden">
-      <h2>🛠 Старый сарай</h2>
+    <section id="barn" class="tab-content panel hidden location-panel barn-panel">
+      <div class="location-scene barn-scene" role="img" aria-label="Старый деревянный сарай и оборудование в мастерской">
+        <div class="barn-wall"></div><div class="barn-roof"></div>
+        <div class="barn-door"></div><div class="barn-window"></div>
+        <div class="barn-barrel barrel-one"></div><div class="barn-barrel barrel-two"></div>
+        <div class="barn-tools"><i></i><b></b><span></span></div>
+        <div class="barn-still"><i></i><b></b><span></span><em></em></div>
+        <div class="barn-floor"></div>
+        <div class="loc-sign"><small>МАСТЕРСКАЯ</small><strong>Старый сарай</strong><span>Пыль, инструменты и большие планы</span></div>
+      </div>
+      <div class="location-heading"><div><span class="section-kicker">РЕМОНТ И ПРОИЗВОДСТВО</span><h2>🛠 Старый сарай</h2></div><span class="location-tag">⚙️ Требует ремонта</span></div>
       <p id="barnDescription"></p>
       <p>Состояние сарая: <b id="barnValue"></b>%</p>
       <p>Самогонный аппарат: <b id="stillValue"></b>%</p>
