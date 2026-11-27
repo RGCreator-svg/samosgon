@@ -96,16 +96,18 @@
       </div>
       <button id="sleepButton" type="button">🌙 Лечь спать</button>
     </section>
-<section class="panel warehouse-panel">
-  <h2>📦 Склад хозяйства</h2>
-  <p>Все запасы под рукой. Главное — не забыть, куда положили.</p>
-
-  <div id="warehouseItems" class="warehouse-grid"></div>
-
-  <p class="warehouse-total">
-    Всего на складе: <b id="warehouseTotal">0</b> шт.
-  </p>
-</section>
+<details class="panel warehouse-panel">
+  <summary class="warehouse-summary">
+    <span class="warehouse-summary-title">📦 Склад хозяйства</span>
+    <span class="warehouse-summary-count">Запасы: <b id="warehouseTotal">0</b></span>
+    <span class="warehouse-summary-hint">Открыть склад ▾</span>
+  </summary>
+  <div class="warehouse-toolbar">
+    <input id="warehouseSearch" type="search" placeholder="Найти товар…" aria-label="Поиск по складу">
+    <label><input id="warehouseShowEmpty" type="checkbox"> Показать пустые позиции</label>
+  </div>
+  <div id="warehouseItems" class="warehouse-groups"></div>
+</details>
 
     <section id="home" class="tab-content panel home-panel">
       <div class="homestead-scene" role="img" aria-label="Старый деревенский дом, сад и огород">
