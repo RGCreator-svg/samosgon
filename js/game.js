@@ -107,13 +107,12 @@ $("#startGame")?.addEventListener("click", () => {
   notify("Бабушкин дом ждёт. Кажется, он даже немного осел от радости.");
 });
 
-// При загрузке сохранённой игры
-if (state.gameStarted) {
-  showGame();
-} else {
-  $("#intro")?.classList.remove("hidden");
-  $("#game")?.classList.add("hidden");
-}
+// Каждый запуск начинается с титульного экрана. Сохранение загружается,
+// но игрок сам решает, когда перейти к хозяйству.
+$("#intro")?.classList.remove("hidden");
+$("#game")?.classList.add("hidden");
+const startButton = $("#startGame");
+if (startButton && state.gameStarted) startButton.textContent = "Продолжить хозяйство";
 
 // Единый делегированный обработчик работает и для вкладок,
  // которые подключаются динамически отдельными игровыми модулями.
