@@ -45,11 +45,15 @@ try{
   assert.ok(imageLoaded,"Squash.png pumpkin asset failed to load");
   assert.ok(await page.locator(".navigation button[data-tab]").count()>=10,"Top navigation did not include dynamic game sections");
   assert.equal(await page.locator(".prototype-side .side-btn").count(),3,"Prototype must show Achievements, Tasks and Goals shortcuts");
-  assert.match(await page.locator(".prototype-side").innerText(),/Достижения[\\s\\S]*Задания[\\s\\S]*Цели/,"Side shortcuts are not in the expected order");
+  assert.match(await page.locator(".prototype-side").innerText(),/Достижения[\s\S]*Задания[\s\S]*Цели/,"Side shortcuts are not in the expected order");
   assert.ok(await page.locator(".player-profile").isVisible(),"Player avatar/profile HUD is missing");
   assert.ok(await page.locator(".player-profile #xpBar").count()===1,"XP progress must be shown inside player profile");
   assert.ok(await page.locator("#wellDevelopmentAction").isVisible(),"Well development task is missing");
   assert.match(await page.locator("#wellDevelopmentDetails").innerText(),/пиломатериалы|инструмент/i,"Well digging requirements are not displayed");
+  await page.locator('.prototype-bottom [data-tab="productionHub"]').click();
+  assert.equal(await page.locator("#productionHub").evaluate(el=>el.classList.contains("hidden")),false,"Production shortcut did not open the production dispatcher");
+  assert.ok(await page.locator("#productionHub").innerText().then(text=>text.includes("Производственный центр")),"Production dispatcher did not render");
+  await page.locator('.navigation [data-tab="home"]').click();
   const cartToggle=page.locator("#cartToggle");
   await cartToggle.waitFor({state:"visible"});
   assert.ok(await cartToggle.locator("img").evaluate(img=>img.complete&&img.naturalWidth>0),"Cart illustration failed to load");
