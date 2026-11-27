@@ -65,9 +65,9 @@ export function calculateDistillationResult(state){
   const equipmentBonus=(Number(state.equipmentTier)||0)*4;
   const baseQuality=Number(state.bragaQuality)||55;
   const artisan=state.specialization==="artisan"?8:0;
-  const quality=Math.max(20,Math.min(100,Math.round(baseQuality+(Number(state.distillation.qualityPoints)||0)+artisan+equipmentBonus+profile.quality+coolingBonus+(Number(state.lab?.qualityBonus)||0)+(Number(state.story?.petrovichQualityBonus)||0))));
+  const quality=Math.max(20,Math.min(100,Math.round(baseQuality+(Number(state.distillation.qualityPoints)||0)+artisan+equipmentBonus+profile.quality+Math.min(5,Number(profile.stability)||0)+coolingBonus+(Number(state.lab?.qualityBonus)||0)+(Number(state.story?.petrovichQualityBonus)||0))));
   const output=Math.max(1,Math.round((2+(Number(state.distillation.outputPoints)||0)+profile.output)*(Number(state.processCenter?.outputMultiplier)||1)));
-  return {quality,output,stillMode:profile.mode,flavour:profile.flavour};
+  return {quality,output,stillMode:profile.mode,flavour:profile.flavour,stability:profile.stability,maintenanceSave:profile.wear};
 }
 
 function renderDistillation(s, root) {
@@ -166,7 +166,7 @@ export function initFeaturePack(s,{render,notify,earnExperience}) {
         const outcome=calculateDistillationResult(s);
         s.distillation={...s.distillation,active:false,phase:null,quality:outcome.quality,result:outcome.output,stillMode:outcome.stillMode,flavour:outcome.flavour};
         const owned=new Set(s.equipmentModules||[]);
-        s.maintenance=Math.max(0,(Number(s.maintenance)||100)-(owned.has("safety_monitor")?1:3));
+        s.maintenance=Math.max(0,(Number(s.maintenance)||100)-Math.max(0,(owned.has("safety_monitor")?1:3)+(Number(outcome.maintenanceSave)||0)));
         s.story??={};s.story.petrovichQualityBonus=0;
         notify("Перегонка завершена: "+outcome.output+" ед., качество "+outcome.quality+"/100. Состояние установки: "+s.maintenance+"%.");
         earnExperience(14);
