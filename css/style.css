@@ -3094,3 +3094,16 @@ body { margin:0; font-family:"Segoe UI", "Comic Sans MS", sans-serif; background
   .prototype-shortcuts { gap:3px; }
   .prototype-shortcuts button { min-width:42px; min-height:48px; padding:3px; font-size:8px; }
 }
+
+/* Prototype spacing refinements */
+#game .needs { display:none !important; }
+#game .navigation { top:128px; }
+#game .tab-content:not(.hidden) { top:235px; }
+@media(max-width:900px) {
+  #game .navigation { top:102px; }
+  #game .tab-content:not(.hidden) { top:210px; }
+}
+@media(max-width:560px) {
+  #game .navigation { top:94px; }
+  #game .tab-content:not(.hidden) { top:218px; }
+}
