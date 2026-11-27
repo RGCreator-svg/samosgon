@@ -48,7 +48,7 @@ export function consumeQualityLots(state,itemId,quantity=1){
 export function consumeQualityForSale(state,itemId,quantity=1){
   const need=Math.max(1,Math.floor(Number(quantity)||1));
   if(!Array.isArray(state.qualityLots))state.qualityLots=[];
-  let remaining=need,weighted=0,tracked=0;
+  let remaining=need,weighted=0,tracked=0,brandWeighted=0;
   // Склад продаётся по FIFO: старые (в том числе без паспорта) остатки уходят первыми.
   for(const lot of state.qualityLots){
     if(lot.item!==itemId||remaining<=0)continue;
@@ -57,7 +57,7 @@ export function consumeQualityForSale(state,itemId,quantity=1){
     if(lot.quality!==null&&lot.quality!==undefined&&Number.isFinite(Number(lot.quality))){
       weighted+=take*Number(lot.quality);tracked+=take;
       const passport=state.productionLog?.find(entry=>entry.passport?.id===lot.passportId)?.passport;
-      if(passport){passport.remaining=Math.max(0,(Number(passport.remaining??passport.amount)||0)-take);passport.sold=(Number(passport.sold)||0)+take;}
+      if(passport){passport.remaining=Math.max(0,(Number(passport.remaining??passport.amount)||0)-take);passport.sold=(Number(passport.sold)||0)+take;brandWeighted+=take*(Number(passport.brandBonus)||0);}
     }
     lot.remaining-=take;remaining-=take;
   }
@@ -65,8 +65,9 @@ export function consumeQualityForSale(state,itemId,quantity=1){
   if(!tracked)return {hasPassport:false,quality:null,multiplier:1,reputationDelta:0,grade:null,untracked:need};
   const trackedQuality=Math.round(weighted/tracked);
   const quality=Math.round((weighted+(need-tracked)*60)/need),grade=qualityGrade(quality);
-  const multiplier=Math.max(.8,Math.min(1.2,1+(quality-60)*.005));
+  const brandBonus=brandWeighted/Math.max(1,tracked)/100;
+  const multiplier=Math.max(.8,Math.min(1.3,1+(quality-60)*.005+brandBonus));
   const reputationDelta=trackedQuality>=92?1:trackedQuality>=82?.5:trackedQuality<35?-1:0;
   if(reputationDelta)state.reputation=Math.max(-100,Math.min(100,(Number(state.reputation)||0)+reputationDelta));
-  return {hasPassport:true,quality,trackedQuality,multiplier,covered:tracked,untracked:need-tracked,grade,reputationDelta};
+  return {hasPassport:true,quality,trackedQuality,multiplier,brandBonus,covered:tracked,untracked:need-tracked,grade,reputationDelta};
 }
