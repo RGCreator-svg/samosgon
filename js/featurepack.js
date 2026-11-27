@@ -92,7 +92,7 @@ function renderFarms(s,root) {
 }
 export function renderFeaturePack(s) {
   ensure(s); const root=$("#featurePack"); if(!root)return; root.replaceChildren();
-  const intro=el("p","feature-intro","Новые технологические системы: качество продукции, специализация, рыночная конъюнктура, выдержка и развитие фермы.");root.append(intro);
+  const intro=el("p","feature-intro","Винокурня и бродильня: готовь сахарную, фруктовую и зерновую брагу, контролируй перегонку, выдерживай дистиллят и развивай оборудование.");root.append(intro);
   renderMashHouse(s,root); renderDistillation(s,root); renderSpecialization(s,root); renderMarket(s,root); renderAging(s,root); renderFarms(s,root);
 }
 export function initFeaturePack(s,{render,notify,earnExperience}) {
