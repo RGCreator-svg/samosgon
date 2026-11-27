@@ -106,6 +106,16 @@ export const ITEMS = [
   ,{id:"raspberry_tincture",name:"Малиновая настойка",emoji:"🍷",price:122,description:"Игровая настойка с ярким ягодным профилем."}
   ,{id:"blueberry_tincture",name:"Черничная настойка",emoji:"🍷",price:128,description:"Игровая настойка из лесной черники."}
   ,{id:"forest_tincture",name:"Лесная настойка",emoji:"🍷",price:148,description:"Авторский ягодный купаж из нескольких видов ягод."}
+,{id:"mint",name:"Мята",emoji:"🌿",price:18,description:"Свежая трава для игровых настоек."}
+,{id:"st_johns_wort",name:"Зверобой",emoji:"🌼",price:22,description:"Летняя трава для травяных купажей."}
+,{id:"thyme",name:"Чабрец",emoji:"🌱",price:24,description:"Пряная трава для авторских настоек."}
+,{id:"linden",name:"Липовый цвет",emoji:"🌸",price:26,description:"Цветочный компонент игровых настоек."}
+,{id:"rosehip",name:"Шиповник",emoji:"🌹",price:23,description:"Осенние плоды для мягких настоек."}
+,{id:"juniper",name:"Можжевельник",emoji:"🫒",price:32,description:"Хвойная ягода для пряного профиля."}
+,{id:"mint_tincture",name:"Мятная настойка",emoji:"🍃",price:132,description:"Игровая настойка с освежающим травяным профилем."}
+,{id:"meadow_tincture",name:"Луговая настойка",emoji:"🌼",price:154,description:"Авторский травяной купаж с цветочными нотами."}
+,{id:"juniper_tincture",name:"Можжевеловая настойка",emoji:"🫒",price:168,description:"Пряная игровая настойка с хвойным характером."}
+,{id:"rosehip_tincture",name:"Шиповниковая настойка",emoji:"🌹",price:142,description:"Осенняя настойка с мягким фруктовым профилем."}
 ];
 
 export const SKILL_BRANCHES = [
@@ -139,6 +149,13 @@ export const SKILL_BRANCHES = [
         description: "Открывает ягодник, посадку кустов и выращивание ягод для настоек.",
         cost: 1,
         requires: "orchard_lore"
+      ,
+      {
+        id: "herb_gardening",
+        name: "Травник",
+        description: "Открывает выращивание ароматных трав и пряностей в ягоднике.",
+        cost: 1,
+        requires: "berry_growing"
       }
     ]
   },
@@ -187,7 +204,9 @@ export const SKILL_BRANCHES = [
     name: "🍓 Настойки и наливки",
     skills: [
       { id:"infusion_basics", name:"Домашние настойки", description:"Открывает игровые партии ягодных настоек.", cost:1 },
-      { id:"berry_blending", name:"Лесной купаж", description:"Открывает авторскую настойку из нескольких ягод и повышает её качество.", cost:2, requires:"infusion_basics" }
+      { id:"berry_blending", name:"Лесной купаж", description:"Открывает авторскую настойку из нескольких ягод и повышает её качество.", cost:2, requires:"infusion_basics" },
+      { id:"herbal_infusions", name:"Травяные сборы", description:"Открывает настойки на травах, цветах и пряных ягодах.", cost:2, requires:"infusion_basics" },
+      { id:"spice_craft", name:"Пряная коллекция", description:"Открывает можжевеловую настойку и повышает ценность пряных партий.", cost:2, requires:"herbal_infusions" }
     ]
   },
   {
