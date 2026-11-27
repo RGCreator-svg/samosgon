@@ -3250,3 +3250,74 @@ body { margin:0; font-family:"Segoe UI", "Comic Sans MS", sans-serif; background
 @media(max-width:900px) {
   #game .tab-content:not(.hidden) ~ .event-console { visibility:hidden; pointer-events:none; }
 }
+
+
+/* REV 8 — slim XP indicator, bottom dock, readable title screen */
+#game .homestead-resource-bar { align-items:center; gap:8px; }
+#game .xp-panel {
+  display:flex; flex-direction:column; justify-content:center; gap:3px;
+  flex:0 1 178px; width:178px; min-width:112px; margin:0 0 0 4px;
+  padding:4px 8px; border:1px solid #756342; border-radius:8px;
+  background:#20251c; box-shadow:inset 0 1px 3px #0005;
+}
+#game .xp-heading { align-items:center; justify-content:space-between; gap:5px; margin:0; color:#d9c18b; font-size:10px; line-height:1.2; white-space:nowrap; }
+#game .xp-heading span:first-child { color:#b8c68b; font-weight:800; letter-spacing:.08em; }
+#game .xp-heading b { font-size:10px; font-variant-numeric:tabular-nums; }
+#game .xp-track { height:5px; border:0; border-radius:8px; background:#10140f; }
+#game .xp-track div { background:linear-gradient(90deg,#849d53,#e0bd69); }
+.game-footer-dock {
+  position:fixed; z-index:55; left:0; right:0; bottom:0;
+  display:flex; align-items:flex-end; gap:14px;
+  min-height:104px; padding:8px clamp(10px,2vw,28px) max(8px,env(safe-area-inset-bottom));
+  background:linear-gradient(0deg,#172018f5 0%,#202c20ed 72%,#202c2099 100%);
+  border-top:1px solid #66744f; box-shadow:0 -8px 24px #0005;
+}
+#game .pumpkin-console-anchor {
+  position:relative; inset:auto; z-index:1; flex:0 0 104px;
+  width:104px; height:88px; display:flex; align-items:flex-end; justify-content:center;
+  pointer-events:none;
+}
+#game .pumpkin-mascot { width:100px; height:82px; margin:0; pointer-events:auto; }
+#game .pumpkin-mascot img { width:82px; height:78px; object-fit:contain; }
+#game .pumpkin-bubble { bottom:74px; left:50%; max-width:220px; width:max-content; font-size:11px; }
+#game .event-console {
+  position:relative; inset:auto; z-index:1; flex:1 1 360px;
+  width:auto; max-width:560px; max-height:88px; min-width:0;
+  display:flex; flex-direction:column; overflow:hidden; margin:0 0 0 auto;
+  padding:0; border:1px solid #526347; border-radius:9px;
+  background:#111710ed; box-shadow:0 3px 12px #0004;
+}
+#game .event-console h2 { flex:0 0 auto; margin:0; padding:4px 9px; font-size:10px; }
+#game #notifications { flex:1 1 auto; min-height:0; max-height:62px; overflow:auto; padding:4px 9px; font-size:9px; }
+#game .tab-content:not(.hidden) { max-height:calc(100vh - 350px); }
+#game .warehouse-panel { bottom:120px; }
+#game .prototype-bottom { bottom:104px; }
+@media(max-width:900px) {
+  #game .xp-panel { flex-basis:145px; width:145px; }
+  .game-footer-dock { min-height:94px; gap:8px; padding:6px 10px max(6px,env(safe-area-inset-bottom)); }
+  #game .pumpkin-console-anchor { position:relative; inset:auto; flex-basis:82px; width:82px; height:76px; }
+  #game .pumpkin-mascot { width:80px; height:72px; }
+  #game .pumpkin-mascot img { width:68px; height:68px; }
+  #game .pumpkin-bubble { bottom:66px; max-width:170px; font-size:9px; }
+  #game .event-console { display:flex; position:relative; inset:auto; width:auto; max-width:none; max-height:78px; }
+  #game #notifications { max-height:54px; }
+  #game .tab-content:not(.hidden) { max-height:calc(100vh - 330px); }
+  #game .warehouse-panel { bottom:108px; }
+}
+@media(max-width:560px) {
+  #game .homestead-resource-bar { justify-content:center; gap:5px; }
+  #game .hud-chip { padding:4px 6px; font-size:10px; }
+  #game .xp-panel { flex:1 1 100%; width:100%; min-width:0; margin:1px 0 0; padding:3px 7px; }
+  #game .xp-heading { font-size:9px; }
+  .game-footer-dock { min-height:82px; gap:5px; padding:4px 6px max(4px,env(safe-area-inset-bottom)); }
+  #game .pumpkin-console-anchor { flex:0 0 60px; width:60px; height:64px; }
+  #game .pumpkin-mascot { width:60px; height:60px; }
+  #game .pumpkin-mascot img { width:55px; height:56px; }
+  #game .pumpkin-bubble { bottom:54px; max-width:125px; padding:3px 5px; font-size:8px; }
+  #game .event-console { max-height:70px; border-radius:7px; }
+  #game .event-console h2 { padding:3px 6px; font-size:8px; }
+  #game #notifications { max-height:48px; padding:3px 6px; font-size:8px; }
+  #game .tab-content:not(.hidden) { max-height:calc(100vh - 340px); }
+  #game .warehouse-panel { bottom:92px; }
+  #game .prototype-bottom { bottom:82px; }
+}
