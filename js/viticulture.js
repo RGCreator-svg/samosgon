@@ -8,6 +8,8 @@ const SUPPLIES = [
   { id:"grapes", name:"Виноград", emoji:"🍇", price:18, desc:"Свежее винодельческое сырьё." },
   { id:"apple", name:"Яблоки для сидра", emoji:"🍎", price:15, desc:"Сырьё для сидра и фруктового вина." },
   { id:"pear", name:"Груши для вина", emoji:"🍐", price:18, desc:"Сырьё для грушевого вина и купажей." },
+  { id:"sugar", name:"Сахар", emoji:"🧂", price:10, desc:"Базовое сырьё для классической партии браги." },
+  { id:"grain", name:"Зерно", emoji:"🌾", price:14, desc:"Сырьё для отдельной зерновой линии брожения." },
   { id:"honey", name:"Мёд", emoji:"🍯", price:28, desc:"Для медовухи и медовой браги." },
   { id:"yeast", name:"Винные дрожжи", emoji:"🧫", price:16, desc:"Игровой ингредиент для брожения." },
   { id:"bottles", name:"Пустые бутылки", emoji:"🍾", price:7, desc:"Тара для готовой продукции." },
@@ -66,7 +68,7 @@ function render(s) {
     b.append(line);
   });
 
-  const supply=card(root,"🧺 Поставщик сырья и тары","Закупайте виноград, мёд, дрожжи и тару. Повторные позиции объединяются в общей корзине.");
+  const supply=card(root,"🧺 Поставщик сырья и тары","Закупайте сырьё для браги, виноделия и медоварения. Повторные позиции объединяются в общей корзине.");
   const grid=el("div","economy-grid");
   SUPPLIES.forEach(item=>{
     const c=el("article","economy-card");
@@ -103,7 +105,7 @@ function render(s) {
   if(!s.viticulture.batches.length)batches.append(el("p","economy-empty","Пока нет активных партий."));
   s.viticulture.batches.forEach(job=>{const row=el("div","aging-row",job.name+" · "+(job.ready?"готово к сбору":(job.stage==="aging"?"выдержка":"брожение")+" · осталось "+job.remaining+" дн."));if(job.ready){const collect=el("button","","Забрать продукцию");collect.dataset.vitiCollect=String(job.id);row.append(collect);}batches.append(row);});
   const stock=card(root,"📦 Запасы винодельни","Виноград и мёд с собственных хозяйств попадают сюда же, что и купленные партии.");
-  const stockNames={grapes:"Виноград",apple:"Яблоки",pear:"Груши",honey:"Мёд",yeast:"Дрожжи",yeast_nutrient:"Питательная добавка",water:"Вода",bottles:"Бутылки",corks:"Пробки",wine:"Вино",mead:"Медовуха",apple_cider:"Яблочный сидр",pear_wine:"Грушевое вино",fruit_wine:"Фруктовое вино",honey_braga:"Медовая брага",honey_spirit:"Медовый дистиллят"};Object.entries(stockNames).forEach(([id,name])=>stock.append(el("p","economy-detail",name+": "+(s.inventory[id]||0))));
+  const stockNames={sugar:"Сахар",grain:"Зерно",grapes:"Виноград",apple:"Яблоки",pear:"Груши",honey:"Мёд",yeast:"Дрожжи",yeast_nutrient:"Питательная добавка",water:"Вода",bottles:"Бутылки",corks:"Пробки",wine:"Вино",mead:"Медовуха",apple_cider:"Яблочный сидр",pear_wine:"Грушевое вино",fruit_wine:"Фруктовое вино",honey_braga:"Медовая брага",honey_spirit:"Медовый дистиллят"};Object.entries(stockNames).forEach(([id,name])=>stock.append(el("p","economy-detail",name+": "+(s.inventory[id]||0))));
 }
 
 export function initViticulture(s,{render:renderGame,notify}) {
