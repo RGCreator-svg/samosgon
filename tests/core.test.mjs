@@ -427,3 +427,31 @@ test("herbal laboratory discovers a profile, records a passport and reproduces i
  assert.ok(passport);assert.equal(passport.recipeId,"herb_mint");assert.equal(passport.ratio,"2:1");
  assert.ok(xp>0);assert.ok(notices.length>=2);
 });
+
+
+test("tincture blending creates distinct signature products with weighted flavor passports",()=>{
+ const state=createInitialState();state.money=500;
+ state.inventory={blackcurrant_tincture:4,raspberry_tincture:3,mint_tincture:4,juniper_tincture:3,meadow_tincture:4,rosehip_tincture:3};
+ state.qualityLots=[
+  {item:"blackcurrant_tincture",remaining:4,quality:90,passportId:"bc"},
+  {item:"raspberry_tincture",remaining:3,quality:86,passportId:"ra"},
+  {item:"mint_tincture",remaining:4,quality:92,passportId:"mi"},
+  {item:"juniper_tincture",remaining:3,quality:88,passportId:"ju"},
+  {item:"meadow_tincture",remaining:4,quality:89,passportId:"me"},
+  {item:"rosehip_tincture",remaining:3,quality:91,passportId:"ro"}
+ ];
+ state.productionLog=[
+  ...[["bc",["смородина"],76,88],["ra",["малина"],68,91],["mi",["мята"],58,92],["ju",["можжевельник"],84,90],["me",["луговые травы"],66,89],["ro",["шиповник"],74,84]].map(([id,notes,body,aroma])=>({passport:{id,flavorProfile:{notes,body,aroma}}}))
+ ];
+ const berry=blendBatch(state,"berry_tincture_blend",recordProduction,{a:3,b:2});
+ assert.ok(berry);assert.equal(berry.recipe.item,"berry_reserve_tincture");assert.equal(state.inventory.berry_reserve_tincture,4);
+ assert.ok(berry.profile.notes.includes("ягодный бархат"));
+ const passport=state.productionLog.find(x=>x.passport?.product==="berry_reserve_tincture").passport;
+ assert.equal(passport.type,"signature");assert.ok(passport.flavorProfile.aroma>70);
+ const herb=blendBatch(state,"herbal_tincture_blend",recordProduction,{a:2,b:1});
+ assert.ok(herb);assert.equal(state.inventory.herbal_spice_tincture,2);
+ state.blendStandards??={};state.blendStandards.berry_tincture_blend={a:3,b:2,quality:berry.score,passportId:berry.passportId};
+ assert.equal(state.blendStandards.berry_tincture_blend.a,3);
+ const meadow=blendBatch(state,"meadow_tincture_blend",recordProduction,{a:2,b:1});
+ assert.ok(meadow);assert.equal(state.inventory.meadow_reserve_tincture,2);
+});
