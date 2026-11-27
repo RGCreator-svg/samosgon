@@ -98,8 +98,8 @@ export function initFeaturePack(s,{render,notify,earnExperience}) {
   ensure(s);
   const nav=$(".navigation"), game=$("#game"); if(!nav||!game)return;
   if(!$("#featurePack")) {
-    const tab=btn("🧭 Технологии","tab","featurePack");tab.dataset.tab="featurePack";nav.append(tab);
-    const section=el("section","tab-content panel hidden");section.id="featurePack";game.append(section);
+    const tab=btn("⚗️ Винокурня","tab","featurePack");tab.dataset.tab="featurePack";nav.append(tab);
+    const section=el("section","tab-content panel hidden");section.id="featurePack";section.innerHTML="<h2>⚗️ Винокурня и производство</h2><p class=\"feature-meta\">Главный производственный цикл: сырьё → брага → перегонка → выдержка → готовый продукт.</p>";game.append(section);
   }
     registerCartHandler("farmUpgrade",(current,item)=>{const farm=FARMS.find(x=>x.id===item.payload?.id);if(farm&&!current.farmUpgrades.includes(farm.id)){current.farmUpgrades.push(farm.id);earnExperience(20);}});
   registerCartHandler("barrelAging",(current,item)=>{if((current.barrelAging||[]).length<3){const input=item.payload?.inputItem||"spirit";current.barrelAging.push({remaining:3,quality:Math.max(45,Number(current.distillation.quality)||65),ready:false,inputItem:input,outputItem:input==="honey_spirit"?"aged_honey_spirit":"aged_spirit"});}});
