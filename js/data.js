@@ -98,6 +98,14 @@ export const ITEMS = [
   ,{id:"house_blend",name:"Деревенский купаж",emoji:"🥃",price:92,description:"Смешанная партия с собственным паспортом качества."}
   ,{id:"orchard_blend",name:"Садовый купаж",emoji:"🍎",price:108,description:"Купаж с подчёркнутым фруктовым профилем."}
   ,{id:"honey_blend",name:"Медовый резерв",emoji:"🍯",price:118,description:"Выдержанный купаж с медовыми нотами."}
+  ,{id:"blackcurrant",name:"Чёрная смородина",emoji:"🫐",price:22,description:"Ягода собственного ягодника для насыщенных игровых настоек."}
+  ,{id:"raspberry",name:"Малина",emoji:"🍓",price:24,description:"Ароматная ягода для сезонных настоек."}
+  ,{id:"blueberry",name:"Черника",emoji:"🫐",price:26,description:"Лесная ягода для мягкого ягодного профиля."}
+  ,{id:"cranberry",name:"Клюква",emoji:"🔴",price:20,description:"Осенняя ягода для терпких игровых настоек."}
+  ,{id:"blackcurrant_tincture",name:"Смородиновая настойка",emoji:"🍷",price:116,description:"Игровая настойка из ягод собственного урожая."}
+  ,{id:"raspberry_tincture",name:"Малиновая настойка",emoji:"🍷",price:122,description:"Игровая настойка с ярким ягодным профилем."}
+  ,{id:"blueberry_tincture",name:"Черничная настойка",emoji:"🍷",price:128,description:"Игровая настойка из лесной черники."}
+  ,{id:"forest_tincture",name:"Лесная настойка",emoji:"🍷",price:148,description:"Авторский ягодный купаж из нескольких видов ягод."}
 ];
 
 export const SKILL_BRANCHES = [
@@ -122,6 +130,13 @@ export const SKILL_BRANCHES = [
         id: "big_harvest",
         name: "Богатый урожай",
         description: "Сбор овощей и фруктов становится прибыльнее.",
+        cost: 1,
+        requires: "orchard_lore"
+      },
+      {
+        id: "berry_growing",
+        name: "Ягодное дело",
+        description: "Открывает ягодник, посадку кустов и выращивание ягод для настоек.",
         cost: 1,
         requires: "orchard_lore"
       }
@@ -165,6 +180,14 @@ export const SKILL_BRANCHES = [
       { id: "cider_making", name: "Сидроделие", description: "Открывает производство яблочного сидра.", cost: 1, requires: "cellar_aging" },
       { id: "pear_wine", name: "Грушевое виноделие", description: "Открывает отдельные партии грушевого вина.", cost: 1, requires: "cellar_aging" },
       { id: "fruit_winemaking", name: "Фруктовые купажи", description: "Открывает производство купажированного вина из яблок и груш.", cost: 2, requires: "pear_wine" }
+    ]
+  },
+  {
+    id: "infusions",
+    name: "🍓 Настойки и наливки",
+    skills: [
+      { id:"infusion_basics", name:"Домашние настойки", description:"Открывает игровые партии ягодных настоек.", cost:1 },
+      { id:"berry_blending", name:"Лесной купаж", description:"Открывает авторскую настойку из нескольких ягод и повышает её качество.", cost:2, requires:"infusion_basics" }
     ]
   },
   {
