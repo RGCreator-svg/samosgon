@@ -2777,3 +2777,199 @@ body {
 .game-world canvas { cursor: default; }
 .nav-group button { min-height: 42px; }
 @media (max-width: 700px) { .game-world canvas { max-height: 220px; } }
+
+
+/* REV 5 — полноэкранная компоновка и единая навигация */
+html, body { min-height:100%; }
+body { min-height:100vh; }
+#game-layout {
+  width:100%;
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:minmax(0,1fr);
+  gap:0;
+  padding:0;
+  margin:0;
+}
+#game-layout:has(#game.hidden) { display:none; }
+#game-layout #game {
+  width:100%;
+  max-width:none;
+  min-width:0;
+  min-height:100vh;
+  margin:0;
+  padding:clamp(12px,1.7vw,28px) clamp(14px,2.4vw,38px) 36px;
+}
+#game .topbar {
+  display:grid;
+  grid-template-columns:minmax(220px,1fr) auto;
+  align-items:center;
+  gap:12px 24px;
+  width:100%;
+}
+#game .topbar > div:first-child { min-width:0; }
+#game .homestead-resource-bar { justify-content:flex-end; min-width:0; }
+#game .xp-panel { grid-column:1/-1; margin:0; }
+#game .navigation {
+  position:relative;
+  top:auto;
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  align-items:start;
+  gap:10px;
+  width:100%;
+  overflow:visible;
+  padding:12px;
+  margin:14px 0 18px;
+}
+#game .navigation .nav-group {
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:7px;
+  min-width:0;
+  padding:7px;
+  border:1px solid #c09a6266;
+  border-radius:10px;
+  background:#241d16aa;
+}
+#game .navigation .nav-group-title {
+  display:block;
+  min-height:1.6em;
+  padding:0 4px 5px;
+  border-bottom:1px solid #a9825055;
+  color:#e4c58e;
+  font-size:.72rem;
+  line-height:1.3;
+  white-space:normal;
+}
+#game .navigation .nav-group button {
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  flex:0 0 auto;
+  width:100%;
+  min-width:0;
+  min-height:40px;
+  padding:8px 10px;
+  white-space:normal;
+  overflow-wrap:anywhere;
+  line-height:1.2;
+  font-size:.9rem;
+  text-align:left;
+}
+#game .game-world {
+  min-height:clamp(250px,34vh,440px);
+  margin:14px 0 18px;
+}
+#game .game-world canvas {
+  width:100%!important;
+  height:auto!important;
+  max-height:none;
+}
+#game .advice-drawer {
+  margin:18px 0;
+  padding:0;
+  overflow:hidden;
+  background:linear-gradient(145deg,#383025,#22251e);
+}
+.advice-drawer > summary {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:15px 18px;
+  color:#f0d49a;
+  font-weight:800;
+  cursor:pointer;
+  list-style:none;
+}
+.advice-drawer > summary::-webkit-details-marker { display:none; }
+.advice-drawer > summary::after { content:"＋"; margin-left:auto; color:#e6c58a; font-size:1.2rem; }
+.advice-drawer[open] > summary::after { content:"−"; }
+.advice-drawer > summary span { color:#bdb095; font-size:.8rem; font-weight:400; }
+.advice-drawer-grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  padding:0 14px 14px;
+}
+.advice-drawer-grid .game-advisor {
+  position:static;
+  margin:0;
+  padding:14px;
+  min-width:0;
+}
+.advice-drawer-grid .advisor-art { min-height:110px; }
+#game .event-console {
+  position:relative;
+  overflow:hidden;
+  margin:22px 0 0;
+  padding:0;
+  border:1px solid #60734f;
+  border-radius:12px;
+  background:#111710;
+  box-shadow:inset 0 0 0 1px #ffffff0a,0 8px 22px #0006;
+}
+#game .event-console h2 {
+  min-height:42px;
+  margin:0;
+  padding:10px 15px;
+  border-bottom:1px solid #526347;
+  background:linear-gradient(180deg,#303d2d,#202a20);
+  color:#d5e0bd;
+  font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+  font-size:.9rem;
+  letter-spacing:.04em;
+}
+#game .event-console h2::before {
+  width:9px;height:9px;border-radius:50%;
+  background:#8cc66b;box-shadow:0 0 10px #8cc66b;
+}
+#notifications {
+  display:flex;
+  flex-direction:column;
+  gap:0;
+  max-height:260px;
+  overflow:auto;
+  padding:10px 14px 14px;
+  border:0;
+  border-radius:0;
+  background:
+    repeating-linear-gradient(180deg,#121a12 0,#121a12 25px,#172017 26px);
+  color:#c8d6b7;
+  font: .82rem/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;
+}
+#game .event-console .notification {
+  position:relative;
+  padding:5px 8px 5px 28px;
+  border:0;
+  border-bottom:1px solid #263326;
+  border-left:0;
+  border-radius:0;
+  background:transparent;
+  color:#c8d6b7;
+  font:inherit;
+}
+#game .event-console .notification::before {
+  content:">";
+  position:absolute;
+  left:8px;
+  color:#8ebc69;
+}
+@media(max-width:900px) {
+  #game .topbar { grid-template-columns:1fr; }
+  #game .homestead-resource-bar { justify-content:flex-start; margin-left:0; }
+  #game .navigation { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:560px) {
+  #game-layout #game { padding:10px 10px 24px; }
+  #game .navigation { grid-template-columns:1fr; gap:8px; }
+  #game .navigation .nav-group { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); }
+  #game .navigation .nav-group-title { grid-column:1/-1; }
+  #game .navigation .nav-group button { min-height:42px; font-size:.84rem; }
+  .advice-drawer-grid { grid-template-columns:1fr; }
+  .advice-drawer > summary { align-items:flex-start; flex-wrap:wrap; }
+  .advice-drawer > summary span { width:100%; }
+  #game .game-world { min-height:190px; }
+}
