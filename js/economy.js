@@ -495,6 +495,8 @@ export function initEconomy(state, { render, notify }) {
       state.purchaseCart = [];
       purchases.forEach(item => CART_HANDLERS.get(item.kind)?.(state, item));
       notify("Общая корзина оплачена. Все покупки проведены одним платежом.");
+      $("#sharedPurchaseCart")?.classList.remove("is-open");
+      $("#cartToggle")?.setAttribute("aria-expanded", "false");
     }
 
     if (action === "order") {
