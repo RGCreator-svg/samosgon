@@ -44,7 +44,12 @@ try{
   const imageLoaded=await pumpkin.evaluate(img=>img.complete&&img.naturalWidth>0);
   assert.ok(imageLoaded,"Squash.png pumpkin asset failed to load");
   assert.ok(await page.locator(".navigation button[data-tab]").count()>=10,"Top navigation did not include dynamic game sections");
-  assert.equal(await page.locator(".prototype-side .side-btn").count(),0,"Duplicate side shortcuts should be removed");
+  assert.equal(await page.locator(".prototype-side .side-btn").count(),3,"Prototype must show Achievements, Tasks and Goals shortcuts");
+  assert.match(await page.locator(".prototype-side").innerText(),/Достижения[\\s\\S]*Задания[\\s\\S]*Цели/,"Side shortcuts are not in the expected order");
+  assert.ok(await page.locator(".player-profile").isVisible(),"Player avatar/profile HUD is missing");
+  assert.ok(await page.locator(".player-profile #xpBar").count()===1,"XP progress must be shown inside player profile");
+  assert.ok(await page.locator("#wellDevelopmentAction").isVisible(),"Well development task is missing");
+  assert.match(await page.locator("#wellDevelopmentDetails").innerText(),/пиломатериалы|инструмент/i,"Well digging requirements are not displayed");
   const cartToggle=page.locator("#cartToggle");
   await cartToggle.waitFor({state:"visible"});
   assert.ok(await cartToggle.locator("img").evaluate(img=>img.complete&&img.naturalWidth>0),"Cart illustration failed to load");
@@ -66,6 +71,7 @@ try{
   await page.locator("#repairGarden").click();
   assert.match(await page.locator("#materialCart").innerText(),/Пиломатериалы|Крепёж/i,"Garden clearing materials were not queued");
   assert.doesNotMatch(await page.locator("#materialCart").innerText(),/Расчистка огорода/,"Garden service leaked into the material cart");
+  await cartToggle.click();
   await page.locator("#materialCart [data-economy-action='pay']").click();
   await page.locator("#harvestVegetables").click();
 
@@ -73,6 +79,7 @@ try{
   await page.locator("#restoreOrchard").click();
   assert.match(await page.locator("#materialCart").innerText(),/Пиломатериалы|Инструмент|Крепёж/i,"Orchard restoration materials were not queued");
   assert.doesNotMatch(await page.locator("#materialCart").innerText(),/Восстановление сада/,"Orchard service leaked into the material cart");
+  await cartToggle.click();
   await page.locator("#materialCart [data-economy-action='pay']").click();
   await page.locator("#harvestFruit").click();
 
@@ -80,6 +87,7 @@ try{
   await page.locator("#repairStill").click();
   assert.match(await page.locator("#materialCart").innerText(),/Металлические заготовки|Инструмент|Крепёж/i,"Still repair materials were not queued");
   assert.doesNotMatch(await page.locator("#materialCart").innerText(),/Ремонт аппарата/,"Still service leaked into the material cart");
+  await cartToggle.click();
   await page.locator("#materialCart [data-economy-action='pay']").click();
 
   // Scene hotspots use the existing game's tab controller.
