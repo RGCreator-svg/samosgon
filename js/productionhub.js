@@ -73,7 +73,7 @@ function render(s) {
   const root = $("#productionHub");
   if (!root) return;
   root.replaceChildren();
-  root.append(el("p", "feature-intro", "Единый диспетчер: отслеживай партии браги, винодельни, перегонки и выдержки. Новые рецептуры и запуск нескольких чанов доступны во вкладке «Винокурня»."));
+  root.append(el("p", "feature-intro", "Единый диспетчер: отслеживай бродильню, независимые перегонные аппараты, винодельню, выдержку и готовую продукцию. Несколько аппаратов работают параллельно в производственном цехе."));
 
   const distillFocus = el("article","production-distill-focus");
   distillFocus.append(el("h3","","⚗️ Главное дело — самогоноварение"));
@@ -85,9 +85,9 @@ function render(s) {
       ? "Партия готова к сбору: "+s.distillation.result+" ед. · качество "+(s.distillation.quality||0)+"/100."
       : "Выбрана "+(mashNames[s.mashType]||"сахарная")+" брага. На складе: "+(s.inventory?.[mashItem]||0)+" ед. Для старта нужно 3 ед.";
   distillFocus.append(el("p","",focusText));
-  const distillButton=el("button","production-distill-button","Перейти в винокурню");
+  const distillButton=el("button","production-distill-button","Открыть производственный цех");
   distillButton.type="button";
-  distillButton.dataset.tab="featurePack";
+  distillButton.dataset.tab="productionPlant";
   distillFocus.append(distillButton);
   root.append(distillFocus);
 
