@@ -149,7 +149,7 @@ export const SKILL_BRANCHES = [
         description: "Открывает ягодник, посадку кустов и выращивание ягод для настоек.",
         cost: 1,
         requires: "orchard_lore"
-      ,
+      },
       {
         id: "herb_gardening",
         name: "Травник",
