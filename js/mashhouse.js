@@ -41,6 +41,19 @@ export function getMashCapacity(state) {
   return 2 + Math.max(0,Number(state.buildings?.production)||0) + (state.skills?.includes("clean_barrel") ? 1 : 0);
 }
 
+export function startMashBatch(state,recipeId) {
+  const recipe=MASH_RECIPES.find(entry=>entry.id===recipeId);
+  const house=ensureMashHouse(state);
+  if(!recipe||house.batches.length>=getMashCapacity(state))return false;
+  const days=Math.max(1,recipe.days-(state.skills?.includes("patient_master")?1:0));
+  house.batches.push({
+    id:house.nextId++,recipeId:recipe.id,name:recipe.name,
+    remaining:days,totalDays:days,stage:"fermentation",ready:false,
+    output:recipe.output,outputItem:recipe.outputItem,quality:recipe.quality,rawItem:recipe.rawItem
+  });
+  return true;
+}
+
 export function getQueuedMashCount(state) {
   return (state.purchaseCart||[])
     .filter(item=>item.kind==="mashHouseBatch")
@@ -53,16 +66,7 @@ export function initMashHouse(state,{notify=()=>{}}={}) {
     const house=ensureMashHouse(current);
     const recipe=MASH_RECIPES.find(entry=>entry.id===item.payload?.recipeId);
     if(!recipe)return;
-    for(let i=0;i<Math.max(1,Number(item.quantity)||1);i++){
-      if(house.batches.length>=getMashCapacity(current))break;
-      house.batches.push({
-        id:house.nextId++,recipeId:recipe.id,name:recipe.name,
-        remaining:Math.max(1,recipe.days-(current.skills?.includes("patient_master")?1:0)),
-        totalDays:Math.max(1,recipe.days-(current.skills?.includes("patient_master")?1:0)),
-        stage:"fermentation",ready:false,output:recipe.output,
-        outputItem:recipe.outputItem,quality:recipe.quality,rawItem:recipe.rawItem
-      });
-    }
+    for(let i=0;i<Math.max(1,Number(item.quantity)||1);i++)startMashBatch(current,recipe.id);
     notify("Новая партия поставлена в бродильню.");
   });
 }
