@@ -2223,3 +2223,99 @@ button:disabled {
     justify-self: start;
   }
 }
+
+
+/* Бабушкин архив: семейные записки и журнал находок */
+.grandma-notes {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+.grandma-notes-intro {
+  margin: 0;
+  color: #c5b99f;
+  line-height: 1.5;
+}
+.grandma-notes h3 {
+  margin: 8px 0 0;
+  color: #e0c995;
+  font-size: 1.02rem;
+}
+.grandma-note-card,
+.grandma-find-card {
+  position: relative;
+  padding: 15px 17px 15px 20px;
+  border: 1px solid #65583e;
+  border-radius: 9px;
+  background: linear-gradient(135deg, #393426, #29291f);
+  box-shadow: 0 3px 9px #0002;
+}
+.grandma-note-card::before,
+.grandma-find-card::before {
+  content: "";
+  position: absolute;
+  inset: 8px auto 8px 8px;
+  width: 3px;
+  border-radius: 3px;
+  background: #b99b62;
+}
+.grandma-note-card h4,
+.grandma-find-card h4 {
+  margin: 0 0 7px;
+  color: #f0dcae;
+  font-size: .98rem;
+}
+.grandma-note-card p,
+.grandma-find-card p {
+  margin: 0;
+  color: #d1c6ae;
+  line-height: 1.55;
+  font-size: .91rem;
+}
+.grandma-find-card {
+  background: linear-gradient(135deg, #283329, #24291f);
+  border-color: #56664a;
+}
+.grandma-find-card::before { background: #8ba66a; }
+.grandma-find-card small {
+  display: block;
+  margin-bottom: 5px;
+  color: #aebc91;
+  font-size: .75rem;
+}
+.grandma-empty {
+  margin: 0;
+  padding: 14px;
+  border: 1px dashed #62583f;
+  border-radius: 8px;
+  color: #aaa18e;
+  background: #24251e;
+}
+.dev-story-tools {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px 12px;
+  align-items: center;
+  margin: 14px 0;
+  padding: 13px;
+  border: 1px solid #746343;
+  border-radius: 9px;
+  background: #292a21;
+}
+.dev-story-tools h3,
+.dev-story-tools p { grid-column: 1 / -1; margin: 0; }
+.dev-story-tools h3 { color: #e0c995; font-size: .95rem; }
+.dev-story-tools p { color: #b9b09c; font-size: .8rem; }
+.dev-story-select {
+  min-width: 0;
+  padding: 8px;
+  color: #eee6d5;
+  background: #171914;
+  border: 1px solid #65583c;
+  border-radius: 6px;
+}
+.dev-story-test { margin: 0; white-space: nowrap; }
+@media (max-width: 520px) {
+  .dev-story-tools { grid-template-columns: 1fr; }
+  .dev-story-tools h3, .dev-story-tools p { grid-column: 1; }
+}
