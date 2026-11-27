@@ -20,6 +20,10 @@ export function renderHUD(state) {
   setText("#day", state.day);
   setText("#money", state.money);
   setText("#level", state.level);
+  const seasonNames = { spring:"Весна", summer:"Лето", autumn:"Осень", winter:"Зима" };
+  const season = state.world?.season;
+  setText("#hudSeason", seasonNames[season] || "Усадьба");
+  setText("#sceneSeasonCaption", `${seasonNames[season] || "Деревня"} · день ${state.day}`);
 }
 
 export function renderNeeds(state) {
