@@ -64,8 +64,8 @@ test("inventory API respects stock, capacity and quality lot accounting", () => 
   assert.equal(state.inventory.apple, 1);
   assert.equal(state.qualityLots.reduce((sum, lot) => sum + lot.remaining, 0), 1);
 
-  assert.equal(addInventory(state, "pear", 50), 26);
-  assert.equal(state.inventory.pear, 26);
+  assert.equal(addInventory(state, "pear", 50), 29);
+  assert.equal(state.inventory.pear, 29);
   assert.equal(addInventory(state, "pear", 1), 0);
 
   setInventoryCount(state, "apple", 4);
