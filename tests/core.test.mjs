@@ -15,7 +15,7 @@ globalThis.localStorage = {
 const { loadGame, saveGame, createInitialState } = await import("../js/engine.js");
 const { addInventory, removeInventory, setInventoryCount, hasInventory } = await import("../js/economy.js");
 const { advanceGameDay } = await import("../js/gameLoop.js");
-const { ensureGrandmaStory, runGrandmaQuestDev } = await import("../js/grandmaNotes.js");
+const { ensureGrandmaStory, runGrandmaQuestDev, runPetrovichEncounterDev, resolvePetrovichEncounter } = await import("../js/grandmaNotes.js");
 
 test("legacy saves migrate without losing inventory and receive legacy quality lots", () => {
   stored = JSON.stringify({
@@ -143,4 +143,23 @@ test("grandmother mystery advances through key, barn chest and orchard box", () 
   assert.ok(story.discovered.includes("quest_orchard_box"));
   assert.equal(state.money, createInitialState().money + 55);
   assert.ok(messages.length >= 4);
+});
+
+
+test("Petrovich encounters offer choices and apply their consequences", () => {
+  const state = createInitialState();
+  const messages = [];
+  const notify = message => messages.push(message);
+  runPetrovichEncounterDev(state, notify);
+  assert.equal(state.story.pendingPetrovich, "clue");
+  const money = state.money;
+  assert.equal(resolvePetrovichEncounter(state, "take", notify), true);
+  assert.equal(state.money, money + 6);
+  assert.equal(state.story.pendingPetrovich, null);
+  assert.equal(state.story.findings[0].title, "Петрович тоже кое-что нашёл");
+  assert.equal(resolvePetrovichEncounter(state, "unknown", notify), false);
+  runPetrovichEncounterDev(state, notify);
+  assert.equal(state.story.pendingPetrovich, "wrong");
+  assert.equal(resolvePetrovichEncounter(state, "keep", notify), true);
+  assert.ok(messages.length >= 3);
 });
