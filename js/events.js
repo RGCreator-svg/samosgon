@@ -1,5 +1,5 @@
 import { addXP } from "./engine.js";
-import { addInventory } from "./economy.js";
+import { addInventory, removeInventory } from "./economy.js";
 
 const DAY_LINES = [
   "Петух прокукарекал так, будто ему задолжали. Доброе утро.",
@@ -66,7 +66,7 @@ const EVENTS = [
     title: "Мышиный рейд",
     text: "Мыши устроили ночной банкет. Пропала часть запасов картошки.",
     chance: 0.08,
-    apply(state) { state.inventory.potato = Math.max(0, (state.inventory.potato || 0) - 1); }
+    apply(state) { removeInventory(state, "potato", 1); }
   }
 ];
 
