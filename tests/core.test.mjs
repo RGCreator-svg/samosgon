@@ -46,6 +46,7 @@ test("berry garden grows seasonal bushes, harvests repeat crops and respects war
   advanceBerryGardenDay(state);
   assert.equal(bush.remaining,2);
   state.world.season="autumn";
+  state.world.weather="cloudy";
   const cranberry=plantBerryBush(state,"cranberry");
   advanceBerryGardenDay(state);
   advanceBerryGardenDay(state);
