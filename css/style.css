@@ -2515,3 +2515,16 @@ button:disabled {
 .still-unit[data-lineage="neutral"] .still-boiler{background-image:linear-gradient(110deg,#39474a,#a7b5b2 28%,#566a6b 60%,#263336)}
 
 .passport-lineage{display:block;margin-top:5px;color:#d9bd82;font-weight:600}
+
+/* Ягодник и мастерская настоек */
+.berry-garden-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px;margin:12px 0}
+.berry-crop-card{padding:13px;border:1px solid #74613f;border-radius:10px;background:linear-gradient(145deg,#343426,#24271f)}
+.berry-crop-card h4{margin:0 0 6px;color:#e7c989}
+.berry-crop-card p{margin:5px 0 9px;font-size:.9rem}
+.berry-crop-card small{display:block;color:#c5b894;margin-bottom:8px}
+.berry-plots{display:grid;gap:8px;margin-top:12px}
+.berry-plot-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:10px 12px;border:1px solid #66563b;border-radius:8px;background:#292b22}
+.berry-plot-row b{min-width:140px;color:#e4c98f}
+.berry-plot-row span{flex:1;color:#d4c9ad}
+.berry-plot-row button{margin-left:auto}
+@media(max-width:600px){.berry-plot-row{align-items:flex-start;flex-direction:column}.berry-plot-row button{margin-left:0}}
