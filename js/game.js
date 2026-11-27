@@ -1,5 +1,6 @@
 import { consumeQualityForSale } from "./quality.js";
 import { advanceGameDay } from "./gameLoop.js";
+import { discoverRepairStory, renderGrandmaNotes } from "./grandmaNotes.js";
 
 import { loadGame, saveGame, addXP } from "./engine.js";
 import { ITEMS, SKILL_BRANCHES } from "./data.js";
@@ -59,6 +60,7 @@ function notify(message) {
 
 function render() {
   renderAll(state);
+  renderGrandmaNotes(state);
   renderEconomy(state);
   renderEquipment(state);
   renderExpansion(state);
@@ -132,7 +134,7 @@ initOrders(state, {
   earnExperience
 });
 
-initDevTools(state, { render, notify });
+initDevTools(state, { render, notify, onStoryTest: (area) => { discoverRepairStory(state, area, notify); render(); } });
 initEconomy(state, { render, notify });
 initEquipment(state, { render, notify });
 initExpansion(state, { render, notify, earnExperience });
@@ -151,6 +153,10 @@ registerCartHandler("homesteadRepair",(current,item)=>{
   if(action==="garden")current.garden=Math.min(100,current.garden+30*item.quantity);
   if(action==="orchard"&&!current.orchardRestored){current.orchardRestored=true;current.trees=current.skills.includes("orchard_lore")?5:3;earnExperience(20);}
   if(action==="basicBatch"&&!current.production.active&&!current.production.ready){current.energy=Math.max(0,current.energy-10);current.production.active=true;current.production.ready=false;current.production.daysLeft=current.skills.includes("patient_master")?1:2;}
+  if(["house","barn","still","garden","orchard"].includes(action)) {
+    discoverRepairStory(current,action,notify);
+    if(item.quantity>1 && Math.random()<0.22) discoverRepairStory(current,action,notify);
+  }
 });
 
 // Журнал событий всегда находится внизу игрового экрана, после динамических вкладок.
