@@ -22,7 +22,7 @@ const { blendBatch, calculateBlendProfile } = await import("../js/blending.js");
 const { getEquipmentProfile, EQUIPMENT_MODULES } = await import("../js/equipment.js");
 const { recordProduction } = await import("../js/productionhub.js");
 const { BERRY_CROPS, HERB_CROPS, GARDEN_CROPS, ensureBerryGarden, plantBerryBush, advanceBerryGardenDay, harvestBerryBush } = await import("../js/berries.js");
-const { HERBAL_FORMULAS } = await import("../js/researchlab.js");
+const { HERBAL_FORMULAS, runHerbalFormula } = await import("../js/researchlab.js");
 
 test("berry garden grows seasonal bushes, harvests repeat crops and respects warehouse capacity", () => {
   const state=createInitialState();
@@ -410,4 +410,19 @@ test("laboratory herbal profiles define distinct ingredients, ratios and tinctur
   assert.ok(f.target>=2);
   assert.ok(["mint_tincture","rosehip_tincture","juniper_tincture"].includes(f.product));
  }
+});
+
+test("herbal laboratory discovers a profile, records a passport and reproduces its signature tincture",()=>{
+ const state=createInitialState();state.money=200;state.day=8;state.inventory={...state.inventory,mint:2,thyme:1,spirit:3,sugar:2,bottles:2,labels:2};
+ state.lab={points:0,qualityBonus:30,standards:{},discoveredHerbalRecipes:[],trialLog:[],experiments:0};
+ const notices=[];let xp=0;const notify=m=>notices.push(m);const earn=n=>xp+=n;
+ assert.equal(runHerbalFormula(state,"herb_mint",2,1,notify,earn,false),true);
+ assert.ok(state.lab.discoveredHerbalRecipes.includes("herb_mint"));
+ const trial=state.lab.trialLog[0];assert.equal(trial.recipe,"herb_mint");assert.ok(trial.passportId);
+ state.lab.standards.herb_mint={a:2,b:1,quality:trial.quality,trialId:trial.id,passportId:trial.passportId};
+ assert.equal(runHerbalFormula(state,"herb_mint",2,1,notify,earn,true),true);
+ assert.equal(state.inventory.mint_tincture,2);
+ const passport=state.productionLog.find(x=>x.name==="Мятно-чабрецовая настойка");
+ assert.ok(passport);assert.equal(passport.recipeId,"herb_mint");assert.equal(passport.ratio,"2:1");
+ assert.ok(xp>0);assert.ok(notices.length>=2);
 });
