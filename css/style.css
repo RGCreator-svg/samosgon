@@ -2545,3 +2545,136 @@ button:disabled {
 .blend-standards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:7px}
 .blend-standards p{margin:0;padding:9px 11px;border:1px solid #596b4d;border-radius:9px;background:#263326;color:#d9e7cb;font-size:.88rem}
 .blend-recipe:has([data-blend="berry_tincture_blend"]),.blend-recipe:has([data-blend="herbal_tincture_blend"]),.blend-recipe:has([data-blend="meadow_tincture_blend"]){border-color:#71875b;background:linear-gradient(145deg,rgba(71,91,55,.25),rgba(34,45,35,.88))}
+
+
+/* === Большая игровая оболочка усадьбы: HUD, панорама, быстрые панели === */
+:root {
+  --wood-950:#2e2118; --wood-800:#513724; --wood-650:#765137;
+  --wood-500:#9b7048; --gold-300:#f1d99c; --cream-100:#fff3d5;
+  --leaf-700:#49613b; --leaf-500:#789052;
+}
+body {
+  background:
+    radial-gradient(ellipse at 50% -8%, #71875a 0, transparent 42%),
+    linear-gradient(180deg,#283326 0%,#171d17 52%,#111611 100%);
+  color:#f6ecd6;
+  font-family: "Trebuchet MS", Georgia, serif;
+}
+#game-layout { grid-template-columns:minmax(145px,175px) minmax(0,1180px) minmax(145px,175px); gap:14px; padding:18px; }
+#game { max-width:none; padding:clamp(10px,1.6vw,22px); }
+#game .topbar {
+  position:relative; overflow:hidden; align-items:center; padding:17px 20px;
+  border:2px solid #b08a56; border-radius:18px;
+  background:linear-gradient(135deg,#68482f 0%,#3f3023 52%,#60452c 100%);
+  box-shadow:inset 0 1px #f5d99a55,inset 0 -5px #21180f66,0 9px 24px #0006;
+}
+#game .topbar::after { content:""; position:absolute; inset:5px; border:1px solid #e6c58a33; border-radius:12px; pointer-events:none; }
+#game .topbar h1 { color:#ffe4a8; text-shadow:0 2px 3px #21170e; letter-spacing:.035em; }
+#game .topbar p { color:#e3cda5; }
+.homestead-resource-bar { gap:8px; margin-left:auto; }
+.hud-chip {
+  display:flex; align-items:center; gap:6px; min-height:42px; padding:7px 11px;
+  border:1px solid #e3c38b88; border-radius:11px;
+  color:#fff0ca; background:linear-gradient(180deg,#87613d,#553a27);
+  box-shadow:inset 0 1px #fff4d0aa,0 3px 0 #302116,0 5px 10px #0003;
+  white-space:nowrap;
+}
+.hud-chip small { font-size:.59rem; letter-spacing:.08em; color:#e8cf9c; }
+.hud-chip b { font-size:1.02rem; color:#fff4d6; }
+#game .xp-panel { background:linear-gradient(180deg,#493625,#30261d); border-color:#9b784e; box-shadow:inset 0 1px #fff2d044,0 4px 0 #21180f; }
+#game .navigation {
+  position:sticky; top:0; z-index:30; display:flex; flex-wrap:nowrap; overflow-x:auto;
+  gap:7px; padding:9px; margin:13px 0;
+  border:2px solid #a98250; border-radius:15px;
+  background:linear-gradient(180deg,#65472f,#3e2d20);
+  box-shadow:inset 0 1px #f9dfaa66,0 5px 0 #21180f,0 9px 18px #0005;
+  scrollbar-width:thin;
+}
+#game .navigation button {
+  flex:0 0 auto; margin:0; padding:9px 13px; border:1px solid #c49b62;
+  border-radius:9px; color:#f8e9c7; font-weight:700;
+  background:linear-gradient(180deg,#96704a,#67472e);
+  box-shadow:inset 0 1px #fff4d066,0 3px 0 #382518;
+  text-shadow:0 1px #302014;
+}
+#game .navigation button.active { color:#382719; background:linear-gradient(180deg,#f0d18b,#c69a54); border-color:#ffedb8; box-shadow:inset 0 1px #fff9dc,0 2px 0 #634526; }
+#game .panel {
+  border:1px solid #9a794e; border-radius:15px;
+  background:linear-gradient(145deg,#39372a,#25291f 72%);
+  box-shadow:inset 0 1px #f4d99b22,0 7px 0 #171c14,0 12px 24px #0003;
+}
+#game .panel h2 { color:#f0d49a; text-shadow:0 1px #21180f; }
+#game button {
+  border:1px solid #c29a60; border-radius:9px;
+  background:linear-gradient(180deg,#98734b,#68472e);
+  box-shadow:inset 0 1px #fff0c766,0 3px 0 #352418;
+  font-weight:700;
+}
+#game button:hover:not(:disabled) { background:linear-gradient(180deg,#b38a55,#805936); transform:translateY(-2px); }
+#game button:active:not(:disabled) { transform:translateY(1px); box-shadow:inset 0 1px #fff0c766,0 1px 0 #352418; }
+#game .homestead-scene {
+  height:clamp(300px,37vw,455px); border:3px solid #9a7549; border-radius:17px;
+  box-shadow:inset 0 -45px 65px #17251a77,0 7px 0 #4c3825,0 14px 25px #0005;
+}
+.homestead-hotspots { position:absolute; inset:0; z-index:10; pointer-events:none; }
+.homestead-hotspots .hotspot {
+  position:absolute; display:grid; justify-items:center; gap:2px; min-width:72px;
+  padding:7px 10px; border:1px solid #f4d69a; border-radius:12px;
+  color:#fff4d8; background:#3d2b1dcc; box-shadow:0 4px 0 #25190f,0 7px 16px #0005;
+  pointer-events:auto; backdrop-filter:blur(5px); transition:transform .2s,filter .2s;
+}
+.hotspot span { font-size:1.5rem; filter:drop-shadow(0 2px 2px #0008); }
+.hotspot b { font-size:.72rem; }
+.hotspot:hover { transform:translateY(-4px) scale(1.05)!important; filter:brightness(1.18); }
+.hotspot-house { left:48%; bottom:22%; }
+.hotspot-farm { left:7%; bottom:22%; }
+.hotspot-orchard { right:8%; bottom:32%; }
+.hotspot-barn { right:34%; bottom:9%; }
+.scene-caption { z-index:11; max-width:min(300px,55%); }
+.homestead-status { border:1px solid #a4b17b; border-radius:99px; padding:7px 12px; background:#35452dcc; color:#e3edc5; font-size:.8rem; }
+.homestead-bottom-dock {
+  position:sticky; bottom:8px; z-index:25; display:grid;
+  grid-template-columns:repeat(6,minmax(0,1fr)); gap:8px; margin:18px 0 12px;
+  padding:10px; border:2px solid #a98250; border-radius:16px;
+  background:linear-gradient(180deg,#62452e,#38291e);
+  box-shadow:inset 0 1px #f9dfaa55,0 5px 0 #21180f,0 10px 22px #0007;
+}
+.homestead-bottom-dock button {
+  display:grid; justify-items:center; gap:3px; min-width:0; margin:0; padding:8px 5px;
+  border-color:#c69d65; background:linear-gradient(180deg,#98714a,#65452d);
+}
+.homestead-bottom-dock button span { font-size:1.45rem; }
+.homestead-bottom-dock button b { font-size:.72rem; }
+#game .warehouse-panel { border-color:#9a794e; background:linear-gradient(145deg,#40382a,#27291f); }
+#game .event-console { border-color:#8b7149; background:linear-gradient(145deg,#282b21,#1d211a); }
+.game-advisor { border:2px solid #9e794c; border-radius:16px; background:linear-gradient(160deg,#60452f,#30271e 75%); box-shadow:inset 0 1px #f4d49a55,0 8px 0 #21180f,0 12px 22px #0005; }
+.game-advisor h2 { color:#f0d49a; }
+.game-advisor-tip { background:#29251d; border-color:#b18b58; color:#f5e6c8; }
+.location-scene { box-shadow:inset 0 -35px 55px #18231855,0 5px 0 #4c3825,0 10px 20px #0004; }
+#game .tab-content:not(#home) { animation:homestead-panel-in .24s ease-out both; }
+@keyframes homestead-panel-in { from { opacity:0; transform:translateY(7px); } to { opacity:1; transform:translateY(0); } }
+@media(max-width:1200px) {
+  #game-layout { grid-template-columns:minmax(0,1fr); padding:10px; }
+  #game { width:100%; }
+}
+@media(max-width:700px) {
+  #game .topbar { padding:13px; }
+  .homestead-resource-bar { width:100%; justify-content:space-between; gap:5px; }
+  .hud-chip { flex:1 1 30%; justify-content:center; padding:6px; font-size:.85rem; }
+  .hud-chip small { display:none; }
+  #game .navigation { top:0; margin-inline:-2px; }
+  #game .navigation button { padding:8px 10px; font-size:.83rem; }
+  .homestead-bottom-dock { grid-template-columns:repeat(3,minmax(0,1fr)); bottom:4px; }
+  .homestead-bottom-dock button b { font-size:.68rem; }
+  .hotspot { min-width:56px!important; padding:5px 7px!important; }
+  .hotspot span { font-size:1.2rem; }
+  .hotspot b { font-size:.63rem; }
+  .hotspot-house { left:43%; bottom:22%; }
+  .hotspot-farm { left:3%; bottom:20%; }
+  .hotspot-orchard { right:2%; bottom:33%; }
+  .hotspot-barn { right:30%; bottom:8%; }
+  .scene-caption { max-width:58%; padding:8px 10px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  #game .tab-content:not(#home) { animation:none; }
+}
