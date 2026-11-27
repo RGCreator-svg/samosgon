@@ -64,6 +64,7 @@ function notify(message) {
 function render() {
   state.waterSystem ??= { level: 0 };
   renderAll(state);
+  renderHouseRepairDetails();
   renderWaterDevelopment();
   renderGrandmaNotes(state, notify, render);
   renderEconomy(state);
@@ -280,6 +281,27 @@ $("#harvestVegetables")?.addEventListener("click", () => {
   notify(harvested > 0 ? `Урожай собран: ${harvested} единиц. Земля пока не требует долю.` : "Склад забит под завязку. Сначала продайте или используйте запасы.");
   render();
 });
+
+// Показываем стоимость работы, материалы и влияние навыка прямо на экране дома.
+function renderHouseRepairDetails() {
+  const details=$("#houseRepairDetails");
+  const button=$("#repairHouse");
+  if(!details||!button)return;
+  const hasSkill=state.skills.includes("handyman");
+  const cost=hasSkill?20:30;
+  button.textContent=state.house>=100?"✓ Дом полностью отремонтирован":`🔨 Отремонтировать дом — ${cost} монет`;
+  button.disabled=state.house>=100;
+  details.replaceChildren();
+  const work=document.createElement("p");
+  work.className="repair-work-cost";
+  work.textContent=`Работа: ${cost} монет`;
+  const materials=document.createElement("p");
+  materials.innerHTML="<strong>Материалы:</strong> Пиломатериалы × 1, Крепёж и гвозди × 1, Краска × 1";
+  const skill=document.createElement("p");
+  skill.className=hasSkill?"repair-skill learned":"repair-skill";
+  skill.textContent=hasSkill?"Навык «Руки из плеч» изучен: стоимость работы снижена до 20 монет.":"Навык «Руки из плеч» не изучен: доступен как улучшение для снижения стоимости ремонта до 20 монет.";
+  details.append(work,materials,skill);
+}
 
 // Работа оплачивается сразу, а в общую корзину попадают только нужные материалы.
 function queueHomesteadRepair(action, name, cost, parts) {
