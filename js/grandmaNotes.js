@@ -53,6 +53,8 @@ export function ensureGrandmaStory(state) {
   state.story.questStep ??= "locked";
   state.story.questRewards ??= [];
   state.story.pendingPetrovich ??= null;
+  state.story.petrovichRelation = Math.max(-100,Math.min(100,Number(state.story.petrovichRelation)||0));
+  state.story.petrovichQualityBonus ??= 0;
   return state.story;
 }
 
@@ -114,36 +116,57 @@ const PETROVICH_ENCOUNTERS = {
   clue: {
     title: "Петрович тоже кое-что нашёл",
     text: "Петрович вынырнул из-за забора с латунной биркой. «Я тут случайно нашёл. Совершенно случайно. Она сама ко мне прилипла». На бирке знакомый бабушкин знак.",
-    choices: [{id:"take",label:"Забрать улику",result:"Ты забрал бирку. Петрович уверяет, что всё равно собирался её подарить.",apply:s=>{s.money=(Number(s.money)||0)+6;}},{id:"thank",label:"Поблагодарить Петровича",result:"Петрович растрогался и ушёл рассказывать всем, что он главный сыщик.",apply:s=>{s.reputation=Math.min(100,(Number(s.reputation)||0)+1);}}]
+    choices: [{id:"take",label:"Забрать улику",relation:-2,result:"Ты забрал бирку. Петрович уверяет, что всё равно собирался её подарить.",apply:s=>{s.money=(Number(s.money)||0)+6;}},{id:"thank",label:"Поблагодарить Петровича",relation:8,result:"Петрович растрогался и ушёл рассказывать всем, что он главный сыщик.",apply:s=>{s.reputation=Math.min(100,(Number(s.reputation)||0)+1);}}]
   },
   wrong: {
     title: "Не та находка",
     text: "Петрович торжественно принёс «старинный ключ». Это ключ от консервной банки, но он настаивает, что замок просто неправильный.",
-    choices: [{id:"keep",label:"Оставить ключ на память",result:"Ключ отправился в ящик с бесполезными, но дорогими сердцу вещами.",apply:s=>addXP(s,4)},{id:"return",label:"Вежливо вернуть находку",result:"Петрович обиделся, но признал, что на ключе написано «огурцы».",apply:s=>{s.reputation=Math.min(100,(Number(s.reputation)||0)+1);}}]
+    choices: [{id:"keep",label:"Оставить ключ на память",relation:-3,result:"Ключ отправился в ящик с бесполезными, но дорогими сердцу вещами.",apply:s=>addXP(s,4)},{id:"return",label:"Вежливо вернуть находку",relation:5,result:"Петрович обиделся, но признал, что на ключе написано «огурцы».",apply:s=>{s.reputation=Math.min(100,(Number(s.reputation)||0)+1);}}]
   },
   share: {
     title: "Петрович требует долю",
     text: "Услышав про бабушкин сундук, Петрович объявил себя «консультантом по наследству» и просит долю за моральную поддержку.",
-    choices: [{id:"pay",label:"Отдать 8 монет",result:"Петрович получил деньги и немедленно купил семечки.",apply:s=>{s.money=Math.max(0,(Number(s.money)||0)-8);}},{id:"refuse",label:"Отказать и напомнить про долги",result:"Петрович ушёл составлять встречный список долгов.",apply:s=>{s.reputation=Math.max(-100,(Number(s.reputation)||0)-1);}}]
+    choices: [{id:"pay",label:"Отдать 8 монет",relation:7,result:"Петрович получил деньги и немедленно купил семечки.",apply:s=>{s.money=Math.max(0,(Number(s.money)||0)-8);}},{id:"refuse",label:"Отказать и напомнить про долги",relation:-9,result:"Петрович ушёл составлять встречный список долгов.",apply:s=>{s.reputation=Math.max(-100,(Number(s.reputation)||0)-1);}}]
   },
   trail: {
     title: "Петрович перепутал следы",
     text: "Петрович показывает уверенный маршрут к тайнику. Через минуту выясняется, что следы ведут к его собственному погребу.",
-    choices: [{id:"follow",label:"Проверить его маршрут",result:"В погребе нашлась забытая банка варенья. Петрович делает вид, что так и планировал.",apply:s=>addInventory(s,"apple",1)},{id:"ignore",label:"Идти по бабушкиной схеме",result:"Ты не стал отвлекаться. Петрович назвал это отсутствием командного духа.",apply:s=>addXP(s,3)}]
+    choices: [{id:"follow",label:"Проверить его маршрут",relation:6,result:"В погребе нашлась забытая банка варенья. Петрович делает вид, что так и планировал.",apply:s=>addInventory(s,"apple",1)},{id:"ignore",label:"Идти по бабушкиной схеме",relation:-2,result:"Ты не стал отвлекаться. Петрович назвал это отсутствием командного духа.",apply:s=>addXP(s,3)}]
+  }
+  },
+  distill_help: {
+    title: "Петрович вызвался помочь с партией",
+    text: "Петрович заглянул в сарай: «Я, конечно, не технолог, но аппарат твой знаю ещё с тех времён, когда он был просто кучей железа». Он предлагает помочь с текущей игровой перегонкой.",
+    choices: [{id:"accept",label:"Принять помощь",relation:9,result:"Петрович помог подготовить партию. Следующая перегонка получит небольшой бонус качества.",apply:s=>{s.story.petrovichQualityBonus=Math.min(8,(Number(s.story.petrovichQualityBonus)||0)+5);s.parts.fasteners=(Number(s.parts?.fasteners)||0)+1;}},{id:"decline",label:"Работать самостоятельно",relation:-2,result:"Петрович пожал плечами: «Ну смотри, мастер». Он оставил тебе на верстаке крепёж.",apply:s=>{s.parts.fasteners=(Number(s.parts?.fasteners)||0)+1;}}]
+  },
+  mash_supply: {
+    title: "Петрович принёс сырьё для брожения",
+    text: "Петрович прикатил тележку: «Нашёл у себя лишнее. Для твоей браги сгодится. Только не спрашивай, почему мешок подписан “не трогать до весны”».",
+    choices: [{id:"accept",label:"Принять ингредиенты",relation:8,result:"Петрович поделился запасами: на склад поступили дрожжи и немного зернового сырья.",apply:s=>{addInventory(s,"yeast",2);addInventory(s,"grain",2);}},{id:"refuse",label:"Отказаться от сомнительного мешка",relation:-1,result:"Петрович забрал мешок, но оставил две монеты «за отказ от ответственности».",apply:s=>{s.money=(Number(s.money)||0)+2;}}]
+  },
+  bad_advice: {
+    title: "Петрович — эксперт по перегонке",
+    text: "Петрович уверяет, что знает секрет идеальной партии. По его словам, достаточно «покрутить все ручки сразу». Ты подозреваешь, что это не научный метод.",
+    choices: [{id:"ignore",label:"Не слушать совет",relation:5,result:"Ты вежливо отказался. Петрович признал, что осторожность — тоже талант.",apply:s=>addXP(s,3)},{id:"try",label:"Рискнуть и проверить в игре",relation:-7,result:"Эксперимент вышел неудачным. Следующая партия получит штраф качества.",apply:s=>{s.story.petrovichQualityBonus=Math.max(-8,(Number(s.story.petrovichQualityBonus)||0)-5);}}]
   }
 };
 
 function maybeStartPetrovichEncounter(story) {
   if (story.questStep === "completed" || story.pendingPetrovich) return;
   if (Math.random() < 0.42) {
-    const ids = Object.keys(PETROVICH_ENCOUNTERS);
+    const relation = Number(story.petrovichRelation)||0;
+    const ids = relation >= 15
+      ? ["clue","trail","distill_help","mash_supply"]
+      : relation <= -15
+        ? ["wrong","share","bad_advice","trail"]
+        : ["clue","wrong","share","trail","distill_help","mash_supply","bad_advice"];
     story.pendingPetrovich = ids[Math.floor(Math.random() * ids.length)];
   }
 }
 
 export function runPetrovichEncounterDev(state, notify = () => {}) {
   const story = ensureGrandmaStory(state);
-  const ids = Object.keys(PETROVICH_ENCOUNTERS);
+  const ids = ["clue","wrong","share","trail","distill_help","mash_supply","bad_advice"];
   const index = Number(story.petrovichDevIndex || 0) % ids.length;
   story.pendingPetrovich = ids[index];
   story.petrovichDevIndex = index + 1;
@@ -157,6 +180,7 @@ export function resolvePetrovichEncounter(state, choiceId, notify = () => {}) {
   const choice = encounter?.choices.find(item => item.id === choiceId);
   if (!choice) return false;
   choice.apply(state);
+  story.petrovichRelation = Math.max(-100,Math.min(100,(Number(story.petrovichRelation)||0)+(Number(choice.relation)||0)));
   story.findings.unshift({
     id:"petrovich_" + story.pendingPetrovich + "_" + choiceId,
     area:"house",
@@ -167,7 +191,9 @@ export function resolvePetrovichEncounter(state, choiceId, notify = () => {}) {
   });
   story.findings = story.findings.slice(0,30);
   story.pendingPetrovich = null;
-  notify("🧔 " + choice.result);
+  const relation = story.petrovichRelation;
+  const mood = relation >= 25 ? "доверяет тебе" : relation <= -25 ? "держит обиду" : "пока присматривается";
+  notify("🧔 " + choice.result + ` Отношения: ${relation}/100 — Петрович ${mood}.`);
   return true;
 }
 
@@ -272,6 +298,11 @@ export function renderGrandmaNotes(state, notify = () => {}, onUpdate = () => {}
     });
     root.append(encounterCard);
   }
+  const relation = Number(story.petrovichRelation)||0;
+  const relationCard = document.createElement("p");
+  relationCard.className = "petrovich-relation";
+  relationCard.textContent = `🧔 Отношения с Петровичем: ${relation}/100 · ${relation>=25?"дружеские":relation<=-25?"натянутые":"нейтральные"} · бонус следующей перегонки: ${Number(story.petrovichQualityBonus)||0>0?"+":""}${Number(story.petrovichQualityBonus)||0} к качеству`;
+  root.append(relationCard);
   const activeQuest = QUEST_STEPS[story.questStep];
   if (activeQuest) {
     const questCard = document.createElement("article");
