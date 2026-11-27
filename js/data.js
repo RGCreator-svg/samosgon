@@ -89,6 +89,9 @@ export const ITEMS = [
   ,{ id:"apple_cider", name:"Яблочный сидр", emoji:"🍏", price:54, description:"Игровой яблочный напиток после созревания." }
   ,{ id:"pear_wine", name:"Грушевое вино", emoji:"🍐", price:72, description:"Игровое вино из грушевого сырья." }
   ,{ id:"fruit_wine", name:"Садовое фруктовое вино", emoji:"🍷", price:82, description:"Игровой купаж из яблок и груш." }
+  ,{ id:"orchard_blush", name:"Румянец старого сада", emoji:"🍷", price:94, description:"Авторский лабораторный яблочно-грушевый сорт." }
+  ,{ id:"golden_vintage", name:"Золотой винтаж", emoji:"🥂", price:118, description:"Авторский виноградный сорт с медовым оттенком." }
+  ,{ id:"pear_honey_reserve", name:"Грушевый медовый резерв", emoji:"🍐", price:108, description:"Редкий сорт, открытый в лаборатории." }
 
 ];
 

@@ -349,9 +349,15 @@ export function renderWarehouse(state) {
     const card = document.createElement("div");
     card.className = "warehouse-item";
 
-    const icon = document.createElement("span");
+    const iconFile = ({
+      braga: "flaticon-filter.png", fruit_braga: "flaticon-filter.png", grain_braga: "flaticon-filter.png", honey_braga: "flaticon-filter.png",
+      spirit: "flaticon-distillation.png", honey_spirit: "flaticon-distillation.png", aged_spirit: "icon_barrel.png", aged_honey_spirit: "icon_barrel.png",
+      water: "flaticon-kettle.png"
+    })[item.id];
+    const icon = iconFile ? document.createElement("img") : document.createElement("span");
     icon.className = "warehouse-icon";
-    icon.textContent = item.emoji;
+    if (iconFile) { icon.src = "assets/images/ui/" + iconFile; icon.alt = ""; icon.loading = "lazy"; }
+    else icon.textContent = item.emoji;
 
     const name = document.createElement("span");
     name.className = "warehouse-name";
@@ -561,6 +567,76 @@ export function renderWorld(state) {
   setText("#gardenValue", state.garden);
   setText("#orchardValue", state.orchardRestored ? 100 : 0);
   setText("#treeCount", state.trees);
+
+  // Сезон и погода берутся из того же календаря, что влияет на урожай.
+  const seasonIds = ["spring", "summer", "autumn", "winter"];
+  const seasonNames = {spring:"Весна",summer:"Лето",autumn:"Осень",winter:"Зима"};
+  const seasonIcons = {spring:"🌸",summer:"☀️",autumn:"🍂",winter:"❄️"};
+  const dayOfYear = ((Math.max(1, Number(state.day) || 1) - 1) % 28) + 1;
+  const seasonId = state.world?.season && seasonIds.includes(state.world.season)
+    ? state.world.season
+    : seasonIds[Math.floor((dayOfYear - 1) / 7)];
+  const weatherId = state.world?.weather || "sunny";
+  const seasonLabel = seasonIcons[seasonId] + " " + seasonNames[seasonId];
+
+  const applySeasonToScene = (scene) => {
+    if (!scene) return;
+    scene.dataset.season = seasonId;
+    scene.dataset.weather = weatherId;
+    let overlay = scene.querySelector(".location-season-overlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.className = "location-season-overlay";
+      overlay.setAttribute("aria-hidden", "true");
+      scene.append(overlay);
+    }
+    overlay.dataset.season = seasonId;
+    overlay.dataset.weather = weatherId;
+    let label = scene.querySelector(".location-season-label");
+    if (!label) {
+      label = document.createElement("span");
+      label.className = "location-season-label";
+      label.setAttribute("aria-hidden", "true");
+      scene.append(label);
+    }
+    label.textContent = seasonLabel;
+  };
+
+  // Сцены отражают состояние хозяйства и обновляются вместе с обычным рендером.
+  const farmScene = $(".farm-scene");
+  applySeasonToScene(farmScene);
+  if (farmScene) {
+    const garden = Math.max(0, Math.min(100, Number(state.garden) || 0));
+    const farmStage = garden < 20 ? "overgrown" : garden < 60 ? "cleared" : garden < 90 ? "cultivated" : "lush";
+    farmScene.dataset.stage = farmStage;
+    const farmSign = farmScene.querySelector(".loc-sign span");
+    if (farmSign) farmSign.textContent = ({overgrown:"Сорняки захватили грядки",cleared:"Участок расчищен",cultivated:"Пошли первые всходы",lush:"Зелёный урожайный огород"})[farmStage];
+    const farmTag = $("#farm .location-tag");
+    if (farmTag) farmTag.textContent = ({overgrown:"🌿 Требует расчистки",cleared:"🪴 Земля подготовлена",cultivated:"🌱 Посадки растут",lush:"🥕 Огород процветает"})[farmStage];
+  }
+
+  const orchardScene = $(".orchard-scene");
+  applySeasonToScene(orchardScene);
+  if (orchardScene) {
+    const orchardStage = state.orchardRestored ? "restored" : "wild";
+    orchardScene.dataset.stage = orchardStage;
+    const orchardSign = orchardScene.querySelector(".loc-sign span");
+    if (orchardSign) orchardSign.textContent = state.orchardRestored ? "Яблони и груши снова плодоносят" : "Заросли скрывают старые деревья";
+    const orchardTag = $("#orchard .location-tag");
+    if (orchardTag) orchardTag.textContent = state.orchardRestored ? "🍎 Сад цветёт и плодоносит" : "🌳 Заброшенные деревья";
+  }
+
+  const barnScene = $(".barn-scene");
+  applySeasonToScene(barnScene);
+  if (barnScene) {
+    const barn = Math.max(0, Math.min(100, Number(state.barn) || 0));
+    const barnStage = barn < 35 ? "ruined" : barn < 70 ? "repairing" : "workshop";
+    barnScene.dataset.stage = barnStage;
+    const barnSign = barnScene.querySelector(".loc-sign span");
+    if (barnSign) barnSign.textContent = ({ruined:"Нужен серьёзный ремонт",repairing:"Постепенно приводим в порядок",workshop:"Чистая и оборудованная мастерская"})[barnStage];
+    const barnTag = $("#barn .location-tag");
+    if (barnTag) barnTag.textContent = ({ruined:"🪚 Требует ремонта",repairing:"🔧 Идёт восстановление",workshop:"🛠 Мастерская готова"})[barnStage];
+  }
 
   setText(
     "#homeDescription",

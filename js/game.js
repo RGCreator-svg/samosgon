@@ -1,3 +1,4 @@
+import { consumeQualityForSale } from "./quality.js";
 
 import { loadGame, saveGame, addXP } from "./engine.js";
 import { ITEMS, SKILL_BRANCHES } from "./data.js";
@@ -13,6 +14,8 @@ import { initMilestones, renderMilestones } from "./progression.js";
 import { initWorld, renderWorld, advanceWorldDay, getWorldYieldMultiplier, getWorldColdPenalty } from "./world.js";
 import { initViticulture, renderViticulture, advanceViticultureDay } from "./viticulture.js";
 import { initProductionHub, renderProductionHub, recordProduction } from "./productionhub.js";
+import { initResearchLab, renderResearchLab, advanceResearchLabDay } from "./researchlab.js";
+import { initProcessCenter, renderProcessCenter } from "./processcenter.js";
 
 let state = loadGame();
 
@@ -63,6 +66,8 @@ function render() {
   renderWorld(state);
   renderViticulture(state);
   renderProductionHub(state);
+  renderResearchLab(state);
+  renderProcessCenter(state);
   renderAdvisor(state);
   save();
 }
@@ -134,6 +139,8 @@ initMilestones(state, { renderGame: render, notify, earnExperience });
 initWorld(state, { render, notify });
 initViticulture(state, { render, notify });
 initProductionHub(state);
+initResearchLab(state, { render, notify, earnExperience });
+initProcessCenter(state, { render, notify, earnExperience });
 registerCartHandler("homesteadRepair",(current,item)=>{
   const action=item.payload.action;
   if(action==="house"){current.house=Math.min(100,current.house+20*item.quantity);earnExperience(5*item.quantity);}
@@ -166,14 +173,15 @@ $("#marketItems")?.addEventListener("click", (event) => {
   }
 
   const multiplier = (state.skills.includes("bargain") ? 1.2 : 1) * getMarketMultiplier(state);
-  const price = Math.round(item.price * multiplier);
+  const quality = consumeQualityForSale(state,itemId,1);
+  const price = Math.round(item.price * multiplier * quality.multiplier);
 
   state.inventory[itemId] -= 1;
   state.money += price;
 
   earnExperience(state.skills.includes("regulars") ? 8 : 5);
 
-  notify(`${item.emoji} Продано: ${item.name}. Получено ${price} монет.`);
+  notify(`${item.emoji} Продано: ${item.name}. Получено ${price} монет${quality.hasPassport? " · качество "+quality.quality+"/100 ("+quality.grade.label+")":""}.`);
   render();
 });
 
@@ -320,6 +328,7 @@ $("#sleepButton")?.addEventListener("click", (event) => {
     advanceDeliveries(state, notify);
     advanceExpansionDay(state, notify);
     advanceWorldDay(state, notify);
+    advanceResearchLabDay(state, notify, earnExperience);
     advanceFeaturePackDay(state, notify);
     advanceViticultureDay(state, notify);
 

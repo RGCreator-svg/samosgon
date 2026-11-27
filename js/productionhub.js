@@ -1,28 +1,59 @@
+import { assessBatchQuality } from "./quality.js";
 const $ = selector => document.querySelector(selector);
 const el = (tag, cls, text) => { const node = document.createElement(tag); if (cls) node.className = cls; if (text !== undefined) node.textContent = text; return node; };
+
+function makePassport(entry, s, type = "production") {
+  const assessment=assessBatchQuality(s,entry);
+  const standard=entry.recipeId?s.lab?.standards?.[entry.recipeId]:null;
+  return {
+    id:"passport-"+Date.now()+"-"+Math.floor(Math.random()*1e7),
+    type,day:Number(s.day)||1,product:String(entry.item||""),
+    productName:String(entry.name||"Партия"),amount:Math.max(0,Number(entry.amount)||0),
+    remaining:Math.max(0,Number(entry.amount)||0),sold:0,
+    process:String(entry.process||"Производство"),quality:assessment.score,grade:assessment.grade.label,
+    baseQuality:assessment.base,saleModifier:Math.round((1+(assessment.score-60)*.005)*100),aroma:assessment.aroma,purity:assessment.purity,stability:assessment.stability,
+    factors:assessment.factors,standardDelta:assessment.standardDelta,
+    recipeId:entry.recipeId||null,recipeName:entry.recipeName||null,ratio:entry.ratio||null,
+    standardId:standard?.trialId||null,standardMatch:assessment.standardMatch
+  };
+}
 
 function ensure(s) {
   s.productionLog ??= [];
   if (!Array.isArray(s.productionLog)) s.productionLog = [];
+  if (!Array.isArray(s.qualityLots)) {
+    s.qualityLots = Object.entries(s.inventory||{}).filter(([,amount])=>Number(amount)>0).map(([item,amount])=>({item,remaining:Number(amount),quality:null,passportId:null,legacy:true}));
+  }
+  s.productionLog.forEach(entry => { if (!entry.passport) entry.passport = makePassport(entry, s, "legacy"); });
 }
 
 export function recordProduction(s, entry) {
   ensure(s);
-  s.productionLog.unshift({
-    id: Date.now() + Math.random(),
-    day: Number(s.day) || 1,
-    name: String(entry.name || "Партия"),
-    amount: Math.max(0, Number(entry.amount) || 0),
-    item: String(entry.item || ""),
-    process: String(entry.process || "Производство"),
-    quality: Number.isFinite(Number(entry.quality)) ? Number(entry.quality) : null
-  });
-  s.productionLog = s.productionLog.slice(0, 30);
+  const record = {
+    id: Date.now() + Math.random(), day: Number(s.day) || 1,
+    name: String(entry.name || "Партия"), amount: Math.max(0, Number(entry.amount) || 0),
+    item: String(entry.item || ""), process: String(entry.process || "Производство"),
+    quality: entry.quality !== null && entry.quality !== undefined && Number.isFinite(Number(entry.quality)) ? Number(entry.quality) : null,
+    recipeId: entry.recipeId || null, recipeName: entry.recipeName || null, ratio: entry.ratio || null
+  };
+  record.passport = makePassport({...entry, ...record}, s, entry.passportType || "production");
+  record.quality=record.passport.quality;
+  s.productionLog.unshift(record);
+  if ((entry.passportType||"production")!=="experiment" && record.amount>0) {
+    s.qualityLots ??= [];
+    s.qualityLots.push({item:record.item,remaining:record.amount,quality:record.passport.quality,passportId:record.passport.id});
+  }
+  s.productionLog = s.productionLog.slice(0, 60);
+  return record.passport.id;
 }
 
 function stageCard(parent, icon, title, detail, status) {
   const node = el("article", "production-stage " + status);
-  node.append(el("span", "production-stage-icon", icon), el("h4", "", title), el("p", "", detail));
+  const image = el("img", "production-stage-icon");
+  image.src = "assets/images/ui/" + icon;
+  image.alt = "";
+  image.loading = "lazy";
+  node.append(image, el("h4", "", title), el("p", "", detail));
   node.append(el("small", "production-stage-state", status === "stage-done" ? "Есть результат" : status === "stage-active" ? "В работе" : "Ожидает"));
   parent.append(node);
 }
@@ -48,11 +79,11 @@ function render(s) {
   root.append(summary);
 
   const flow = el("div","production-flow");
-  stageCard(flow,"🌾","Сырьё","Урожай, закупки и склад",Object.keys(s.inventory||{}).some(k=>(s.inventory[k]||0)>0)?"stage-done":"stage-wait");
-  stageCard(flow,"🫙","Брожение","Базовая брага и винные партии",batches.some(x=>x.stage==="Брожение")?"stage-active":batches.some(x=>x.done)?"stage-done":"stage-wait");
-  stageCard(flow,"⚗️","Перегонка","Игровая перегонка и оценка качества",s.distillation?.active?"stage-active":(s.distillation?.result||0)>0?"stage-done":"stage-wait");
-  stageCard(flow,"🪵","Выдержка","Созревание в бочках и погребе",(s.barrelAging||[]).some(x=>!x.ready)||(s.viticulture?.batches||[]).some(x=>x.stage==="aging"&&!x.ready)?"stage-active":(s.barrelAging||[]).some(x=>x.ready)?"stage-done":"stage-wait");
-  stageCard(flow,"🍾","Готовая продукция","Склад, рынок и заказы",Object.entries(s.inventory||{}).some(([id,n])=>n>0&&["wine","mead","apple_cider","pear_wine","fruit_wine","spirit","aged_spirit","honey_spirit","aged_honey_spirit"].includes(id))?"stage-done":"stage-wait");
+  stageCard(flow,"flaticon-kettle.png","Сырьё","Урожай, закупки и склад",Object.keys(s.inventory||{}).some(k=>(s.inventory[k]||0)>0)?"stage-done":"stage-wait");
+  stageCard(flow,"flaticon-filter.png","Брожение","Базовая брага и винные партии",batches.some(x=>x.stage==="Брожение")?"stage-active":batches.some(x=>x.done)?"stage-done":"stage-wait");
+  stageCard(flow,"flaticon-distillation.png","Перегонка","Игровая перегонка и оценка качества",s.distillation?.active?"stage-active":(s.distillation?.result||0)>0?"stage-done":"stage-wait");
+  stageCard(flow,"icon_barrel.png","Выдержка","Созревание в бочках и погребе",(s.barrelAging||[]).some(x=>!x.ready)||(s.viticulture?.batches||[]).some(x=>x.stage==="aging"&&!x.ready)?"stage-active":(s.barrelAging||[]).some(x=>x.ready)?"stage-done":"stage-wait");
+  stageCard(flow,"icon_flask.png","Готовая продукция","Склад, рынок и заказы",Object.entries(s.inventory||{}).some(([id,n])=>n>0&&["wine","mead","apple_cider","pear_wine","fruit_wine","spirit","aged_spirit","honey_spirit","aged_honey_spirit"].includes(id))?"stage-done":"stage-wait");
   root.append(el("h3","","Производственная цепочка"),flow);
 
   const list = el("div","production-batch-list");
@@ -66,6 +97,40 @@ function render(s) {
   if (!s.productionLog.length) archive.append(el("p","economy-empty","Архив пополнится после сбора готовой продукции."));
   s.productionLog.slice(0,10).forEach(entry=>{const row=el("div","production-log-row");row.append(el("span","production-log-day","День "+entry.day),el("b","",entry.name),el("span","",entry.process+" · "+entry.amount+" ед."));if(entry.quality!==null)row.append(el("small","","Качество: "+entry.quality+"/100"));archive.append(row);});
   root.append(archive);
+
+  root.append(el("h3", "", "Паспорта качества партий"));
+  const passports = el("div", "production-passports");
+  s.productionLog.slice(0, 12).forEach(entry => {
+    const p = entry.passport || makePassport(entry, s, "legacy");
+    entry.passport = p;
+    const card = el("article", "production-passport");
+    const head = el("div", "passport-head");
+    head.append(el("b", "", p.productName), el("strong", "", p.quality + "/100 · "+(p.grade||"Обычное")) );
+    card.append(head, el("small", "", "№ " + p.id + " · день " + p.day + " · " + p.process));
+    const metrics = el("div", "passport-metrics");
+    [["Аромат",p.aroma],["Чистота",p.purity],["Стабильность",p.stability]].forEach(([label,value]) => metrics.append(el("span","",label+": "+value)));
+    card.append(metrics,el("small","passport-sale","Влияние на цену: "+(p.saleModifier>=100?"+":"")+(p.saleModifier-100)+"%"));
+    const factors=el("details","passport-factors");factors.append(el("summary","","Разбор оценки качества"));
+    (p.factors||[]).forEach(f=>factors.append(el("p","",f.label+": "+(f.value>0?"+":"")+f.value+" · "+f.detail)));
+    card.append(factors);
+    card.append(el("small","passport-stock","На складе по паспорту: "+(p.remaining??p.amount??0)+" · продано: "+(p.sold||0)));
+    if (p.ratio) card.append(el("small","passport-recipe","Рецепт: "+(p.recipeName||p.recipeId)+" · пропорция "+p.ratio));
+    if (p.standardId) card.append(el("small","passport-standard",p.standardMatch?"✓ Соответствует стандарту":"Отклонение от стандарта"));
+    passports.append(card);
+  });
+  if (!passports.childElementCount) passports.append(el("p","economy-empty","Паспорта появятся после завершения первых партий."));
+  root.append(passports);
+
+  root.append(el("h3", "", "Стандарты лаборатории"));
+  const standards = el("div", "production-standards");
+  Object.entries(s.lab?.standards || {}).forEach(([id,st]) => {
+    const names={orchard:"Румянец старого сада",vineyard:"Золотой винтаж",pear:"Грушевый медовый резерв"};
+    const card=el("article","production-standard");
+    card.append(el("b","",names[id]||id),el("span","",st.a+":"+st.b+" · качество "+st.quality+"/100"),el("small","","Закреплён по паспорту "+(st.passportId||"—")));
+    standards.append(card);
+  });
+  if (!standards.childElementCount) standards.append(el("p","economy-empty","Пока нет закреплённых стандартов. Лучшие партии можно закрепить во вкладке «Лаборатория»."));
+  root.append(standards);
 }
 
 export function initProductionHub(s) {

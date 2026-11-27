@@ -1,3 +1,4 @@
+import { consumeQualityLots } from "./quality.js";
 export const BUILDINGS = [
   {
     id: "warehouse",
@@ -440,7 +441,7 @@ export function initEconomy(state, { render, notify }) {
       }
       state.money -= totals.money;
       Object.entries(totals.parts).forEach(([partId, qty]) => { state.parts[partId] = (Number(state.parts[partId]) || 0) - qty; });
-      Object.entries(totals.inventory).forEach(([itemId, qty]) => { state.inventory[itemId] = (Number(state.inventory[itemId]) || 0) - qty; });
+      Object.entries(totals.inventory).forEach(([itemId, qty]) => { consumeQualityLots(state,itemId,qty); state.inventory[itemId] = (Number(state.inventory[itemId]) || 0) - qty; });
       Object.entries(state.materialCart || {}).forEach(([partId, qty]) => { state.parts[partId] = (Number(state.parts[partId]) || 0) + qty; });
       const purchases = [...totals.purchases];
       state.materialCart = {};

@@ -1,3 +1,4 @@
+import { consumeQualityForSale } from "./quality.js";
 import { ITEMS } from "./data.js";
 
 const $ = (selector) => document.querySelector(selector);
@@ -427,7 +428,9 @@ export function initOrders(state, { notify, render, earnExperience }) {
       }
 
       state.inventory[order.itemId] -= order.quantity;
-      state.money += order.reward;
+      const quality=consumeQualityForSale(state,order.itemId,order.quantity);
+      const payout=Math.round(order.reward*quality.multiplier);
+      state.money += payout;
       state.reputation = Math.min(100, state.reputation + 3);
       state.orders.completed += 1;
 
@@ -436,7 +439,7 @@ export function initOrders(state, { notify, render, earnExperience }) {
       earnExperience(order.xp);
 
       notify(
-        `Заказ выполнен! Получено ${order.reward} монет. Репутация выросла.`
+        `Заказ выполнен! Получено ${payout} монет${quality.hasPassport? " · качество партии "+quality.quality+"/100":""}. Репутация выросла.`
       );
 
       render();
