@@ -52,6 +52,7 @@ export function ensureGrandmaStory(state) {
   state.story.read ??= [];
   state.story.questStep ??= "locked";
   state.story.questRewards ??= [];
+  state.story.pendingPetrovich ??= null;
   return state.story;
 }
 
@@ -109,6 +110,57 @@ const QUEST_STEPS = {
   }
 };
 
+const PETROVICH_ENCOUNTERS = {
+  clue: {
+    title: "Петрович тоже кое-что нашёл",
+    text: "Петрович вынырнул из-за забора с латунной биркой. «Я тут случайно нашёл. Совершенно случайно. Она сама ко мне прилипла». На бирке знакомый бабушкин знак.",
+    choices: [{id:"take",label:"Забрать улику",result:"Ты забрал бирку. Петрович уверяет, что всё равно собирался её подарить.",apply:s=>{s.money=(Number(s.money)||0)+6;}},{id:"thank",label:"Поблагодарить Петровича",result:"Петрович растрогался и ушёл рассказывать всем, что он главный сыщик.",apply:s=>{s.reputation=Math.min(100,(Number(s.reputation)||0)+1);}}]
+  },
+  wrong: {
+    title: "Не та находка",
+    text: "Петрович торжественно принёс «старинный ключ». Это ключ от консервной банки, но он настаивает, что замок просто неправильный.",
+    choices: [{id:"keep",label:"Оставить ключ на память",result:"Ключ отправился в ящик с бесполезными, но дорогими сердцу вещами.",apply:s=>addXP(s,4)},{id:"return",label:"Вежливо вернуть находку",result:"Петрович обиделся, но признал, что на ключе написано «огурцы».",apply:s=>{s.reputation=Math.min(100,(Number(s.reputation)||0)+1);}}]
+  },
+  share: {
+    title: "Петрович требует долю",
+    text: "Услышав про бабушкин сундук, Петрович объявил себя «консультантом по наследству» и просит долю за моральную поддержку.",
+    choices: [{id:"pay",label:"Отдать 8 монет",result:"Петрович получил деньги и немедленно купил семечки.",apply:s=>{s.money=Math.max(0,(Number(s.money)||0)-8);}},{id:"refuse",label:"Отказать и напомнить про долги",result:"Петрович ушёл составлять встречный список долгов.",apply:s=>{s.reputation=Math.max(-100,(Number(s.reputation)||0)-1);}}]
+  },
+  trail: {
+    title: "Петрович перепутал следы",
+    text: "Петрович показывает уверенный маршрут к тайнику. Через минуту выясняется, что следы ведут к его собственному погребу.",
+    choices: [{id:"follow",label:"Проверить его маршрут",result:"В погребе нашлась забытая банка варенья. Петрович делает вид, что так и планировал.",apply:s=>addInventory(s,"apple",1)},{id:"ignore",label:"Идти по бабушкиной схеме",result:"Ты не стал отвлекаться. Петрович назвал это отсутствием командного духа.",apply:s=>addXP(s,3)}]
+  }
+};
+
+function maybeStartPetrovichEncounter(story) {
+  if (story.questStep === "completed" || story.pendingPetrovich) return;
+  if (Math.random() < 0.42) {
+    const ids = Object.keys(PETROVICH_ENCOUNTERS);
+    story.pendingPetrovich = ids[Math.floor(Math.random() * ids.length)];
+  }
+}
+
+export function resolvePetrovichEncounter(state, choiceId, notify = () => {}) {
+  const story = ensureGrandmaStory(state);
+  const encounter = PETROVICH_ENCOUNTERS[story.pendingPetrovich];
+  const choice = encounter?.choices.find(item => item.id === choiceId);
+  if (!choice) return false;
+  choice.apply(state);
+  story.findings.unshift({
+    id:"petrovich_" + story.pendingPetrovich + "_" + choiceId,
+    area:"house",
+    title:encounter.title,
+    text:choice.result,
+    reward:"Решение принято",
+    day:state.day
+  });
+  story.findings = story.findings.slice(0,30);
+  story.pendingPetrovich = null;
+  notify("🧔 " + choice.result);
+  return true;
+}
+
 function unlockSpecialNote(story, id) {
   if (!story.discovered.includes(id)) story.discovered.push(id);
   if (!story.unlocked.includes(id)) story.unlocked.push(id);
@@ -162,6 +214,7 @@ export function performGrandmaQuestAction(state, notify = () => {}, force = fals
     });
     notify("🌳 Найдена семейная коробка! Открыт рецепт «Бабушкин яблочный сбор».");
   }
+  maybeStartPetrovichEncounter(story);
   return true;
 }
 
@@ -190,6 +243,24 @@ export function renderGrandmaNotes(state, notify = () => {}, onUpdate = () => {}
 
   if (story.questStep === "locked" && story.discovered.includes("house_letter_1")) {
     story.questStep = "floorboard";
+  }
+  const encounter = PETROVICH_ENCOUNTERS[story.pendingPetrovich];
+  if (encounter) {
+    const encounterCard = document.createElement("article");
+    encounterCard.className = "grandma-quest-card petrovich-encounter";
+    const encounterTitle = document.createElement("h3");
+    encounterTitle.textContent = "🧔 " + encounter.title;
+    const encounterText = document.createElement("p");
+    encounterText.textContent = encounter.text;
+    encounterCard.append(encounterTitle, encounterText);
+    encounter.choices.forEach(choice => {
+      const choiceButton = document.createElement("button");
+      choiceButton.type = "button";
+      choiceButton.dataset.petrovichChoice = choice.id;
+      choiceButton.textContent = choice.label;
+      encounterCard.append(choiceButton);
+    });
+    root.append(encounterCard);
   }
   const activeQuest = QUEST_STEPS[story.questStep];
   if (activeQuest) {
@@ -258,6 +329,12 @@ export function renderGrandmaNotes(state, notify = () => {}, onUpdate = () => {}
   if (!root.dataset.questBound) {
     root.dataset.questBound = "true";
     root.addEventListener("click", event => {
+      const choice = event.target.closest("[data-petrovich-choice]");
+      if (choice) {
+        resolvePetrovichEncounter(state, choice.dataset.petrovichChoice, notify);
+        onUpdate();
+        return;
+      }
       const button = event.target.closest("[data-grandma-quest]");
       if (!button) return;
       performGrandmaQuestAction(state, notify);
