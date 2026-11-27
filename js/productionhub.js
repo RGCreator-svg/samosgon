@@ -181,7 +181,7 @@ export function initProductionHub(s,{notify=()=>{}}={}) {
   if(!hub.dataset.blendBound){
     hub.dataset.blendBound="1";
     hub.addEventListener("click",event=>{
-      const button=event.target.closest("[data-blend]");if(!button)return;
+      const button=event.target.closest("[data-blend],[data-pin-blend]");if(!button)return;
       const result=handleBlendClick(s,button,recordProduction,notify);
       if(result)render(s);
     });
