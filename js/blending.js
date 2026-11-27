@@ -73,6 +73,8 @@ export function blendBatch(state, recipeId, recordProduction, ratio=null) {
     }
     return null;
   }
+  const recentScores=(state.blendLog||[]).slice(0,9).map(row=>Number(row.quality)||0);
+  state.blendReputation=Math.round(([...recentScores,score].reduce((sum,n)=>sum+n,0))/Math.max(1,recentScores.length+1));
   const passportId=recordProduction(state,{
     name:recipe.name,item:recipe.item,amount:output,process:"Купажирование",
     quality:score,recipeId:recipe.id,recipeName:recipe.name,
@@ -87,7 +89,7 @@ export function blendBatch(state, recipeId, recordProduction, ratio=null) {
 
 export function renderBlendWorkshop(state,root) {
   const card=el("section","blend-workshop");
-  card.append(el("h3","","🧪 Купажная мастерская"),el("p","","Объединяй готовые партии. Качество и вкусовой профиль рассчитываются по паспортам исходных партий; купаж получает собственный паспорт."));
+  card.append(el("h3","","🧪 Купажная мастерская"),el("p","","Подбирай пропорции, проводи дегустацию и закрепляй собственную марку. Каждый результат получает паспорт партии."),el("p","blend-brand-reputation","Репутация марки: "+(Number(state.blendReputation)||0)+"/100 · на цену купажей влияет стабильность качества."));
   for(const recipe of BLEND_RECIPES){
     const row=el("article","blend-recipe");
     const labels={spirit:"Спирт-сырец",aged_spirit:"Выдержанный продукт",honey_spirit:"Медовый дистиллят",aged_honey_spirit:"Выдержанный медовый дистиллят"};
