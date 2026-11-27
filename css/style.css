@@ -2678,3 +2678,28 @@ body {
 @media(prefers-reduced-motion:reduce) {
   #game .tab-content:not(#home) { animation:none; }
 }
+
+/* Живые признаки работы усадьбы */
+.homestead-house .chimney::after {
+  content:""; position:absolute; left:50%; top:-28px; width:13px; height:13px;
+  border-radius:50%; background:#eee8d8a8; filter:blur(2px); opacity:0;
+}
+.homestead-scene[data-production="active"] .homestead-house .chimney::after {
+  opacity:.8; animation:homestead-smoke 3.2s ease-out infinite;
+}
+.homestead-scene[data-production="ready"] .homestead-house .chimney::after {
+  opacity:1; width:17px; height:17px; background:#f4d18a; box-shadow:0 0 15px #f3d28a;
+  animation:homestead-ready-pulse 1.2s ease-in-out infinite;
+}
+@keyframes homestead-smoke {
+  0% { transform:translate(-50%,10px) scale(.55); opacity:0; }
+  25% { opacity:.65; }
+  100% { transform:translate(9px,-46px) scale(1.8); opacity:0; }
+}
+@keyframes homestead-ready-pulse {
+  0%,100% { transform:scale(.9); }
+  50% { transform:scale(1.25); }
+}
+@media(prefers-reduced-motion:reduce) {
+  .homestead-scene[data-production] .homestead-house .chimney::after { animation:none; }
+}
