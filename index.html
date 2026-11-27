@@ -343,6 +343,13 @@
       <p>Состояние дома: <b id="houseValue"></b>%</p>
       <button id="repairHouse">Починить дом — 30 монет</button><p class="action-requirements">Навык: «Руки из плеч» снижает цену до 20 монет. Материалы: пиломатериалы ×1, крепёж ×1, краска ×1.</p>
     </section>
+          <section class="well-development-card" aria-labelledby="wellDevelopmentTitle">
+        <h3 id="wellDevelopmentTitle">💧 Колодец и водоснабжение</h3>
+        <p id="wellDevelopmentStatus">Пока на участке нет колодца. Начните с рытья шахты, затем установите насос и постройте водонапорную башню.</p>
+        <div id="wellDevelopmentDetails"></div>
+        <button id="wellDevelopmentAction" type="button" data-water-upgrade="1">⛏ Вырыть колодец</button>
+      </section>
+
 
     <section id="farm" class="tab-content panel hidden location-panel farm-panel">
       <div class="location-scene farm-scene" role="img" aria-label="Огород с грядками, овощами и деревянным забором">
@@ -363,12 +370,6 @@
       <p>Состояние огорода: <b id="gardenValue"></b>%</p>
       <button id="harvestVegetables">Собрать овощи</button>
       <button id="repairGarden">Расчистить грядки — 20 монет</button><p class="action-requirements">Навык: «Руки из плеч» снижает цену до 15 монет. Материалы: пиломатериалы ×1, крепёж ×1.</p>
-          <section class="well-development-card" aria-labelledby="wellDevelopmentTitle">
-        <h3 id="wellDevelopmentTitle">💧 Колодец и водоснабжение</h3>
-        <p id="wellDevelopmentStatus">Пока на участке нет колодца. Начните с рытья шахты, затем установите насос и постройте водонапорную башню.</p>
-        <div id="wellDevelopmentDetails"></div>
-        <button id="wellDevelopmentAction" type="button" data-water-upgrade="1">⛏ Вырыть колодец</button>
-      </section>
 </section>
 
     <section id="orchard" class="tab-content panel hidden location-panel orchard-panel">
@@ -385,7 +386,7 @@
       <p id="orchardDescription"></p>
       <p>Состояние сада: <b id="orchardValue"></b>%</p>
       <p>Деревья: <b id="treeCount"></b></p>
-      <button id="restoreOrchard">Расчистить сад — 40 монет</button>
+      <button id="restoreOrchard">Расчистить сад — 40 монет</button><p class="action-requirements">Навык: «Руки из плеч» снижает цену до 30 монет. Материалы: пиломатериалы ×2, крепёж ×1, инструменты ×1.</p>
       <button id="harvestFruit">Собрать фрукты</button>
     </section>
 
