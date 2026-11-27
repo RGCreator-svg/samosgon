@@ -20,6 +20,7 @@ import { initResearchLab, renderResearchLab, advanceResearchLabDay } from "./res
 import { initProcessCenter, renderProcessCenter } from "./processcenter.js";
 import { initProductionPlant, renderProductionPlant, advanceProductionPlantDay } from "./productionplant.js";
 import { initCellar, renderCellar, ageBarrelsOneDay } from "./cellar.js";
+import { initGamePresentation } from "./gamePresentation.js";
 
 let state = loadGame();
 
@@ -151,6 +152,7 @@ initResearchLab(state, { render, notify, earnExperience });
 initProcessCenter(state, { render, notify, earnExperience });
 initProductionPlant(state, { render, notify, earnExperience });
 initCellar(state, { render, notify });
+initGamePresentation();
 registerCartHandler("homesteadRepair",(current,item)=>{
   const action=item.payload.action;
   if(action==="house"){current.house=Math.min(100,current.house+20*item.quantity);earnExperience(5*item.quantity);}
