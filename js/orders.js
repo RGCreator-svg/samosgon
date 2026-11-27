@@ -1,4 +1,5 @@
 import { consumeQualityForSale } from "./quality.js";
+import { removeInventory } from "./economy.js";
 import { ITEMS } from "./data.js";
 
 const $ = (selector) => document.querySelector(selector);
@@ -427,8 +428,8 @@ export function initOrders(state, { notify, render, earnExperience }) {
         return;
       }
 
-      state.inventory[order.itemId] -= order.quantity;
       const quality=consumeQualityForSale(state,order.itemId,order.quantity);
+      removeInventory(state, order.itemId, order.quantity, { consumeQuality: false });
       const payout=Math.round(order.reward*quality.multiplier);
       state.money += payout;
       state.reputation = Math.min(100, state.reputation + 3);
