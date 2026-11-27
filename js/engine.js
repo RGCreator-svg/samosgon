@@ -39,6 +39,7 @@ export function createInitialState() {
     maintenance: 100,
     story: { unlocked: [] },
     advancedContracts: { offer: null, completed: 0 },
+    cellar: { barrels: [], nextId: 1 },
 
     production: {
       active: false,
@@ -72,6 +73,10 @@ function migrateSave(parsed) {
     advancedContracts: {
       offer: parsed.advancedContracts?.offer || null,
       completed: Math.max(0, Number(parsed.advancedContracts?.completed) || 0)
+    },
+    cellar: {
+      barrels: Array.isArray(parsed.cellar?.barrels) ? parsed.cellar.barrels : [],
+      nextId: Math.max(1, Number(parsed.cellar?.nextId) || 1)
     }
   };
 
