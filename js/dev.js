@@ -46,7 +46,7 @@ function makeField(key, label, value, min, max) {
   return wrapper;
 }
 
-export function initDevTools(state, { render, notify, onStoryTest = () => {}, onQuestTest = () => {} }) {
+export function initDevTools(state, { render, notify, onStoryTest = () => {}, onQuestTest = () => {}, onPetrovichTest = () => {} }) {
   const topbar = document.querySelector(".topbar");
   if (!topbar || document.querySelector("#devToggle")) return;
 
@@ -113,7 +113,15 @@ export function initDevTools(state, { render, notify, onStoryTest = () => {}, on
     onQuestTest();
     storyHint.textContent = `Цепочка: ${state.story?.questStep || "не начата"} · записок: ${(state.story?.discovered||[]).length} · находок: ${(state.story?.findings||[]).length}`;
   });
-  storyTools.append(storyTitle,storyHint,storySelect,storyButton,questButton);
+  const petrovichButton = document.createElement("button");
+  petrovichButton.type = "button";
+  petrovichButton.className = "dev-story-test";
+  petrovichButton.textContent = "Вызвать Петровича";
+  petrovichButton.addEventListener("click", () => {
+    onPetrovichTest();
+    storyHint.textContent = `Встреча: ${state.story?.pendingPetrovich || "нет активной"} · цепочка: ${state.story?.questStep || "не начата"}`;
+  });
+  storyTools.append(storyTitle,storyHint,storySelect,storyButton,questButton,petrovichButton);
 
   const form = document.createElement("form");
   form.id = "devForm";
