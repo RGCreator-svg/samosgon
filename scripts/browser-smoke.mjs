@@ -45,7 +45,8 @@ try{
   assert.ok(imageLoaded,"Squash.png pumpkin asset failed to load");
   assert.ok(await page.locator(".navigation button[data-tab]").count()>=10,"Top navigation did not include dynamic game sections");
   assert.equal(await page.locator(".prototype-side .side-btn").count(),3,"Prototype must show Achievements, Tasks and Goals shortcuts");
-  assert.match(await page.locator(".prototype-side").innerText(),/Достижения[\s\S]*Задания[\s\S]*Цели/,"Side shortcuts are not in the expected order");
+  const sideText=await page.locator(".prototype-side").innerText();
+  assert.ok(sideText.indexOf("Достижения")<sideText.indexOf("Задания")&&sideText.indexOf("Задания")<sideText.indexOf("Цели"),"Side shortcuts are not in the expected order");
   assert.ok(await page.locator(".player-profile").isVisible(),"Player avatar/profile HUD is missing");
   assert.ok(await page.locator(".player-profile #xpBar").count()===1,"XP progress must be shown inside player profile");
   assert.ok(await page.locator("#wellDevelopmentAction").isVisible(),"Well development task is missing");
