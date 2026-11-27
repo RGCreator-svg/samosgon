@@ -63,7 +63,7 @@ function render(s) {
   const root = $("#productionHub");
   if (!root) return;
   root.replaceChildren();
-  root.append(el("p", "feature-intro", "Единый диспетчер хозяйства: здесь собраны активные партии из сарая, винодельни, перегонки и бочек. Это обзор игрового производства, а не отдельная производственная механика."));
+  root.append(el("p", "feature-intro", "Единый диспетчер: отслеживай партии браги, винодельни, перегонки и выдержки. Новые рецептуры и запуск нескольких чанов доступны во вкладке «Винокурня»."));
 
   const distillFocus = el("article","production-distill-focus");
   distillFocus.append(el("h3","","⚗️ Главное дело — самогоноварение"));
