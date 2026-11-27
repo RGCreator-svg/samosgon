@@ -221,9 +221,8 @@ registerCartHandler("homesteadRepair",(current,item)=>{
   }
 });
 
-// Журнал событий всегда находится внизу игрового экрана, после динамических вкладок.
-const eventConsole = $("#notifications")?.closest(".event-console");
-if (eventConsole) $("#game")?.append(eventConsole);
+// Журнал остаётся внутри .game-footer-dock рядом с тыквой.
+ // Не переносить его в #game: это разрывает общий flex-контейнер и ломает расположение.
 
 // Продажа товаров — кнопки создаются в ui.js
 $("#marketItems")?.addEventListener("click", (event) => {
