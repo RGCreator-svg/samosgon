@@ -46,7 +46,7 @@ function makeField(key, label, value, min, max) {
   return wrapper;
 }
 
-export function initDevTools(state, { render, notify, onStoryTest = () => {} }) {
+export function initDevTools(state, { render, notify, onStoryTest = () => {}, onQuestTest = () => {} }) {
   const topbar = document.querySelector(".topbar");
   if (!topbar || document.querySelector("#devToggle")) return;
 
@@ -105,7 +105,15 @@ export function initDevTools(state, { render, notify, onStoryTest = () => {} }) 
     const counts = state.story || {};
     storyHint.textContent = `Записок: ${(counts.discovered||[]).length} · находок: ${(counts.findings||[]).length}`;
   });
-  storyTools.append(storyTitle,storyHint,storySelect,storyButton);
+  const questButton = document.createElement("button");
+  questButton.type = "button";
+  questButton.className = "dev-story-test";
+  questButton.textContent = "Следующий шаг семейной тайны";
+  questButton.addEventListener("click", () => {
+    onQuestTest();
+    storyHint.textContent = `Цепочка: ${state.story?.questStep || "не начата"} · записок: ${(state.story?.discovered||[]).length} · находок: ${(state.story?.findings||[]).length}`;
+  });
+  storyTools.append(storyTitle,storyHint,storySelect,storyButton,questButton);
 
   const form = document.createElement("form");
   form.id = "devForm";
