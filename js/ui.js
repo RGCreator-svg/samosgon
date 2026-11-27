@@ -634,6 +634,11 @@ export function renderWorld(state) {
   };
 
   // Сцены отражают состояние хозяйства и обновляются вместе с обычным рендером.
+  const homeScene = $(".homestead-scene");
+  applySeasonToScene(homeScene);
+  const productionActive = Boolean(state.production?.active || state.mashHouse?.batches?.length || state.distillation?.active || state.viticulture?.batches?.some(batch => batch.status === "fermenting" || batch.status === "aging" || batch.daysLeft > 0));
+  const productionReady = Boolean(state.production?.ready || state.mashHouse?.batches?.some(batch => Number(batch.daysLeft) <= 0));
+  if (homeScene) { homeScene.dataset.production = productionReady ? "ready" : productionActive ? "active" : "idle"; }
   const farmScene = $(".farm-scene");
   applySeasonToScene(farmScene);
   if (farmScene) {
