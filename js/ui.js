@@ -362,7 +362,7 @@ function renderWarehouse(state) {
   }
   if (showEmpty) showEmpty.checked = warehouseShowEmpty;
 
-  const openGroups = new Set([...warehouse.querySelectorAll("details[open]")].map(node => node.dataset.group));
+  const openGroups = new Set([...warehouse.querySelectorAll("details[open]")].filter(node => node.dataset.autoOpened !== "true").map(node => node.dataset.group));
   const query = (search?.value || "").trim().toLocaleLowerCase("ru");
   warehouse.replaceChildren();
 
@@ -390,6 +390,7 @@ function renderWarehouse(state) {
     const section = document.createElement("details");
     section.className = "warehouse-category";
     section.dataset.group = group.id;
+    section.dataset.autoOpened = query ? "true" : "false";
     section.open = openGroups.has(group.id) || (!!query && entries.length > 0);
 
     const summary = document.createElement("summary");
@@ -521,38 +522,6 @@ const GRISHKA_TIPS = [
   "Бабушка говорила: если деталь осталась лишней — значит, ты собрал что-то новое."
 ];
 
-function createGrishkaPortrait() {
-  return `
-  <svg class="grishka-art" viewBox="0 0 260 330" role="img" aria-label="Дядька Гришка — хитрый деревенский советчик">
-    <defs>
-      <linearGradient id="grishka-coat" x2="1" y2="1"><stop stop-color="#71804c"/><stop offset="1" stop-color="#293a28"/></linearGradient>
-      <radialGradient id="grishka-face"><stop stop-color="#f3c99a"/><stop offset="1" stop-color="#b97855"/></radialGradient>
-      <filter id="grishka-glow"><feGaussianBlur stdDeviation="5"/></filter>
-    </defs>
-    <ellipse cx="130" cy="304" rx="91" ry="13" fill="#000" opacity=".35"/>
-    <path d="M58 295 Q62 210 88 181 L174 181 Q205 224 207 295Z" fill="url(#grishka-coat)" stroke="#a18b5b" stroke-width="3"/>
-    <path d="M93 190 L126 225 L111 288 L78 285Z" fill="#d0c2a0"/>
-    <path d="M164 190 L133 225 L151 288 L185 285Z" fill="#d0c2a0"/>
-    <path d="M92 194 L64 282 M174 194 L198 280" stroke="#b29a65" stroke-width="13" stroke-linecap="round"/>
-    <path d="M84 82 Q75 28 130 24 Q190 29 182 95 L169 159 Q132 192 93 154Z" fill="#eee0c5"/>
-    <path d="M88 94 Q75 48 113 37 Q146 16 177 58 L173 112 Q160 83 148 80 Q125 105 88 94Z" fill="#f1e6d1"/>
-    <ellipse cx="130" cy="105" rx="48" ry="58" fill="url(#grishka-face)" stroke="#6b4939" stroke-width="2"/>
-    <path d="M91 87 Q108 69 122 87 M140 87 Q158 68 171 89" stroke="#6b4939" stroke-width="9" stroke-linecap="round"/>
-    <ellipse cx="112" cy="103" rx="8" ry="11" fill="#fff"/><ellipse cx="151" cy="103" rx="8" ry="11" fill="#fff"/>
-    <circle cx="114" cy="105" r="4" fill="#29251d"/><circle cx="151" cy="105" r="4" fill="#29251d"/>
-    <path d="M128 104 Q111 131 132 132 Q145 132 142 122" fill="#c88661" stroke="#7e4d3a" stroke-width="2"/>
-    <path d="M105 143 Q130 170 159 140 Q146 180 119 166Z" fill="#57352d"/>
-    <path d="M104 145 Q130 156 157 142" stroke="#fff1d8" stroke-width="5"/>
-    <path d="M76 61 Q95 8 158 15 Q205 18 215 57 Q162 43 76 61Z" fill="#8c7545" stroke="#d2b56e" stroke-width="4"/>
-    <path d="M113 21 Q126 -2 146 17" stroke="#e1c879" stroke-width="8" fill="none"/>
-    <circle cx="169" cy="31" r="13" fill="#e7bd49"/><circle cx="169" cy="31" r="5" fill="#754a24"/>
-    <path d="M191 154 Q216 130 224 91" stroke="#b2a17a" stroke-width="8" fill="none" stroke-linecap="round"/>
-    <path d="M218 92 Q236 48 247 86 Q235 112 218 92Z" fill="#e58d32" stroke="#7a4b26" stroke-width="2"/>
-    <path d="M225 65 Q231 49 240 58 M230 67 Q245 49 250 55" stroke="#77934e" stroke-width="5" fill="none"/>
-    <path d="M61 285 L38 311 L91 311 L104 289 M167 289 L183 311 L231 311 L202 283" fill="#514233" stroke="#b39b70" stroke-width="4"/>
-    <path d="M98 200 L115 218 L101 238 L85 218Z M163 202 L147 221 L165 241 L181 219Z" fill="#a56b45" stroke="#d2a66a" stroke-width="2"/>
-  </svg>`;
-}
 
 export function renderSkills(state) {
   const tree = $("#skillTree");
