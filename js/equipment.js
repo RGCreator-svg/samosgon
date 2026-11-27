@@ -154,7 +154,7 @@ function renderVisualAssembly(s){
     <div class="still-workbench" data-lineage="${getEquipmentProfile(s,s.mashType||"sugar").lineageTag}" role="img" aria-label="Анимированная 2D-модель аппарата с установленными модулями">
       <div class="workbench-wall"><span class="wall-pipe wall-pipe-one"></span><span class="wall-pipe wall-pipe-two"></span><span class="wall-hook"></span><span class="wall-shelf"></span></div>
       <div class="still-floor-shadow"></div>
-      <div class="still-unit">
+      <div class="still-unit" data-lineage="${getEquipmentProfile(s,s.mashType||"sugar").lineageTag}"><div class="lineage-apparatus-mark" aria-hidden="true">${({sugar:"▤ ЧИСТАЯ СЕРИЯ",fruit:"♧ САДОВАЯ ЛИНИЯ",grain:"▦ ЗЕРНОВОЙ УЗЕЛ",honey:"✦ МЕДОВЫЙ РЕЗЕРВ"})[s.mashType]||"▤ УНИВЕРСАЛЬНАЯ ЛИНИЯ"}</div>
         ${column?`<div class="still-column ${rect?"packed":"plate"}" data-module-visual="${columnModule}"><i></i><i></i><i></i><i></i><span class="column-cap"></span></div>`:""}
         ${has("dephlegmator")?'<div class="still-dephlegmator" data-module-visual="dephlegmator"><span></span><i></i></div>':""}
         ${copper?'<div class="still-head" data-module-visual="copper_head"><span class="head-neck"></span><i class="head-rivet"></i></div>':'<div class="still-lid"></div>'}
