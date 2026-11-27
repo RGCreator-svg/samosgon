@@ -60,7 +60,7 @@ function notify(message) {
 
 function render() {
   renderAll(state);
-  renderGrandmaNotes(state, notify);
+  renderGrandmaNotes(state, notify, render);
   renderEconomy(state);
   renderEquipment(state);
   renderExpansion(state);
