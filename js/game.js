@@ -336,7 +336,10 @@ $("#sleepButton")?.addEventListener("click", (event) => {
     render();
   } catch (error) {
     console.error("Не удалось завершить игровой день:", error);
-    state = JSON.parse(snapshot);
+    const restored = JSON.parse(snapshot);
+    // Не заменяем объект state: игровые модули хранят ссылку на него.
+    Object.keys(state).forEach(key => delete state[key]);
+    Object.assign(state, restored);
     render();
     notify("Не получилось завершить день: изменения отменены. Попробуйте ещё раз.");
   } finally {
