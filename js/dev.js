@@ -46,7 +46,7 @@ function makeField(key, label, value, min, max) {
   return wrapper;
 }
 
-export function initDevTools(state, { render, notify, onStoryTest = () => {}, onQuestTest = () => {}, onPetrovichTest = () => {} }) {
+export function initDevTools(state, { render, notify, onStoryTest = () => {}, onQuestTest = () => {}, onPetrovichTest = () => {}, onEquipmentTest = () => {} }) {
   const topbar = document.querySelector(".topbar");
   if (!topbar || document.querySelector("#devToggle")) return;
 
@@ -151,7 +151,13 @@ export function initDevTools(state, { render, notify, onStoryTest = () => {}, on
 
   actions.append(apply, reset);
   form.append(grid, actions);
-  dialog.append(header, note, storyTools, form);
+  const equipmentTools=document.createElement("div");equipmentTools.className="dev-story-tools";
+  const equipmentTitle=document.createElement("h3");equipmentTitle.textContent="⚙️ Конструктор оборудования";
+  const equipmentHint=document.createElement("p");equipmentHint.textContent="Выдать новые типы колонн, холодильников, узлов отбора и измерительных модулей для проверки сборки."; 
+  const equipmentButton=document.createElement("button");equipmentButton.type="button";equipmentButton.textContent="Выдать комплект новых модулей";
+  equipmentButton.addEventListener("click",()=>{onEquipmentTest();});
+  equipmentTools.append(equipmentTitle,equipmentHint,equipmentButton);
+  dialog.append(header, note, storyTools, equipmentTools, form);
   modal.append(dialog);
   topbar.append(toggle);
   document.body.append(modal);
