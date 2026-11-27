@@ -93,7 +93,6 @@ function showTab(tabId) {
   $("[data-tab]").forEach((button) => {
     button.classList.toggle("active", button.dataset.tab === tabId);
   });
-  document.querySelector("#game-world")?.dispatchEvent(new CustomEvent("samosgon:tab-change", { detail: tabId }));
   window.dispatchEvent(new CustomEvent("samosgon:tab-change", { detail: tabId }));
 }
 
