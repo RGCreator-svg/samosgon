@@ -2537,3 +2537,11 @@ button:disabled {
 .lab-herbal-workshop{margin:18px 0;padding:16px;border:1px solid #647b4d;border-radius:14px;background:linear-gradient(145deg,rgba(52,69,42,.35),rgba(28,36,29,.65))}
 .lab-herbal-workshop h3{color:#c4d99e}.lab-herbal-workshop .lab-recipe-type{font-size:.82rem}.lab-herbal-workshop .lab-discovered-card{border-color:#7a9161}
 .lab-herbal-workshop .lab-discovered-card small{display:block;color:#b6c99a;margin:7px 0}
+
+
+/* Авторские купажи настоек */
+.blend-standard-note{display:block;color:#b9d6a2;margin:8px 0}
+.blend-pin-standard{margin:12px 0;background:linear-gradient(135deg,#526c43,#718b52);border:1px solid #91aa70;color:#fff}
+.blend-standards{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:7px}
+.blend-standards p{margin:0;padding:9px 11px;border:1px solid #596b4d;border-radius:9px;background:#263326;color:#d9e7cb;font-size:.88rem}
+.blend-recipe:has([data-blend="berry_tincture_blend"]),.blend-recipe:has([data-blend="herbal_tincture_blend"]),.blend-recipe:has([data-blend="meadow_tincture_blend"]){border-color:#71875b;background:linear-gradient(145deg,rgba(71,91,55,.25),rgba(34,45,35,.88))}
