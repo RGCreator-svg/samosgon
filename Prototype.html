@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Уютная ферма и деревенская винокурня</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; user-select:none; }
+  html,body { width:100%; height:100%; overflow:hidden; font-family:'Segoe UI', 'Comic Sans MS', sans-serif; }
+  #game { position:relative; width:100vw; height:100vh; overflow:hidden;
+    background:linear-gradient(#7ec8f5 0%, #a8d8f8 40%, #cfe9b9 42%, #9ccf6f 100%); }
+
+  /* ===== СЦЕНА (SVG фон) ===== */
+  #scene { position:absolute; inset:0; width:100%; height:100%; }
+  .clickable { cursor:pointer; }
+  .clickable:hover { filter:brightness(1.08); }
+  .bob { animation: bob 2.2s ease-in-out infinite; transform-box:fill-box; transform-origin:center; }
+  @keyframes bob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-4px)} }
+  .smoke { animation: rise 3s linear infinite; opacity:.5; }
+  @keyframes rise { 0%{transform:translateY(0); opacity:.5} 100%{transform:translateY(-28px); opacity:0} }
+  .bird { animation: fly 14s linear infinite; }
+  @keyframes fly { 0%{transform:translate(-60px,20px)} 50%{transform:translate(50vw,-10px)} 100%{transform:translate(110vw,30px)} }
+
+  /* ===== ВЕРХНЯЯ ПАНЕЛЬ ===== */
+  .top { position:absolute; top:0; left:0; right:0; display:flex; align-items:flex-start; gap:12px; padding:10px 14px; z-index:10; pointer-events:none; }
+  .top > * { pointer-events:auto; }
+  .profile { display:flex; align-items:center; gap:10px; background:linear-gradient(#5c3a1e,#7a4d26); border:3px solid #3d2510; border-radius:60px; padding:6px 18px 6px 8px; box-shadow:0 3px 0 #2c1a0a; cursor:pointer; }
+  .avatar { width:58px; height:58px; border-radius:50%; border:3px solid #f0c04a; background:radial-gradient(circle at 35% 35%, #ffe9a8, #d99a2b); display:flex; align-items:center; justify-content:center; font-size:30px; }
+  .profile .info b { color:#fff; font-size:17px; text-shadow:0 2px 0 #00000055; display:block; }
+  .profile .lvl { color:#ffd75e; font-size:13px; }
+  .xpbar { width:110px; height:8px; background:#3d2510; border-radius:4px; margin-top:3px; overflow:hidden; }
+  .xpbar div { height:100%; width:35%; background:linear-gradient(#ffe36e,#f5a623); }
+
+  .res-bar { display:flex; gap:10px; margin-left:6px; }
+  .res { display:flex; align-items:center; gap:8px; background:linear-gradient(#7a4d26,#5c3a1e); border:3px solid #3d2510; border-radius:30px; padding:5px 8px 5px 6px; box-shadow:0 3px 0 #2c1a0a; }
+  .res .ico { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:17px; }
+  .res .coin { background:radial-gradient(circle at 35% 35%, #ffe27a, #e8a417); }
+  .res .bolt { background:radial-gradient(circle at 35% 35%, #9fe3ff, #2f9de0); }
+  .res .gem  { background:radial-gradient(circle at 35% 35%, #e79aff, #8a2be2); }
+  .res b { color:#fff; font-size:17px; min-width:58px; text-shadow:0 2px 0 #00000066; }
+  .plus { width:24px; height:24px; border-radius:50%; border:none; background:radial-gradient(circle at 35% 35%, #8fe36e, #3a9a1f); color:#fff; font-weight:bold; font-size:15px; cursor:pointer; box-shadow:0 2px 0 #2c6a10; }
+  .plus:active { transform:translateY(1px); }
+
+  .season { margin-left:auto; text-align:center; background:linear-gradient(#7a4d26,#5c3a1e); border:3px solid #3d2510; border-radius:14px; padding:6px 16px; color:#fff; box-shadow:0 3px 0 #2c1a0a; }
+  .season .t { font-size:17px; font-weight:bold; }
+  .season .d { font-size:12px; color:#ffe6b0; }
+
+  /* ===== НАВИГАЦИЯ ===== */
+  .nav { position:absolute; top:86px; left:0; right:0; display:flex; justify-content:center; gap:8px; z-index:10; flex-wrap:wrap; padding:0 10px; }
+  .tab { display:flex; align-items:center; gap:7px; background:linear-gradient(#8a5a2e,#6b431f); border:3px solid #3d2510; border-radius:12px; padding:8px 14px; color:#fff; font-weight:bold; font-size:15px; cursor:pointer; box-shadow:0 3px 0 #2c1a0a; text-shadow:0 1px 0 #00000066; }
+  .tab:hover { filter:brightness(1.1); }
+  .tab.active { background:linear-gradient(#f5a623,#d67f0a); }
+  .tab .ic { font-size:18px; }
+
+  /* ===== БОКОВЫЕ КНОПКИ ===== */
+  .side { position:absolute; left:14px; top:170px; display:flex; flex-direction:column; gap:12px; z-index:10; }
+  .side-btn { width:86px; text-align:center; background:linear-gradient(#8a5a2e,#6b431f); border:3px solid #3d2510; border-radius:14px; padding:8px 4px; color:#fff; font-size:13px; font-weight:bold; cursor:pointer; box-shadow:0 3px 0 #2c1a0a; position:relative; }
+  .side-btn .big { font-size:26px; display:block; margin-bottom:2px; }
+  .side-btn:hover { filter:brightness(1.1); }
+  .badge { position:absolute; top:-6px; right:-6px; background:radial-gradient(circle at 35% 35%, #ff7a7a, #c62828); color:#fff; width:24px; height:24px; border-radius:50%; font-size:12px; line-height:24px; border:2px solid #7a1010; }
+
+  /* ===== ЗАДАЧА ===== */
+  .task { position:absolute; right:14px; top:170px; width:210px; background:linear-gradient(#fdf3d7,#f3ddaa); border:3px solid #8a5a2e; border-radius:14px; padding:10px 12px; z-index:10; box-shadow:0 4px 8px #0003; }
+  .task h4 { color:#6b431f; font-size:14px; margin-bottom:6px; }
+  .task .row { display:flex; align-items:center; gap:10px; }
+  .task .app { font-size:30px; }
+  .task .txt { font-size:13px; color:#5c3a1e; line-height:1.3; }
+  .task .cnt { font-weight:bold; color:#c66a00; }
+
+  /* ===== НИЖНЯЯ ПАНЕЛЬ ===== */
+  .bottom { position:absolute; bottom:0; left:0; right:0; display:flex; align-items:flex-end; gap:12px; padding:12px 14px; z-index:10; }
+  .panel-mini { background:linear-gradient(#8a5a2e,#6b431f); border:3px solid #3d2510; border-radius:14px; padding:8px 14px; color:#fff; box-shadow:0 3px 0 #2c1a0a; cursor:pointer; }
+  .panel-mini:hover { filter:brightness(1.1); }
+  .panel-mini .t { font-weight:bold; font-size:15px; }
+  .panel-mini .s { font-size:13px; color:#ffe6b0; display:flex; align-items:center; gap:8px; }
+  .cat { position:relative; margin:0 auto; }
+  .cat .bubble { position:absolute; bottom:54px; left:50%; transform:translateX(-50%); background:#fff; border:3px solid #8a5a2e; border-radius:16px; padding:8px 14px; font-size:14px; color:#5c3a1e; white-space:nowrap; box-shadow:0 3px 6px #0002; }
+  .cat .bubble:after { content:''; position:absolute; bottom:-14px; left:50%; transform:translateX(-50%); border:8px solid transparent; border-top-color:#8a5a2e; }
+  .navbtns { display:flex; gap:10px; margin-left:auto; }
+  .navbtn { width:86px; height:74px; background:linear-gradient(#8a5a2e,#6b431f); border:3px solid #3d2510; border-radius:14px; color:#fff; font-size:13px; font-weight:bold; cursor:pointer; box-shadow:0 3px 0 #2c1a0a; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; }
+  .navbtn:hover { filter:brightness(1.1); }
+  .navbtn .ic { font-size:24px; }
+  .navbtn.red { background:linear-gradient(#e05a4a,#b02a1a); box-shadow:0 3px 0 #6a100a; }
+
+  /* ===== ПАНЕЛИ-МОДАЛКИ ===== */
+  .overlay { position:absolute; inset:0; background:#0006; display:none; align-items:center; justify-content:center; z-index:50; }
+  .overlay.show { display:flex; }
+  .modal { width:min(680px, 92vw); max-height:80vh; overflow:auto; background:linear-gradient(#fdf3d7,#f0dcb0); border:4px solid #6b431f; border-radius:18px; padding:18px 20px; box-shadow:0 10px 30px #0007; position:relative; }
+  .modal h2 { color:#6b431f; margin-bottom:12px; font-size:22px; }
+  .close { position:absolute; top:10px; right:12px; width:32px; height:32px; border-radius:50%; border:none; background:#c62828; color:#fff; font-weight:bold; font-size:16px; cursor:pointer; box-shadow:0 2px 0 #6a100a; }
+
+  .card { background:#fff8e6; border:2px solid #d9b57c; border-radius:12px; padding:10px 14px; margin-bottom:10px; display:flex; align-items:center; gap:12px; }
+  .card .ci { font-size:30px; }
+  .card .grow { flex:1; }
+  .card b { color:#5c3a1e; }
+  .card .sub { font-size:12px; color:#8a6a3e; }
+  .btn { border:none; border-radius:10px; padding:8px 16px; font-weight:bold; color:#fff; cursor:pointer; box-shadow:0 2px 0 #0004; font-size:14px; }
+  .btn:active { transform:translateY(1px); }
+  .btn.g { background:linear-gradient(#7cc84e,#4e9a22); box-shadow:0 2px 0 #2c6a10; }
+  .btn.b { background:linear-gradient(#4aa8e0,#1f6fb0); box-shadow:0 2px 0 #10486a; }
+  .btn.o { background:linear-gradient(#f5a623,#d67f0a); box-shadow:0 2px 0 #8a5200; }
+  .btn:disabled { filter:grayscale(1) opacity(.55); cursor:not-allowed; }
+  .bar { height:10px; background:#e3cfa4; border-radius:5px; overflow:hidden; margin-top:4px; }
+  .bar div { height:100%; background:linear-gradient(#7cc84e,#4e9a22); }
+
+  .log { position:absolute; left:50%; top:38%; transform:translateX(-50%); z-index:40; pointer-events:none; }
+  .float { position:absolute; font-weight:bold; font-size:20px; color:#fff; text-shadow:0 2px 2px #0008; animation: fl 1.1s ease-out forwards; white-space:nowrap; }
+  @keyframes fl { 0%{opacity:1; transform:translateY(0)} 100%{opacity:0; transform:translateY(-50px)} }
+  .toast { position:absolute; top:150px; left:50%; transform:translateX(-50%); background:#3d2510; color:#ffe6b0; padding:10px 18px; border-radius:12px; font-size:14px; z-index:60; opacity:0; transition:opacity .3s; pointer-events:none; }
+  .toast.show { opacity:1; }
+
+  .ach-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .ach { background:#fff8e6; border:2px solid #d9b57c; border-radius:12px; padding:10px; font-size:13px; color:#5c3a1e; }
+  .ach.done { border-color:#4e9a22; background:#eaf7e0; }
+  .ach .a-ic { font-size:24px; }
+</style>
+</head>
+<body>
+<div id="game">
+  <!-- ===== СЦЕНА ===== -->
+  <svg id="scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
+    <!-- небо и холмы -->
+    <rect width="1600" height="900" fill="url(#sky)"/>
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#6dbef2"/><stop offset="0.55" stop-color="#bfe3f8"/>
+      </linearGradient>
+      <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#a4d05e"/><stop offset="1" stop-color="#7cb540"/>
+      </linearGradient>
+      <linearGradient id="roof" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#b5722e"/><stop offset="1" stop-color="#8a5220"/>
+      </linearGradient>
+      <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#e8b366"/><stop offset="1" stop-color="#c98f42"/>
+      </linearGradient>
+    </defs>
+    <!-- облака -->
+    <g fill="#ffffff" opacity="0.9">
+      <ellipse cx="300" cy="120" rx="70" ry="26"/><ellipse cx="360" cy="105" rx="55" ry="22"/>
+      <ellipse cx="1150" cy="90" rx="80" ry="28"/><ellipse cx="1220" cy="110" rx="55" ry="20"/>
+      <ellipse class="bird" cx="700" cy="70" rx="26" ry="10" opacity="0.8"/>
+    </g>
+    <!-- дальняя деревня и церковь -->
+    <g opacity="0.85">
+      <rect x="1380" y="250" width="14" height="60" fill="#e8e0d0"/>
+      <polygon points="1373,250 1401,250 1387,215" fill="#4a6a9a"/>
+      <rect x="1290" y="290" width="50" height="34" fill="#e8e0d0"/>
+      <polygon points="1283,290 1347,290 1315,262" fill="#a05a2a"/>
+      <rect x="1450" y="300" width="44" height="30" fill="#f0e8d8"/>
+      <polygon points="1443,300 1501,300 1472,276" fill="#b06a30"/>
+    </g>
+    <!-- земля -->
+    <rect y="560" width="1600" height="340" fill="url(#grass)"/>
+    <path d="M0,620 Q400,585 800,625 T1600,610 L1600,900 L0,900 Z" fill="#8fbf52"/>
+    <path d="M540,900 L1120,900 L1030,660 Q800,635 640,665 Z" fill="#c9a06a"/>
+    <path d="M600,900 L1080,900 L1010,672 Q800,648 660,676 Z" fill="#dcb87e"/>
+
+    <!-- ---- ДОМ (кликабельный) ---- -->
+    <g id="house" class="clickable" data-tip="Дом">
+      <rect x="240" y="380" width="300" height="180" rx="6" fill="url(#wall)" stroke="#8a5220" stroke-width="4"/>
+      <!-- брёвна -->
+      <g stroke="#a06a2a" stroke-width="2.5" opacity="0.6">
+        <line x1="240" y1="410" x2="540" y2="410"/><line x1="240" y1="440" x2="540" y2="440"/>
+        <line x1="240" y1="470" x2="540" y2="470"/><line x1="240" y1="500" x2="540" y2="500"/>
+        <line x1="240" y1="530" x2="540" y2="530"/>
+      </g>
+      <!-- крыша -->
+      <polygon points="215,385 565,385 390,270" fill="url(#roof)" stroke="#6b3d14" stroke-width="4"/>
+      <g stroke="#6b3d14" stroke-width="2" opacity="0.5">
+        <line x1="250" y1="382" x2="390" y2="283"/><line x1="310" y1="382" x2="415" y2="288"/><line x1="370" y1="380" x2="445" y2="295"/><line x1="440" y1="378" x2="470" y2="308"/>
+      </g>
+      <!-- труба + дым -->
+      <rect x="470" y="292" width="26" height="55" fill="#b5563e" stroke="#7a3222" stroke-width="3"/>
+      <circle class="smoke" cx="483" cy="285" r="9" fill="#eee" opacity="0.6"/>
+      <circle class="smoke" cx="490" cy="285" r="12" fill="#eee" opacity="0.5" style="animation-delay:1s"/>
+      <!-- окно с синими ставнями -->
+      <rect x="300" y="410" width="52" height="56" rx="4" fill="#bfe3f8" stroke="#6b431f" stroke-width="3"/>
+      <rect x="286" y="404" width="14" height="66" rx="3" fill="#5a8fc4" stroke="#3d6a9a" stroke-width="2"/>
+      <rect x="352" y="404" width="14" height="66" rx="3" fill="#5a8fc4" stroke="#3d6a9a" stroke-width="2"/>
+      <line x1="326" y1="410" x2="326" y2="466" stroke="#6b431f" stroke-width="2"/>
+      <line x1="300" y1="438" x2="352" y2="438" stroke="#6b431f" stroke-width="2"/>
+      <!-- дверь -->
+      <rect x="430" y="440" width="52" height="120" rx="6" fill="#7a4a20" stroke="#5a3410" stroke-width="3"/>
+      <circle cx="472" cy="500" r="4" fill="#f0c04a"/>
+      <!-- окно второе -->
+      <rect x="490" y="420" width="36" height="40" rx="3" fill="#bfe3f8" stroke="#6b431f" stroke-width="3"/>
+      <!-- фонарь -->
+      <rect x="395" y="400" width="4" height="26" fill="#4a3418"/>
+      <circle cx="397" cy="432" r="8" fill="#ffe27a" stroke="#8a6a2a" stroke-width="2"/>
+    </g>
+
+    <!-- ---- ЯБЛОНЯ (кликабельная — сбор урожая) ---- -->
+    <g id="tree" class="clickable" data-tip="Яблоня">
+      <rect x="806" y="440" width="30" height="110" rx="8" fill="#8a5a30" stroke="#6b431f" stroke-width="3"/>
+      <path d="M820,470 Q760,430 720,460 M822,470 Q880,425 925,455 M820,455 Q800,410 760,410" stroke="#6b431f" stroke-width="7" fill="none"/>
+      <circle cx="800" cy="380" r="72" fill="#5a9a2a"/>
+      <circle cx="748" cy="412" r="52" fill="#4e8a24"/>
+      <circle cx="878" cy="408" r="56" fill="#4e8a24"/>
+      <circle cx="822" cy="352" r="48" fill="#66a832"/>
+      <circle cx="770" cy="368" r="14" fill="#ff5a3c" stroke="#c63818" stroke-width="2"/>
+      <circle cx="846" cy="392" r="14" fill="#ff5a3c" stroke="#c63818" stroke-width="2"/>
+      <circle cx="880" cy="360" r="13" fill="#ff5a3c" stroke="#c63818" stroke-width="2"/>
+      <circle cx="806" cy="428" r="13" fill="#ff5a3c" stroke="#c63818" stroke-width="2"/>
+      <circle cx="742" cy="396" r="12" fill="#ff5a3c" stroke="#c63818" stroke-width="2"/>
+    </g>
+
+    <!-- ---- АМБАР-ВИНОКУРНЯ (кликабельный) ---- -->
+    <g id="barn" class="clickable" data-tip="Винокурня">
+      <rect x="1080" y="360" width="330" height="200" rx="6" fill="url(#wall)" stroke="#8a5220" stroke-width="4"/>
+      <polygon points="1055,365 1435,365 1245,255" fill="url(#roof)" stroke="#6b3d14" stroke-width="4"/>
+      <g stroke="#6b3d14" stroke-width="2" opacity="0.5">
+        <line x1="1090" y1="362" x2="1235" y2="268"/><line x1="1160" y1="362" x2="1265" y2="276"/><line x1="1240" y1="360" x2="1295" y2="285"/><line x1="1320" y1="360" x2="1340" y2="300"/>
+      </g>
+      <!-- ворота -->
+      <rect x="1160" y="400" width="170" height="160" fill="#7a4a20" stroke="#5a3410" stroke-width="4"/>
+      <line x1="1245" y1="400" x2="1245" y2="560" stroke="#5a3410" stroke-width="4"/>
+      <g stroke="#5a3410" stroke-width="3"><line x1="1160" y1="420" x2="1330" y2="540"/><line x1="1160" y1="470" x2="1330" y2="590" opacity="0.4"/></g>
+      <!-- окно -->
+      <rect x="1360" y="420" width="34" height="38" rx="3" fill="#bfe3f8" stroke="#6b431f" stroke-width="3"/>
+      <!-- куб внутри -->
+      <g id="still">
+        <circle cx="1230" cy="520" r="34" fill="#c9752e" stroke="#8a4a14" stroke-width="3"/>
+        <path d="M1230,486 q10,-24 0,-40" stroke="#8a4a14" stroke-width="6" fill="none"/>
+        <circle cx="1230" cy="438" r="8" fill="#e0904a" stroke="#8a4a14" stroke-width="3"/>
+        <rect x="1196" y="540" width="68" height="18" rx="4" fill="#a05a20" stroke="#7a3a10" stroke-width="2"/>
+      </g>
+      <!-- бочки -->
+      <g id="barrels">
+        <g transform="translate(1370,530)">
+          <ellipse cx="0" cy="8" rx="24" ry="8" fill="#6b431f"/>
+          <rect x="-22" y="-30" width="44" height="38" rx="10" fill="#a06a30" stroke="#6b431f" stroke-width="3"/>
+          <line x1="-22" y1="-18" x2="22" y2="-18" stroke="#5a3a18" stroke-width="3"/>
+          <line x1="-22" y1="-4" x2="22" y2="-4" stroke="#5a3a18" stroke-width="3"/>
+        </g>
+        <g transform="translate(1408,542)">
+          <rect x="-18" y="-24" width="36" height="32" rx="8" fill="#a06a30" stroke="#6b431f" stroke-width="3"/>
+        </g>
+      </g>
+      <!-- колесо у стены -->
+      <circle cx="1420" cy="480" r="26" fill="none" stroke="#6b431f" stroke-width="5"/>
+      <circle cx="1420" cy="480" r="6" fill="#6b431f"/>
+    </g>
+
+    <!-- ---- ГРЯДКИ (кликабельные) ---- -->
+    <g id="beds">
+      <g class="bed clickable" data-idx="0" data-tip="Грядка с помидорами">
+        <rect x="120" y="660" width="300" height="60" rx="10" fill="#8a5a30" stroke="#6b431f" stroke-width="3"/>
+        <rect x="128" y="668" width="284" height="44" rx="8" fill="#5a7a30"/>
+        <circle cx="160" cy="680" r="9" fill="#e04a2a"/><circle cx="200" cy="700" r="9" fill="#e04a2a"/>
+        <circle cx="245" cy="682" r="9" fill="#e04a2a"/><circle cx="290" cy="702" r="9" fill="#e04a2a"/>
+        <circle cx="335" cy="680" r="9" fill="#e04a2a"/><circle cx="380" cy="700" r="9" fill="#e04a2a"/>
+      </g>
+      <g class="bed clickable" data-idx="1" data-tip="Грядка с зеленью">
+        <rect x="170" y="740" width="300" height="60" rx="10" fill="#8a5a30" stroke="#6b431f" stroke-width="3"/>
+        <rect x="178" y="748" width="284" height="44" rx="8" fill="#5a7a30"/>
+        <circle cx="215" cy="762" r="10" fill="#66b032"/><circle cx="260" cy="780" r="10" fill="#66b032"/>
+        <circle cx="308" cy="762" r="10" fill="#66b032"/><circle cx="355" cy="780" r="10" fill="#66b032"/>
+        <circle cx="400" cy="764" r="10" fill="#66b032"/>
+      </g>
+    </g>
+
+    <!-- ---- КОЛОДЕЦ (кликабельный) ---- -->
+    <g id="well" class="clickable" data-tip="Колодец">
+      <rect x="1470" y="640" width="80" height="70" rx="6" fill="#9a9a92" stroke="#6a6a62" stroke-width="3"/>
+      <g stroke="#7a7a72" stroke-width="2"><line x1="1470" y1="658" x2="1550" y2="658"/><line x1="1470" y1="676" x2="1550" y2="676"/><line x1="1470" y1="694" x2="1550" y2="694"/></g>
+      <polygon points="1460,612 1560,612 1510,585" fill="url(#roof)" stroke="#6b3d14" stroke-width="3"/>
+      <rect x="1494" y="640" width="32" height="26" fill="#4a3018"/>
+    </g>
+
+    <!-- ---- КУРЫ (кликабельные) ---- -->
+    <g id="chicken1" class="clickable bob" data-tip="Курица">
+      <ellipse cx="880" cy="640" rx="26" ry="20" fill="#f5f0e6" stroke="#c9bfa8" stroke-width="2"/>
+      <circle cx="902" cy="622" r="12" fill="#f5f0e6" stroke="#c9bfa8" stroke-width="2"/>
+      <polygon points="912,620 924,624 912,628" fill="#e08a2a"/>
+      <circle cx="905" cy="618" r="2" fill="#333"/>
+      <polygon points="898,608 902,600 906,608" fill="#e04a3a"/>
+      <path d="M872,640 q-10,14 -2,22" stroke="#e0a83a" stroke-width="3" fill="none"/>
+    </g>
+    <g id="chicken2" class="clickable bob" data-tip="Петух" style="animation-delay:.6s">
+      <ellipse cx="960" cy="650" rx="24" ry="18" fill="#e8dcc8" stroke="#c0a888" stroke-width="2"/>
+      <circle cx="980" cy="632" r="11" fill="#e8dcc8" stroke="#c0a888" stroke-width="2"/>
+      <polygon points="989,630 1000,634 989,638" fill="#e08a2a"/>
+      <circle cx="983" cy="628" r="2" fill="#333"/>
+      <path d="M976,618 q4,-10 10,-8 q-4,4 -2,8" fill="#c63828"/>
+      <path d="M986,636 q14,-6 20,-2 q-8,8 -20,6" fill="#3a7a2a" opacity="0.9"/>
+    </g>
+    <!-- цыплята -->
+    <g fill="#ffe27a" stroke="#d0a030" stroke-width="2">
+      <circle cx="920" cy="672" r="8" class="bob"/><circle cx="945" cy="678" r="8" class="bob" style="animation-delay:.4s"/>
+    </g>
+
+    <!-- ---- КОТ (кликабельный) ---- -->
+    <g id="cat" class="clickable" data-tip="Кот">
+      <ellipse cx="700" cy="838" rx="60" ry="24" fill="#f0a04a" stroke="#c07828" stroke-width="3"/>
+      <circle cx="660" cy="818" r="20" fill="#f0a04a" stroke="#c07828" stroke-width="3"/>
+      <polygon points="648,806 644,792 656,800" fill="#f0a04a" stroke="#c07828" stroke-width="2"/>
+      <polygon points="666,804 674,792 674,804" fill="#f0a04a" stroke="#c07828" stroke-width="2"/>
+      <path d="M652,822 q4,3 8,0 M660,822 q4,3 8,0" stroke="#7a4a10" stroke-width="2" fill="none"/>
+      <path d="M756,838 q18,-4 14,-20" stroke="#f0a04a" stroke-width="10" fill="none" stroke-linecap="round"/>
+      <path d="M640,838 q-30,4 -20,18 q8,6 16,-4" fill="#f0a04a" stroke="#c07828" stroke-width="2"/>
+    </g>
+
+    <!-- тачка, лейка, подсолнухи, цветы -->
+    <g>
+      <rect x="580" y="760" width="90" height="30" rx="8" fill="#8a5a30" stroke="#6b431f" stroke-width="3"/>
+      <circle cx="600" cy="798" r="12" fill="#6b431f"/><circle cx="650" cy="798" r="12" fill="#6b431f"/>
+      <path d="M668,768 l26,20" stroke="#6b431f" stroke-width="5"/>
+      <circle cx="610" cy="756" r="10" fill="#e04a2a"/><circle cx="630" cy="752" r="10" fill="#f0c04a"/><circle cx="648" cy="758" r="10" fill="#e04a2a"/>
+      <rect x="420" y="770" width="20" height="40" rx="4" fill="#9ab0b8" stroke="#6a8088" stroke-width="2"/>
+      <path d="M410,770 q10,-16 24,-8" stroke="#6a8088" stroke-width="4" fill="none"/>
+    </g>
+    <g id="sunflowers">
+      <g transform="translate(150,640)"><rect x="-3" y="0" width="6" height="46" fill="#4a7a28"/><circle r="13" fill="#f0c04a"/><circle r="7" fill="#8a5a20"/></g>
+      <g transform="translate(190,650)"><rect x="-3" y="0" width="6" height="40" fill="#4a7a28"/><circle r="12" fill="#f0c04a"/><circle r="6" fill="#8a5a20"/></g>
+    </g>
+    <g fill="#e06a9a"><circle cx="1080" cy="820" r="6"/><circle cx="1100" cy="830" r="5"/><circle cx="1340" cy="800" r="6"/><circle cx="1362" cy="812" r="5"/><circle cx="160" cy="810" r="6"/><circle cx="140" cy="820" r="5"/></g>
+    <g fill="#8a6ad0"><circle cx="1120" cy="815" r="5"/><circle cx="90" cy="800" r="5"/></g>
+
+    <!-- забор -->
+    <g stroke="#b08a4a" stroke-width="6">
+      <line x1="60" y1="700" x2="60" y2="770"/><line x1="110" y1="702" x2="110" y2="772"/><line x1="160" y1="704" x2="160" y2="774"/>
+      <line x1="40" y1="720" x2="180" y2="714"/><line x1="40" y1="750" x2="180" y2="744"/>
+      <line x1="1420" y1="740" x2="1420" y2="810"/><line x1="1470" y1="742" x2="1470" y2="812"/><line x1="1520" y1="744" x2="1520" y2="814"/>
+    </g>
+  </svg>
+
+  <!-- ===== ИНТЕРФЕЙС ===== -->
+  <div class="top">
+    <div class="profile" id="profileBtn">
+      <div class="avatar">👨‍🌾</div>
+      <div class="info">
+        <b>Дядя Ваня</b>
+        <span class="lvl">★ Уровень: <span id="lvl">7</span></span>
+        <div class="xpbar"><div id="xpbar" style="width:35%"></div></div>
+      </div>
+    </div>
+    <div class="res-bar">
+      <div class="res"><div class="ico coin">🪙</div><b id="coins">12 450</b><button class="plus" data-buy="coins">+</button></div>
+      <div class="res"><div class="ico bolt">⚡</div><b id="energy">78</b><button class="plus" data-buy="energy">+</button></div>
+      <div class="res"><div class="ico gem">💎</div><b id="gems">25</b><button class="plus" data-buy="gems">+</button></div>
+    </div>
+    <div class="season">
+      <div class="t">☀️ Лето</div>
+      <div class="d">День <span id="day">23</span> · <span id="temp">+24</span>°C</div>
+    </div>
+  </div>
+
+  <div class="nav">
+    <div class="tab active" data-tab="home"><span class="ic">🏠</span>Дом</div>
+    <div class="tab" data-tab="garden"><span class="ic">🥕</span>Огород</div>
+    <div class="tab" data-tab="orchard"><span class="ic">🍎</span>Сад</div>
+    <div class="tab" data-tab="shed"><span class="ic">🔧</span>Сарай</div>
+    <div class="tab" data-tab="prod"><span class="ic">🫗</span>Производство</div>
+    <div class="tab" data-tab="lab"><span class="ic">🧪</span>Техцентр</div>
+    <div class="tab" data-tab="market"><span class="ic">🏪</span>Рынок</div>
+  </div>
+
+  <div class="side">
+    <div class="side-btn" id="achBtn"><span class="big">🏆</span>Достижения</div>
+    <div class="side-btn" id="questsBtn"><span class="big">📜</span>Задания<span class="badge" id="qBadge">3</span></div>
+    <div class="side-btn" id="eventsBtn"><span class="big">🎁</span>События<span class="badge" id="eBadge">1</span></div>
+  </div>
+
+  <div class="task">
+    <h4>❗ Текущая задача:</h4>
+    <div class="row">
+      <div class="app">🍎</div>
+      <div class="txt">Соберите урожай яблок<br><span class="cnt"><span id="taskNow">0</span> / <span id="taskMax">50</span></span></div>
+    </div>
+  </div>
+
+  <div class="bottom">
+    <div class="panel-mini" id="storageBtn">
+      <div class="t">📦 Склад хозяйства</div>
+      <div class="s"><span id="storageTxt">245 / 1000</span> <button class="plus" data-buy="storage">+</button></div>
+    </div>
+    <div class="panel-mini" id="prodBtn">
+      <div class="t">🫗 Производство</div>
+      <div class="s" id="prodStatus">Простой · запустить в цехе</div>
+    </div>
+    <div class="cat">
+      <div class="bubble" id="catSay">Хороший денёк для больших дел!</div>
+      <svg width="120" height="70" viewBox="0 0 160 60">
+        <ellipse cx="80" cy="42" rx="58" ry="18" fill="#f0a04a" stroke="#c07828" stroke-width="2"/>
+        <circle cx="40" cy="30" r="14" fill="#f0a04a" stroke="#c07828" stroke-width="2"/>
+        <polygon points="32,20 28,10 38,16" fill="#f0a04a" stroke="#c07828" stroke-width="1.5"/>
+        <polygon points="44,16 50,8 50,18" fill="#f0a04a" stroke="#c07828" stroke-width="1.5"/>
+        <path d="M34,32 q3,2 6,0 M42,32 q3,2 6,0" stroke="#7a4a10" stroke-width="1.5" fill="none"/>
+      </svg>
+    </div>
+    <div class="navbtns">
+      <div class="navbtn" id="invBtn"><span class="ic">🎒</span>Инвентарь</div>
+      <div class="navbtn" id="profBtn2"><span class="ic">📖</span>Профиль</div>
+      <div class="navbtn" id="setBtn"><span class="ic">⚙️</span>Настройки</div>
+      <div class="navbtn red" id="exitBtn"><span class="ic">🔌</span>Выход</div>
+    </div>
+  </div>
+
+  <div class="log" id="log"></div>
+  <div class="toast" id="toast"></div>
+
+  <!-- ===== МОДАЛКИ ===== -->
+  <div class="overlay" id="modalOverlay">
+    <div class="modal">
+      <button class="close" id="modalClose">✕</button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ================== СОСТОЯНИЕ ==================
+const S = {
+  coins: 12450, energy: 78, gems: 25,
+  level: 7, xp: 340, xpNeed: 1000,
+  apples: 12, tomatoes: 8, greens: 15,
+  mash: 0, raw: 0, brandy: 0,
+  storage: 35, storageMax: 1000,
+  taskHave: 0, taskMax: 50,
+  questsDone: [], eventsClaimed: 0,
+  prod: null, // {recipe, startedAt, readyAt}
+  day: 23, temp: 24
+};
+const RECIPES = {
+  mash:   { name:'Яблочная брага', ic:'🥫', time:20, need:{apples:5}, gives:'mash', out:'Брага', energy:2 },
+  raw:    { name:'Дистилляция',    ic:'🔥', time:35, need:{mash:2},  gives:'raw',  out:'Спирт-сырец', energy:4 },
+  brandy: { name:'Выдержка бренди',ic:'🥃', time:50, need:{raw:1},   gives:'brandy', out:'Бренди', energy:3 }
+};
+const PRICES = { apples:15, tomatoes:12, greens:8, mash:40, raw:120, brandy:450 };
+const STORAGE_ITEM = { apples:1, tomatoes:1, greens:1, mash:2, raw:3, brandy:4 };
+
+function storageUsed(){ return S.apples + S.tomatoes + S.greens + S.mash*2 + S.raw*3 + S.brandy*4; }
+
+// ================== УТИЛИТЫ ==================
+const $ = s => document.querySelector(s);
+const fmt = n => n.toLocaleString('ru-RU');
+function save(){ try{ localStorage.setItem('farmSave', JSON.stringify(S)); }catch(e){} }
+function load(){ try{ const d=localStorage.getItem('farmSave'); if(d) Object.assign(S, JSON.parse(d)); }catch(e){} }
+
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._tm); t._tm = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+function floatText(x, y, text, color){
+  const el = document.createElement('div');
+  el.className = 'float'; el.textContent = text;
+  el.style.left = x+'px'; el.style.top = y+'px';
+  if(color) el.style.color = color;
+  $('#log').appendChild(el);
+  setTimeout(()=>el.remove(), 1100);
+}
+function scenePoint(e){
+  const svg = $('#scene'), r = svg.getBoundingClientRect();
+  return { x: (e.clientX - r.left) * 1600 / r.width, y: (e.clientY - r.top) * 900 / r.height };
+}
+function addXp(n){
+  S.xp += n;
+  while(S.xp >= S.xpNeed){ S.xp -= S.xpNeed; S.level++; S.xpNeed = Math.round(S.xpNeed*1.4); toast('🎉 Новый уровень: '+S.level+'!'); }
+  $('#lvl').textContent = S.level;
+  $('#xpbar').style.width = Math.min(100, S.xp/S.xpNeed*100)+'%';
+}
+function spendEnergy(n){
+  if(S.energy < n){ toast('⚡ Не хватает энергии! Подожди или используй алмазы.'); return false; }
+  S.energy -= n; return true;
+}
+function addCoins(n){ S.coins += n; }
+
+// ================== РЕНДЕР ==================
+function render(){
+  $('#coins').textContent = fmt(S.coins);
+  $('#energy').textContent = S.energy;
+  $('#gems').textContent = S.gems;
+  $('#taskNow').textContent = S.taskHave;
+  $('#taskMax').textContent = S.taskMax;
+  $('#storageTxt').textContent = storageUsed() + ' / ' + S.storageMax;
+  $('#day').textContent = S.day;
+  $('#temp').textContent = (S.day % 5 === 0 ? '+1' : '+' + (20 + (S.day%7))) ;
+  if(S.prod){
+    const left = Math.max(0, Math.round((S.prod.readyAt - Date.now())/1000));
+    const m = Math.floor(left/60), s = left%60;
+    $('#prodStatus').textContent = RECIPES[S.prod.recipe].ic + ' Готово через: ' + m + ' м ' + String(s).padStart(2,'0') + ' сек';
+    if(left === 0){ finishProd(); }
+  } else {
+    $('#prodStatus').textContent = 'Простой · запустить в цехе';
+  }
+  save();
+}
+function finishProd(){
+  const r = RECIPES[S.prod.recipe];
+  S[r.gives] = (S[r.gives]||0) + 1;
+  addXp(25);
+  toast('✅ ' + r.out + ' готово! Проверь склад.');
+  S.prod = null;
+  render();
+}
+setInterval(render, 1000);
+
+// ================== КЛИКИ ПО СЦЕНЕ ==================
+function clickable(el, handler){
+  el.addEventListener('click', e => { e.stopPropagation(); handler(e); });
+}
+// Яблоня
+clickable($('#tree'), e => {
+  if(S.taskHave >= S.taskMax){ toast('Задача выполнена! Загляни в «Задания» 🎁'); return; }
+  if(!spendEnergy(1)) return;
+  const n = 3;
+  S.apples += n; S.taskHave = Math.min(S.taskMax, S.taskHave + n);
+  addXp(8);
+  const p = scenePoint(e);
+  floatText(p.x, p.y, '+' + n + ' 🍎', '#ffd75e');
+  render(); checkTask();
+});
+// Грядки
+document.querySelectorAll('.bed').forEach(b => {
+  clickable(b, e => {
+    if(!spendEnergy(1)) return;
+    const isTomato = b.dataset.idx === '0';
+    const n = 2;
+    if(isTomato) S.tomatoes += n; else S.greens += n;
+    addXp(6);
+    const p = scenePoint(e);
+    floatText(p.x, p.y, '+' + n + (isTomato ? ' 🍅' : ' 🥬'), '#aaffaa');
+    render();
+  });
+});
+// Колодец
+clickable($('#well'), e => {
+  if(!spendEnergy(1)) return;
+  S.energy += 3; // вода бодрит
+  const p = scenePoint(e);
+  floatText(p.x, p.y, '💧 +3 ⚡', '#9fe3ff');
+  render();
+});
+// Куры
+['#chicken1','#chicken2'].forEach(id => clickable($(id), e => {
+  const phrases = ['Ко-ко-ко!','Кудах-тах-тах!','Яйцо будет позже 🥚','Перья не отдам!'];
+  const p = scenePoint(e);
+  floatText(p.x, p.y, phrases[Math.floor(Math.random()*phrases.length)], '#ffffff');
+}));
+// Кот
+const CAT_PHRASES = ['Хороший денёк для больших дел!','Мур-р-р... брага учится варить?','Я тут главный по уюту.','Погладь — и энергия сама прибавится (нет, но приятно).'];
+let catIdx = 0;
+clickable($('#cat'), () => {
+  catIdx = (catIdx+1) % CAT_PHRASES.length;
+  $('#catSay').textContent = CAT_PHRASES[catIdx];
+  const p = scenePoint(event);
+  floatText(p.x, p.y, 'Мур-р-р 💛', '#ffd75e');
+});
+// Дом и амбар открывают вкладки
+clickable($('#house'), () => openTab('home'));
+clickable($('#barn'), () => openTab('prod'));
+
+// ================== ВКЛАДКИ ==================
+function openTab(name){
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  showTabModal(name);
+}
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => openTab(t.dataset.tab)));
+
+function showTabModal(name){
+  const body = $('#modalBody');
+  const titles = { home:'🏠 Дом', garden:'🥕 Огород', orchard:'🍎 Сад', shed:'🔧 Сарай', prod:'🫗 Производство', lab:'🧪 Техцентр', market:'🏪 Рынок' };
+  let h = '<h2>' + titles[name] + '</h2>';
+  if(name === 'home'){
+    h += '<div class="card"><div class="ci">🛏️</div><div class="grow"><b>Отдохнуть</b><div class="sub">Полноценный сон: +20 энергии</div></div><button class="btn b" onclick="sleep()" '+(S.energy>=100?'disabled':'')+'>Спать</button></div>';
+    h += '<div class="card"><div class="ci">🍰</div><div class="grow"><b>Пирог с яблоками</b><div class="sub">5 🍎 → монеты и опыт</div></div><button class="btn g" onclick="bakePie()" '+(S.apples<5?'disabled':'')+'>Испечь</button></div>';
+  }
+  if(name === 'garden' || name === 'orchard'){
+    h += '<p style="color:#8a6a3e;font-size:13px;margin-bottom:10px">Кликай по грядкам и яблоне прямо на экране, чтобы собирать урожай. Колодец даёт +3 энергии.</p>';
+    h += '<div class="card"><div class="ci">🍅</div><div class="grow"><b>Помидоры: '+S.tomatoes+'</b></div><button class="btn o" onclick="sellItem(\'tomatoes\')">Продать</button></div>';
+    h += '<div class="card"><div class="ci">🥬</div><div class="grow"><b>Зелень: '+S.greens+'</b></div><button class="btn o" onclick="sellItem(\'greens\')">Продать</button></div>';
+    h += '<div class="card"><div class="ci">🍎</div><div class="grow"><b>Яблоки: '+S.apples+'</b><div class="sub">Нужны для браги</div></div><button class="btn o" onclick="sellItem(\'apples\')">Продать</button></div>';
+  }
+  if(name === 'shed'){
+    h += '<div class="card"><div class="ci">🪣</div><div class="grow"><b>Ремонтный набор</b><div class="sub">Апгрейд склада: +500 к лимиту</div></div><button class="btn b" onclick="upgradeStorage()" '+(S.coins<2000?'disabled':'')+'>2 000 🪙</button></div>';
+    h += '<div class="card"><div class="ci">🔋</div><div class="grow"><b>Ветряк</b><div class="sub">Пассивно: +1 энергия / 30 сек</div></div><button class="btn b" onclick="buyWindmill(this)" '+(S.coins<5000?'disabled':'')+'>5 000 🪙</button></div>';
+  }
+  if(name === 'prod'){
+    for(const k in RECIPES){
+      const r = RECIPES[k];
+      const needTxt = Object.entries(r.need).map(([res,n]) => NAMES[res]+' ×'+n).join(', ');
+      const can = S.prod === null && Object.entries(r.need).every(([res,n]) => (S[res]||0) >= n);
+      h += '<div class="card"><div class="ci">'+r.ic+'</div><div class="grow"><b>'+r.name+'</b><div class="sub">Сырьё: '+needTxt+' · Время: '+r.time+' сек · ⚡'+r.energy+'</div></div><button class="btn g" onclick="startProd(\''+k+'\')" '+(can?'':'disabled')+'>'+(S.prod?'Занято':'Запустить')+'</button></div>';
+    }
+    h += '<div class="card"><div class="ci">🥃</div><div class="grow"><b>Бренди на складе: '+S.brandy+'</b><div class="sub">Самый дорогой товар!</div></div><button class="btn o" onclick="sellItem(\'brandy\')" '+(S.brandy?'':'disabled')+'>Продать</button></div>';
+  }
+  if(name === 'lab'){
+    h += '<p style="color:#8a6a3e;font-size:13px;margin-bottom:10px">Улучшения производства — за алмазы 💎</p>';
+    h += '<div class="card"><div class="ci">⏱️</div><div class="grow"><b>Ускоритель брожения</b><div class="sub">Следующая партия браги: −50% времени</div></div><button class="btn b" onclick="buyBoost()" '+(S.gems<5?'disabled':'')+'>5 💎</button></div>';
+    h += '<div class="card"><div class="ci">⚗️</div><div class="grow"><b>Качество перегонки</b><div class="sub">+25% к цене спирта-сырца</div></div><button class="btn b" onclick="buyQuality()" '+(S.gems<10?'disabled':'')+'>10 💎</button></div>';
+  }
+  if(name === 'market'){
+    h += '<p style="color:#8a6a3e;font-size:13px;margin-bottom:10px">Продаёшь всё, что нажито. Цены пока стабильные — колебания в следующем обновлении 😉</p>';
+    for(const k in PRICES){
+      if(!NAMES[k]) continue;
+      h += '<div class="card"><div class="ci">'+ICONS[k]+'</div><div class="grow"><b>'+NAMES[k]+': '+(S[k]||0)+'</b><div class="sub">Цена: '+PRICES[k]+' 🪙 за шт.</div></div><button class="btn o" onclick="sellItem(\''+k+'\')" '+((S[k]||0)?'':'disabled')+'>Продать 1</button></div>';
+    }
+  }
+  body.innerHTML = h;
+  $('#modalOverlay').classList.add('show');
+}
+const NAMES = { apples:'Яблоки', tomatoes:'Помидоры', greens:'Зелень', mash:'Брага', raw:'Спирт-сырец', brandy:'Бренди' };
+const ICONS = { apples:'🍎', tomatoes:'🍅', greens:'🥬', mash:'🥫', raw:'🧴', brandy:'🥃' };
+
+// ================== ДЕЙСТВИЯ ==================
+window.sleep = () => { S.energy = Math.min(100, S.energy + 20); toast('💤 Выспались! +20 энергии'); closeModal(); render(); };
+window.bakePie = () => {
+  if(S.apples < 5) return;
+  S.apples -= 5; addCoins(120); addXp(30);
+  toast('🍰 Пирог продан: +120 🪙'); closeModal(); render();
+};
+window.upgradeStorage = () => {
+  if(S.coins < 2000) return toast('Не хватает монет!');
+  S.coins -= 2000; S.storageMax += 500; toast('📦 Склад расширен до ' + S.storageMax); closeModal(); render();
+};
+let windmill = false;
+window.buyWindmill = btn => {
+  if(S.coins < 5000) return toast('Не хватает монет!');
+  S.coins -= 5000; windmill = true; btn.disabled = true;
+  toast('🌬️ Ветряк установлен: +1 ⚡ каждые 30 сек'); closeModal(); render();
+};
+setInterval(() => { if(windmill){ S.energy = Math.min(100, S.energy+1); render(); } }, 30000);
+window.buyBoost = () => { if(S.gems<5) return; S.gems-=5; S.boost=true; toast('⏱️ Ускоритель активен для браги!'); closeModal(); render(); };
+window.buyQuality = () => { if(S.gems<10) return; S.gems-=10; S.quality=true; PRICES.raw = Math.round(PRICES.raw*1.25); toast('⚗️ Цена сырца выросла!'); closeModal(); render(); };
+window.startProd = k => {
+  if(S.prod) return;
+  const r = RECIPES[k];
+  for(const [res,n] of Object.entries(r.need)) if((S[res]||0) < n) return;
+  if(!spendEnergy(r.energy)) return;
+  for(const [res,n] of Object.entries(r.need)) S[res] -= n;
+  const t = (k==='mash' && S.boost) ? r.time*0.5 : r.time;
+  S.boost = (k==='mash') ? false : S.boost;
+  S.prod = { recipe:k, startedAt:Date.now(), readyAt:Date.now()+t*1000 };
+  toast('▶️ ' + r.name + ' запущена!'); closeModal(); render();
+};
+window.sellItem = k => {
+  if(!(S[k] > 0)) return;
+  S[k]--; addCoins(PRICES[k]); addXp(10);
+  toast('💰 +' + PRICES[k] + ' 🪙 за ' + NAMES[k]); closeModal(); render();
+};
+function checkTask(){
+  if(S.taskHave >= S.taskMax){
+    addCoins(1500); addXp(150); S.taskHave = S.taskMax;
+    toast('🎉 Задача выполнена! +1 500 🪙 и +150 опыта');
+  }
+}
+
+// ================== МОДАЛКИ: сайд-кнопки и пр. ==================
+$('#achBtn').onclick = () => {
+  const list = [
+    { ic:'🍎', t:'Первый урожай', d:'Собрать яблоки', done: S.taskHave>0 },
+    { ic:'🔥', t:'Первая перегонка', d:'Получить спирт-сырец', done: (S.rawTotal||0)>0 || S.raw>0 || S.brandy>0 },
+    { ic:'🥃', t:'Мастер погреба', d:'Выдержать бренди', done: S.brandy>0 },
+    { ic:'💰', t:'Богач', d:'Накопить 20 000 монет', done: S.coins>=20000 }
+  ];
+  $('#modalBody').innerHTML = '<h2>🏆 Достижения</h2><div class="ach-grid">' +
+    list.map(a => '<div class="ach '+(a.done?'done':'')+'"><span class="a-ic">'+a.ic+'</span> <b>'+a.t+'</b><br>'+a.d+(a.done?' ✅':'')+'</div>').join('') + '</div>';
+  $('#modalOverlay').classList.add('show');
+};
+$('#questsBtn').onclick = () => {
+  $('#modalBody').innerHTML = '<h2>📜 Задания</h2>' +
+    '<div class="card"><div class="ci">🍎</div><div class="grow"><b>Собери 50 яблок</b><div class="sub">Прогресс: '+S.taskHave+'/'+S.taskMax+'</div></div>'+(S.taskHave>=S.taskMax?'<span style="color:#4e9a22;font-weight:bold">Готово!</span>':'')+'</div>' +
+    '<div class="card"><div class="ci">🥫</div><div class="grow"><b>Поставь первую брагу</b><div class="sub">Вкладка «Производство»</div></div>'+(S.mash>0?'<span style="color:#4e9a22;font-weight:bold">Готово!</span>':'')+'</div>' +
+    '<div class="card"><div class="ci">🏪</div><div class="grow"><b>Продай что-нибудь на рынке</b></div></div>';
+  $('#modalOverlay').classList.add('show');
+};
+$('#eventsBtn').onclick = () => {
+  $('#modalBody').innerHTML = '<h2>🎁 События</h2>' +
+    '<div class="card"><div class="ci">🎪</div><div class="grow"><b>Ярмарка выходного дня</b><div class="sub">Забери бонус: +200 🪙</div></div><button class="btn g" onclick="claimEvent(this)">Забрать</button></div>';
+  $('#modalOverlay').classList.add('show');
+};
+window.claimEvent = btn => { btn.disabled = true; addCoins(200); toast('🎁 +200 🪙'); $('#eBadge').style.display='none'; render(); };
+$('#storageBtn').onclick = () => showTabModal('prod');
+$('#prodBtn').onclick = () => showTabModal('prod');
+$('#invBtn').onclick = () => {
+  $('#modalBody').innerHTML = '<h2>🎒 Инвентарь</h2>' +
+    Object.keys(NAMES).map(k => '<div class="card"><div class="ci">'+ICONS[k]+'</div><div class="grow"><b>'+NAMES[k]+': '+(S[k]||0)+'</b></div></div>').join('');
+  $('#modalOverlay').classList.add('show');
+};
+$('#profBtn2').onclick = $('#profileBtn').onclick = () => {
+  $('#modalBody').innerHTML = '<h2>📖 Профиль</h2>' +
+    '<div class="card"><div class="ci">👨‍🌾</div><div class="grow"><b>Дядя Ваня</b><div class="sub">Уровень '+S.level+' · Опыт '+S.xp+'/'+S.xpNeed+'</div></div></div>' +
+    '<div class="card"><div class="ci">🪙</div><div class="grow"><b>Монеты: '+fmt(S.coins)+'</b></div></div>' +
+    '<div class="card"><div class="ci">💎</div><div class="grow"><b>Алмазы: '+S.gems+'</b></div></div>';
+  $('#modalOverlay').classList.add('show');
+};
+$('#setBtn').onclick = () => {
+  $('#modalBody').innerHTML = '<h2>⚙️ Настройки</h2>' +
+    '<div class="card"><div class="ci">🔊</div><div class="grow"><b>Звук</b><div class="sub">скоро</div></div></div>' +
+    '<div class="card"><div class="ci">🗑️</div><div class="grow"><b>Сбросить сохранение</b></div><button class="btn b" onclick="resetSave()">Сбросить</button></div>';
+  $('#modalOverlay').classList.add('show');
+};
+window.resetSave = () => { localStorage.removeItem('farmSave'); location.reload(); };
+$('#exitBtn').onclick = () => toast('👋 Это прототип — выходить пока некуда! Кот сказал бы: «Мур-р, оставайся».');
+
+function closeModal(){ $('#modalOverlay').classList.remove('show'); }
+$('#modalClose').onclick = closeModal;
+$('#modalOverlay').addEventListener('click', e => { if(e.target === $('#modalOverlay')) closeModal(); });
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeModal(); });
+
+// + покупка за алмазы
+document.querySelectorAll('.plus').forEach(b => b.addEventListener('click', e => {
+  e.stopPropagation();
+  const what = b.dataset.buy;
+  if(what === 'coins'){ if(S.gems<1) return toast('Нужен 1 💎'); S.gems--; addCoins(500); }
+  if(what === 'energy'){ if(S.gems<2) return toast('Нужно 2 💎'); S.gems-=2; S.energy = Math.min(100, S.energy+25); }
+  if(what === 'gems'){ toast('💎 Алмазы появятся после монетизации 😉'); }
+  if(what === 'storage'){ window.upgradeStorage(); }
+  render();
+}));
+
+// день идёт
+setInterval(() => { S.day++; render(); }, 60000);
+
+// ================== СТАРТ ==================
+load();
+render();
+</script>
+</body>
+</html>
