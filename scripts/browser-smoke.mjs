@@ -53,7 +53,7 @@ try{
   assert.match(await page.locator("#wellDevelopmentDetails").innerText(),/пиломатериалы|инструмент/i,"Well digging requirements are not displayed");
   await page.locator('.prototype-bottom [data-tab="productionHub"]').click();
   assert.equal(await page.locator("#productionHub").evaluate(el=>el.classList.contains("hidden")),false,"Production shortcut did not open the production dispatcher");
-  assert.ok(await page.locator("#productionHub").innerText().then(text=>text.includes("Производственный центр")),"Production dispatcher did not render");
+  assert.ok(await page.locator("#productionHub").innerText().then(text=>text.includes("Главное дело — самогоноварение")),"Production dispatcher did not render");
   await page.locator('.navigation [data-tab="home"]').click();
   const cartToggle=page.locator("#cartToggle");
   await cartToggle.waitFor({state:"visible"});
