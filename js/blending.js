@@ -38,9 +38,15 @@ export function calculateBlendProfile(state, recipe) {
   return {score,profile};
 }
 
-export function blendBatch(state, recipeId, recordProduction) {
-  const recipe=BLEND_RECIPES.find(row=>row.id===recipeId);
-  if(!recipe||!hasInventory(state,recipe.ingredients))return null;
+export function blendBatch(state, recipeId, recordProduction, ratio=null) {
+  const baseRecipe=BLEND_RECIPES.find(row=>row.id===recipeId);
+  if(!baseRecipe)return null;
+  const ids=Object.keys(baseRecipe.ingredients);
+  const ingredients=ratio&&ids.length===2?{[ids[0]]:Math.max(1,Math.min(4,Number(ratio.a)||baseRecipe.ingredients[ids[0]])),[ids[1]]:Math.max(1,Math.min(4,Number(ratio.b)||baseRecipe.ingredients[ids[1]]))}:baseRecipe.ingredients;
+  const recipe={...baseRecipe,ingredients};
+  const deviation=ids.reduce((sum,id)=>sum+Math.abs(ingredients[id]-baseRecipe.ingredients[id]),0);
+  recipe.bonus=baseRecipe.bonus-deviation*2;
+  if(!hasInventory(state,recipe.ingredients))return null;
   const {score,profile}=calculateBlendProfile(state,recipe);
   // Отражаем расход в исходных паспортах до FIFO-списания складских лотов.
   for(const [item,amount] of Object.entries(recipe.ingredients)){
@@ -56,7 +62,7 @@ export function blendBatch(state, recipeId, recordProduction) {
   for(const [item,amount] of Object.entries(recipe.ingredients)){
     if(removeInventory(state,item,amount)!==amount)return null;
   }
-  const output=2;
+  const output=Math.max(1,Object.values(recipe.ingredients).reduce((sum,n)=>sum+n,0)-1);
   const accepted=addInventory(state,recipe.item,output);
   if(accepted!==output){
     if(accepted>0)removeInventory(state,recipe.item,accepted);
@@ -87,7 +93,16 @@ export function renderBlendWorkshop(state,root) {
     const labels={spirit:"Спирт-сырец",aged_spirit:"Выдержанный продукт",honey_spirit:"Медовый дистиллят",aged_honey_spirit:"Выдержанный медовый дистиллят"};
     const requirements=Object.entries(recipe.ingredients).map(([id,n])=>labels[id]+": "+(Number(state.inventory?.[id])||0)+"/"+n).join(" · ");
     row.append(el("h4","",recipe.name),el("p","",recipe.description),el("small","",requirements));
-    const button=el("button","","Смешать 2 ед.");
+    const ratioPanel=el("div","blend-ratio-panel");
+    const ids=Object.keys(recipe.ingredients);
+    ids.forEach((id,index)=>{
+      const field=el("label","blend-ratio-field",(labels[id]||id)+" · доля");
+      const select=el("select","");select.dataset.blendRatio=index===0?"a":"b";select.setAttribute("aria-label","Количество: "+(labels[id]||id));
+      for(let n=1;n<=4;n++){const option=el("option","",String(n));option.value=String(n);option.selected=n===recipe.ingredients[id];select.append(option);}
+      field.append(select);ratioPanel.append(field);
+    });
+    row.append(ratioPanel);
+    const button=el("button","","Смешать партию");
     button.type="button";button.dataset.blend=recipe.id;
     button.disabled=!hasInventory(state,recipe.ingredients);
     row.append(button);card.append(row);
@@ -101,8 +116,10 @@ export function renderBlendWorkshop(state,root) {
 
 export function handleBlendClick(state,button,recordProduction,notify=()=>{}) {
   if(!button?.dataset?.blend)return false;
-  const result=blendBatch(state,button.dataset.blend,recordProduction);
+  const row=button.closest(".blend-recipe");
+  const ratio={a:Number(row?.querySelector('[data-blend-ratio="a"]')?.value),b:Number(row?.querySelector('[data-blend-ratio="b"]')?.value)};
+  const result=blendBatch(state,button.dataset.blend,recordProduction,ratio);
   if(!result){notify("Не хватает подходящих партий или свободного места на складе.");return true;}
-  notify("Купаж «"+result.recipe.name+"» готов: "+result.output+" ед., качество "+result.score+"/100.");
+  notify("Купаж «"+result.recipe.name+"» готов: "+result.output+" ед., качество "+result.score+"/100. Пропорция: "+Object.entries(result.recipe.ingredients).map(([id,n])=>id+" × "+n).join(" + ")+".");
   return true;
 }
