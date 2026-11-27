@@ -1,0 +1,138 @@
+import { addInventory } from "./economy.js";
+
+const NOTEBOOK = {
+  house: [
+    { id:"house_letter_1", title:"Письмо под обоями", text:"«Дорогая внучка (или внук, если опять перепутала конверты). Дом не продавай. В нём скрипит половица у окна — под ней ключ от сундука. Сундук не открывай без пирога. Это не суеверие, это техника безопасности»." },
+    { id:"house_letter_2", title:"Список важных дел", text:"«1. Починить крышу. 2. Посадить укроп. 3. Не давать Петровичу стремянку. 4. Если Петрович уже взял стремянку — считать её подарком судьбы и купить новую»." },
+    { id:"house_letter_3", title:"Записка на кухне", text:"«В шкафу чашки для гостей. Сколотая — для Петровича. Он всё равно говорит, что чай у него дома вкуснее. Пусть хоть чашка будет с характером»." }
+  ],
+  garden: [
+    { id:"garden_letter_1", title:"План огорода на салфетке", text:"«Картошку сажать рядами. Морковь — рядом. Петровича — вообще не подпускать к грядкам. В прошлом году он перепутал семена с кормом для кур, и теперь у меня растёт очень подозрительная капуста»." },
+    { id:"garden_letter_2", title:"Секрет большой моркови", text:"«Хорошая морковь любит рыхлую землю и терпение. Плохая морковь любит спорить с хозяином. Если выросла кривая — не ругай. Может, она просто обходит камень»." },
+    { id:"garden_letter_3", title:"Долг огородный", text:"«Петрович должен мне три ведра навоза, две лопаты и объяснение, почему у него кабачок размером с телёнка. Не забудь спросить. Он начнёт рассказывать про луну — не верь»." }
+  ],
+  orchard: [
+    { id:"orchard_letter_1", title:"Письмо из старого сада", text:"«Яблони помнят больше нас. Под самой старой, что наклонилась к колодцу, закопана жестяная коробка. Не пугайся ржавчины: там не клад, а мои лучшие рецепты. Хотя клад тоже был бы кстати»." },
+    { id:"orchard_letter_2", title:"Про грушу и соседей", text:"«Груши снимай чуть раньше, чем их заметит Петрович. У него удивительное зрение: свои яблоки он не видит, а чужую грушу — за три участка»." },
+    { id:"orchard_letter_3", title:"Садовый календарь", text:"«Если яблоня цветёт — не торопись. Если яблоня не цветёт — тоже не торопись. Суета нужна только Петровичу, когда он объясняет, куда делась моя лестница»." }
+  ],
+  barn: [
+    { id:"barn_letter_1", title:"Инструкция к сараю", text:"«В сарае всё лежит на своих местах. Если не нашёл — значит, Петрович одолжил. Если Петрович отрицает — ищи у него за баней. Если нашёл — не спрашивай, зачем ему три гаечных ключа и свадебная фата»." },
+    { id:"barn_letter_2", title:"Чертёж неизвестного устройства", text:"«Нарисовала аппарат для автоматической уборки. Ведро, верёвка, колесо и курица. Не получилось. Курица теперь не разговаривает со мной, а ведро требует отдельную комнату»." },
+    { id:"barn_letter_3", title:"Заметка на балке", text:"«Не выбрасывай старые бочки. Одну оставь под яблоки, вторую под инструменты, третью — для Петровича, когда он опять скажет: “Я на минутку”»." }
+  ],
+  still: [
+    { id:"still_letter_1", title:"Памятка мастеру", text:"«Любое железо любит уход. Аппарат любит ещё больше. А если он начал стучать — это не музыка, даже если Петрович уже пустился в пляс»." },
+    { id:"still_letter_2", title:"Запись о первой партии", text:"«Первая партия получилась так себе. Зато дед сказал, что напиток бодрит. Правда, он сказал это после того, как проснулся на сеновале. Надо будет записать, что именно мы тогда сделали»." }
+  ]
+};
+
+const FINDS = [
+  { id:"coins", title:"Банка с мелочью", text:"В щели между досками нашлась банка с монетами. Бабушка называла это «пенсионным фондом на случай Петровича».", apply(s){s.money+=18;} , reward:"+18 монет" },
+  { id:"timber", title:"Сухие доски", text:"Под старым брезентом обнаружились вполне годные доски. Пахнут пылью и разумной экономией.", apply(s){s.parts.timber=(s.parts.timber||0)+2;}, reward:"+2 древесины" },
+  { id:"fasteners", title:"Коробка крепежа", text:"Нашлась коробка гвоздей и крепежа. На крышке надпись: «Не отдавать соседям». Мудрая женщина.", apply(s){s.parts.fasteners=(s.parts.fasteners||0)+4;}, reward:"+4 крепежа" },
+  { id:"tools", title:"Инструментальный тайник", text:"В старой тряпке лежит приличный инструмент. Петрович, судя по всему, искал его много лет.", apply(s){s.parts.tools=(s.parts.tools||0)+1;}, reward:"+1 инструмент" },
+  { id:"potato", title:"Картошка на чёрный день", text:"В сухом углу нашёлся мешочек картошки. Бабушка предусмотрела даже тот случай, когда хозяин забудет поесть.", apply(s){addInventory(s,"potato",3);}, reward:"+3 картофелины" },
+  { id:"recipe", title:"Кулинарная вырезка", text:"В жестяной коробке нашлась вырезка с рецептом пирога. На обороте бабушка приписала: «Петровичу не давать, он всё равно съест начинку до выпечки».", apply(s){s.story.recipeFound=true; s.money+=8;}, reward:"+8 монет и рецепт в записках" },
+  { id:"nothing", title:"Очень важный камень", text:"Под половицей обнаружился камень. Бабушка подписала его: «Для подпирания двери». В хозяйстве полезно всё. Почти всё.", apply(s){s.xp=(Number(s.xp)||0)+3;}, reward:"+3 опыта" }
+];
+
+const AREA_LABELS = { house:"Дом", garden:"Огород", orchard:"Сад", barn:"Сарай", still:"Аппарат" };
+
+export function ensureGrandmaStory(state) {
+  state.story ??= { unlocked: [] };
+  state.story.unlocked ??= [];
+  state.story.discovered ??= [];
+  state.story.findings ??= [];
+  state.story.read ??= [];
+  return state.story;
+}
+
+export function discoverRepairStory(state, action, notify = () => {}) {
+  const story = ensureGrandmaStory(state);
+  const area = action === "still" ? "still" : action;
+  if (!NOTEBOOK[area]) return null;
+
+  const freshNote = NOTEBOOK[area].find(note => !story.discovered.includes(note.id));
+  if (freshNote) {
+    story.discovered.push(freshNote.id);
+    story.unlocked.push(freshNote.id);
+    notify(`📖 Найдена записка: «${freshNote.title}». Загляните в бабушкины записки.`);
+    return { type:"note", id:freshNote.id, title:freshNote.title };
+  }
+
+  if (Math.random() < 0.42) {
+    const available = FINDS.filter(find => !story.findings.some(entry => entry.id === find.id && entry.area === area));
+    const find = available[Math.floor(Math.random() * available.length)] || FINDS[Math.floor(Math.random()*FINDS.length)];
+    find.apply(state);
+    story.findings.unshift({ id:find.id, area, title:find.title, text:find.text, reward:find.reward, day:state.day });
+    story.findings = story.findings.slice(0,30);
+    notify(`🔎 ${find.title}! ${find.reward}`);
+    return { type:"find", id:find.id, title:find.title };
+  }
+
+  const quips = [
+    "Пыль, паутина и один очень недовольный паук. На этот раз без добычи.",
+    "За доской обнаружился старый фантик. Судя по дате, он старше некоторых соседей.",
+    "Нашлась пуговица. Бабушка записала бы её в активы, но бухгалтерия пока не готова.",
+    "В углу лежала инструкция. К сожалению, от утюга. Но бумага крепкая."
+  ];
+  notify(`🧹 ${AREA_LABELS[area]}: ${quips[Math.floor(Math.random()*quips.length)]}`);
+  return null;
+}
+
+export function renderGrandmaNotes(state) {
+  const root = document.querySelector("#grandmaNotes");
+  if (!root) return;
+  const story = ensureGrandmaStory(state);
+  const notes = Object.values(NOTEBOOK).flat().filter(note => story.discovered.includes(note.id));
+  const findings = story.findings || [];
+  root.replaceChildren();
+
+  const intro = document.createElement("p");
+  intro.className = "grandma-notes-intro";
+  intro.textContent = "Бабушка оставляла подсказки в самых неожиданных местах. Читайте внимательно: между рецептами и ворчанием иногда прячется польза.";
+  root.append(intro);
+
+  const noteHeading = document.createElement("h3");
+  noteHeading.textContent = `📜 Записки бабушки · ${notes.length}`;
+  root.append(noteHeading);
+  if (!notes.length) {
+    const empty = document.createElement("p");
+    empty.className = "grandma-empty";
+    empty.textContent = "Пока страницы пусты. Наведите порядок в доме, огороде, саду или сарае — бабушка явно что-то припрятала.";
+    root.append(empty);
+  }
+  notes.forEach(note => {
+    const card = document.createElement("article");
+    card.className = "grandma-note-card";
+    const title = document.createElement("h4");
+    title.textContent = note.title;
+    const body = document.createElement("p");
+    body.textContent = `«${note.text}»`;
+    card.append(title, body);
+    root.append(card);
+  });
+
+  const findHeading = document.createElement("h3");
+  findHeading.textContent = `🔎 Журнал находок · ${findings.length}`;
+  root.append(findHeading);
+  if (!findings.length) {
+    const empty = document.createElement("p");
+    empty.className = "grandma-empty";
+    empty.textContent = "Здесь будут появляться найденные вещи и небольшие сюрпризы после уборки и ремонта.";
+    root.append(empty);
+  }
+  findings.forEach(find => {
+    const card = document.createElement("article");
+    card.className = "grandma-find-card";
+    const meta = document.createElement("small");
+    meta.textContent = `${AREA_LABELS[find.area] || "Хозяйство"} · день ${find.day} · ${find.reward}`;
+    const title = document.createElement("h4");
+    title.textContent = find.title;
+    const body = document.createElement("p");
+    body.textContent = find.text;
+    card.append(meta, title, body);
+    root.append(card);
+  });
+}
