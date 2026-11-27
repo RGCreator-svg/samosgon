@@ -31,7 +31,8 @@ export const MASH_RECIPES = [
 ];
 
 export function ensureMashHouse(state) {
-  state.mashHouse ??= { batches:[], nextId:1 };
+  state.mashHouse ??= { batches:[], nextId:1, tempProfile:"stable" };
+  state.mashHouse.tempProfile ??= "stable";
   if (!Array.isArray(state.mashHouse.batches)) state.mashHouse.batches = [];
   state.mashHouse.nextId = Math.max(1,Number(state.mashHouse.nextId)||1);
   return state.mashHouse;
@@ -41,7 +42,7 @@ export function getMashCapacity(state) {
   return 2 + Math.max(0,Math.min(3,Number(state.buildings?.production)||0));
 }
 
-export function startMashBatch(state,recipeId) {
+export function startMashBatch(state,recipeId,tempProfile=ensureMashHouse(state).tempProfile) {
   const recipe=MASH_RECIPES.find(entry=>entry.id===recipeId);
   const house=ensureMashHouse(state);
   if(!recipe||house.batches.length>=getMashCapacity(state))return false;
@@ -49,7 +50,8 @@ export function startMashBatch(state,recipeId) {
   house.batches.push({
     id:house.nextId++,recipeId:recipe.id,name:recipe.name,
     remaining:days,totalDays:days,stage:"fermentation",ready:false,
-    output:recipe.output,outputItem:recipe.outputItem,quality:recipe.quality,rawItem:recipe.rawItem
+    output:recipe.output,outputItem:recipe.outputItem,quality:recipe.quality,rawItem:recipe.rawItem,
+    tempProfile:["stable","fast","gentle"].includes(tempProfile)?tempProfile:"stable",temperatureDrift:0
   });
   return true;
 }
@@ -66,7 +68,7 @@ export function initMashHouse(state,{notify=()=>{}}={}) {
     const house=ensureMashHouse(current);
     const recipe=MASH_RECIPES.find(entry=>entry.id===item.payload?.recipeId);
     if(!recipe)return;
-    for(let i=0;i<Math.max(1,Number(item.quantity)||1);i++)startMashBatch(current,recipe.id);
+    for(let i=0;i<Math.max(1,Number(item.quantity)||1);i++)startMashBatch(current,recipe.id,item.payload?.tempProfile);
     notify("Новая партия поставлена в бродильню.");
   });
 }
@@ -82,6 +84,16 @@ export function renderMashHouse(state,root) {
   summary.append(el("b","",String(house.batches.length)+" / "+capacity+" чанов занято"));
   summary.append(el("span","",queued?"В общей корзине ожидает запуска: "+queued:"Новых запусков в корзине нет"));
   card.append(summary);
+  const profilePanel=el("div","mash-temp-panel");
+  profilePanel.append(el("b","","Игровой режим контроля брожения"));
+  const profiles=[["stable","🌡 Стабильный","Ровный результат, стандартный срок."],["fast","⚡ Ускоренный","Быстрее, но выше риск потери качества."],["gentle","🍃 Бережный","Немного дольше, бонус к стабильности партии."]];
+  profiles.forEach(([id,label,desc])=>{
+    const button=el("button","mash-temp-option"+(house.tempProfile===id?" selected":""),label);
+    button.type="button";button.dataset.mashTempProfile=id;button.title=desc;
+    profilePanel.append(button);
+  });
+  profilePanel.append(el("small","","Термометр ферментера и охлаждающая рубашка уменьшают игровые погодные колебания. Это условная механика, не инструкция по реальному брожению."));
+  card.append(profilePanel);
 
   const recipes=el("div","mash-recipe-grid");
   MASH_RECIPES.forEach(recipe=>{
@@ -120,6 +132,7 @@ export function renderMashHouse(state,root) {
 }
 
 export function handleMashHouseClick(state,button,{notify=()=>{},render=()=>{}}={}) {
+  if(button.dataset.mashTempProfile){ensureMashHouse(state).tempProfile=button.dataset.mashTempProfile;render();return true;}
   const recipeId=button.dataset.mashBatch;
   if(recipeId){
     const recipe=MASH_RECIPES.find(item=>item.id===recipeId);
@@ -132,7 +145,7 @@ export function handleMashHouseClick(state,button,{notify=()=>{},render=()=>{}}=
     queuePurchase(state,{
       key:"mash-house:"+recipe.id,kind:"mashHouseBatch",
       name:"Брожение: "+recipe.name,cost:8,consume:recipe.consume,
-      payload:{recipeId:recipe.id},stackable:true
+      payload:{recipeId:recipe.id,tempProfile:ensureMashHouse(state).tempProfile},stackable:true
     });
     notify("Партия добавлена в общую корзину. После оплаты чаны начнут работу.");
     render();return true;
@@ -161,11 +174,25 @@ export function advanceMashHouseDay(state,notify=()=>{}) {
   const house=ensureMashHouse(state);
   house.batches.forEach(batch=>{
     if(batch.ready)return;
-    batch.remaining=Math.max(0,(Number(batch.remaining)||0)-1);
+    const weather=state.world?.weather||"sunny";
+    const unstable=["heat","frost","storm","snow"].includes(weather);
+    const owned=new Set(state.equipmentModules||[]);
+    const control=owned.has("ferment_thermo")?2:0;
+    const cooling=owned.has("cooling_jacket")?2:0;
+    const airlock=owned.has("airlock")?1:0;
+    const protection=control+cooling+airlock;
+    if(unstable){
+      const risk=batch.tempProfile==="fast"?3:batch.tempProfile==="gentle"?0:1;
+      const drift=Math.max(0,risk-protection);
+      batch.temperatureDrift=(Number(batch.temperatureDrift)||0)+drift;
+      batch.quality=Math.max(35,(Number(batch.quality)||60)-drift);
+    } else if(batch.tempProfile==="gentle") batch.quality=Math.min(96,(Number(batch.quality)||60)+1);
+    batch.remaining=Math.max(0,(Number(batch.remaining)||0)-(batch.tempProfile==="fast"?1:1));
     if(batch.remaining===0){
       batch.ready=true;
-      batch.quality=Math.max(35,Math.min(96,Number(batch.quality)||60));
-      notify("🫙 "+batch.name+" готова! Забери брагу из бродильни.");
+      const bonus= batch.tempProfile==="gentle"?2:0;
+      batch.quality=Math.max(35,Math.min(96,(Number(batch.quality)||60)+bonus));
+      notify("🫙 "+batch.name+" готова! Игровая оценка стабильности: "+Math.max(0,100-(batch.temperatureDrift||0)*8)+"/100.");
     }
   });
 }
