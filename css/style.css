@@ -2319,3 +2319,43 @@ button:disabled {
   .dev-story-tools { grid-template-columns: 1fr; }
   .dev-story-tools h3, .dev-story-tools p { grid-column: 1; }
 }
+
+
+/* Сюжетная цепочка бабушки */
+.grandma-quest-card {
+  display: grid;
+  gap: 9px;
+  padding: 16px;
+  border: 1px solid #a58a54;
+  border-radius: 11px;
+  background:
+    radial-gradient(ellipse at 100% 0%, #74613a55, transparent 55%),
+    linear-gradient(135deg, #3c3526, #292a20);
+  box-shadow: inset 0 1px #fff1, 0 5px 16px #0003;
+}
+.grandma-quest-card h3 {
+  margin: 0;
+  color: #f0d69c;
+  font-size: 1.05rem;
+}
+.grandma-quest-card p {
+  margin: 0;
+  color: #d0c3a6;
+  line-height: 1.5;
+}
+.grandma-quest-card button {
+  justify-self: start;
+  margin: 3px 0 0;
+}
+.grandma-quest-card button:disabled {
+  opacity: .45;
+  cursor: not-allowed;
+}
+.grandma-quest-complete {
+  padding: 14px 16px;
+  border: 1px solid #829765;
+  border-radius: 9px;
+  color: #e0edc9;
+  background: #34412b;
+  line-height: 1.5;
+}
