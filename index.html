@@ -50,10 +50,11 @@
         <h1>Самогон 2.0</h1>
         <p>Хозяйство имени последней надежды</p>
       </div>
-<div class="stats">
-  <span>📅 День <b id="day">1</b></span>
-  <span>💰 <b id="money">80</b> монет</span>
-  <span>⭐ Уровень <b id="level">1</b></span>
+<div class="stats homestead-resource-bar">
+  <span class="hud-chip hud-day">📅 <small>ДЕНЬ</small> <b id="day">1</b></span>
+  <span class="hud-chip hud-coins">🪙 <small>МОНЕТЫ</small> <b id="money">80</b></span>
+  <span class="hud-chip hud-level">⭐ <small>УРОВЕНЬ</small> <b id="level">1</b></span>
+  <span class="hud-chip hud-season">🌦 <small>УСАДЬБА</small> <b id="hudSeason">Весна</b></span>
 </div>
 
 <div class="xp-panel">
@@ -67,7 +68,7 @@
 </div>
     </header>
 
-    <nav class="navigation">
+    <nav class="navigation" aria-label="Разделы хозяйства">
       <button data-tab="home" class="active">🏚 Дом</button>
       <button data-tab="farm">🥕 Огород</button>
       <button data-tab="orchard">🍎 Сад</button>
@@ -122,7 +123,13 @@
         <div class="homestead-house"><i class="roof"></i><b class="chimney"></b><span class="window window-left"></span><span class="window window-right"></span><em class="door"></em></div>
         <div class="homestead-path"></div>
         <div class="homestead-fence"></div>
-        <div class="scene-caption"><span>ВАШЕ НАСЛЕДСТВО</span><strong>Дом, сад и новая история</strong><small>День первый · Деревня просыпается</small></div>
+        <div class="scene-caption"><span>ВАШЕ НАСЛЕДСТВО</span><strong>Дом, сад и новая история</strong><small id="sceneSeasonCaption">Усадьба просыпается</small></div>
+        <div class="homestead-hotspots" aria-label="Быстрый переход по усадьбе">
+          <button type="button" data-tab="home" class="hotspot hotspot-house"><span>🏡</span><b>Дом</b></button>
+          <button type="button" data-tab="farm" class="hotspot hotspot-farm"><span>🥕</span><b>Огород</b></button>
+          <button type="button" data-tab="orchard" class="hotspot hotspot-orchard"><span>🍎</span><b>Сад</b></button>
+          <button type="button" data-tab="barn" class="hotspot hotspot-barn"><span>⚙️</span><b>Сарай</b></button>
+        </div>
       </div>
       <div class="home-heading">
         <div><span class="section-kicker">ГЛАВНАЯ УСАДЬБА</span><h2>🏚 Бабушкин дом</h2></div>
@@ -224,6 +231,14 @@
       <div id="grandmaNotes" class="grandma-notes"></div>
     </section>
 
+    <nav class="homestead-bottom-dock" aria-label="Быстрые разделы">
+      <button type="button" data-tab="productionHub"><span>🏭</span><b>Производство</b></button>
+      <button type="button" data-tab="featurePack"><span>⚗️</span><b>Перегонка</b></button>
+      <button type="button" data-tab="viticulture"><span>🍷</span><b>Винодельня</b></button>
+      <button type="button" data-tab="researchLab"><span>🧪</span><b>Лаборатория</b></button>
+      <button type="button" data-tab="processCenter"><span>🧰</span><b>Техцентр</b></button>
+      <button type="button" data-tab="market"><span>🧺</span><b>Торговля</b></button>
+    </nav>
     <section class="panel event-console">
       <h2>▣ Консоль событий · Последние записи</h2>
       <div id="notifications"></div>
