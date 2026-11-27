@@ -2383,3 +2383,35 @@ button:disabled {
 @media (prefers-reduced-motion: reduce) {
   .petrovich-encounter button:hover { transform: none; }
 }
+
+
+/* Bring the moonshining loop back to the foreground */
+.production-distill-focus {
+  margin: 18px 0 22px;
+  padding: 18px;
+  border: 1px solid rgba(164, 112, 52, .55);
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(250, 239, 214, .96), rgba(235, 218, 183, .92));
+  color: #49351f;
+  box-shadow: 0 8px 22px rgba(68, 43, 19, .09);
+}
+.production-distill-focus h3 { margin: 0 0 8px; color: #70451f; }
+.production-distill-focus p { margin: 0 0 12px; }
+.production-distill-button {
+  border: 1px solid #98652f;
+  border-radius: 10px;
+  padding: 10px 15px;
+  background: #81552d;
+  color: #fff8eb;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.production-distill-button:hover { background: #674221; }
+.petrovich-relation {
+  padding: 10px 13px;
+  border-left: 4px solid #a87942;
+  border-radius: 8px;
+  background: rgba(169, 121, 66, .1);
+  font-weight: 650;
+}
