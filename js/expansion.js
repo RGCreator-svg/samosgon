@@ -232,12 +232,7 @@ export function initExpansion(state, { render, notify, earnExperience }) {
     game.append(section);
   }
 
-  nav.addEventListener("click", event => {
-    if (!event.target.closest('[data-tab="expansion"]')) return;
-    document.querySelectorAll(".tab-content").forEach(tab => tab.classList.toggle("hidden", tab.id !== "expansion"));
-    nav.querySelectorAll("[data-tab]").forEach(item => item.classList.toggle("active", item.dataset.tab === "expansion"));
-  });
-
+  
   registerCartHandler("productionRecipe",(current,item)=>{const recipe=RECIPES.find(entry=>entry.id===item.payload?.id);if(!recipe||current.equipmentTier<recipe.tier||current.advancedProduction.queue.length+item.quantity>12)return;for(let i=0;i<item.quantity;i++)current.advancedProduction.queue.push({id:current.advancedProduction.nextId++,recipeId:recipe.id,name:recipe.name,mashType:recipe.mashType,outputItem:recipe.outputItem,days:recipe.days,remaining:recipe.days,output:recipe.output,quality:batchQuality(current,recipe),ready:false});startQueued(current);});
   $("#expansion").addEventListener("click", event => {
     const recipeButton = event.target.closest("[data-production-recipe]");
