@@ -40,6 +40,14 @@ try {
   const box = await canvas.boundingBox();
   assert.ok(box && box.width > 300 && box.height > 100, "Phaser canvas must have a visible size");
   assert.ok(await page.locator(".navigation .nav-group").count() >= 3, "Navigation groups were not rendered");
+  assert.equal(await page.locator("#game-layout > .game-advisor").count(), 0, "Advisor cards must not occupy side columns");
+  assert.equal(await page.locator(".advice-drawer").count(), 1, "Advisor drawer is missing");
+  const layout = await page.locator("#game-layout").evaluate(el => ({ width:el.getBoundingClientRect().width, columns:getComputedStyle(el).gridTemplateColumns }));
+  assert.ok(layout.width >= 1200, "Game layout does not use the full desktop viewport");
+  const navDisplay = await page.locator(".navigation").evaluate(el => getComputedStyle(el).display);
+  assert.equal(navDisplay, "grid", "Navigation must use the aligned grid layout");
+  const consoleFont = await page.locator(".event-console h2").evaluate(el => getComputedStyle(el).fontFamily);
+  assert.match(consoleFont, /mono/i, "Event console must use a terminal-style monospace font");
 
   // Scene hotspots must open the matching DOM section.
   await page.mouse.click(box.x + box.width*.16, box.y + box.height*.73);
