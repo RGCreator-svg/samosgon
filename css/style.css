@@ -3384,3 +3384,45 @@ body { margin:0; font-family:"Segoe UI", "Comic Sans MS", sans-serif; background
 
 /* Keep bottom production/warehouse shortcuts above the expandable warehouse panel. */
 #game .prototype-bottom { z-index:38; }
+
+
+/* REV 9.2 — журнал стоит рядом с тыквой, а не прижимается к правому краю */
+#game .game-footer-dock {
+  position:fixed !important;
+  left:0 !important; right:0 !important; bottom:0 !important;
+  display:flex !important; flex-direction:row !important;
+  align-items:flex-end !important; justify-content:flex-start !important;
+  gap:12px !important;
+  padding:8px 18px max(8px,env(safe-area-inset-bottom)) !important;
+}
+#game .game-footer-dock > .pumpkin-console-anchor {
+  position:relative !important; inset:auto !important;
+  flex:0 0 104px !important; width:104px !important; height:88px !important;
+  margin:0 !important;
+}
+#game .game-footer-dock > .event-console {
+  position:relative !important; inset:auto !important;
+  flex:0 1 440px !important; width:min(440px,calc(100vw - 150px)) !important;
+  max-width:440px !important; min-width:0 !important;
+  margin:0 !important; align-self:flex-end !important;
+}
+#game .game-footer-dock #notifications { min-width:0; }
+@media(max-width:900px) {
+  #game .game-footer-dock { gap:8px !important; padding:6px 10px max(6px,env(safe-area-inset-bottom)) !important; }
+  #game .game-footer-dock > .pumpkin-console-anchor {
+    flex:0 0 82px !important; width:82px !important; height:76px !important;
+  }
+  #game .game-footer-dock > .event-console {
+    flex:1 1 0 !important; width:auto !important; max-width:none !important;
+    max-height:78px !important;
+  }
+}
+@media(max-width:560px) {
+  #game .game-footer-dock { gap:6px !important; padding:4px 6px max(4px,env(safe-area-inset-bottom)) !important; }
+  #game .game-footer-dock > .pumpkin-console-anchor {
+    flex:0 0 60px !important; width:60px !important; height:64px !important;
+  }
+  #game .game-footer-dock > .event-console {
+    flex:1 1 0 !important; width:auto !important; max-height:70px !important;
+  }
+}
