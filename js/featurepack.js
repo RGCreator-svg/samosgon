@@ -2,6 +2,7 @@ import { removeInventory, queuePurchase, registerCartHandler, addInventory } fro
 import { getEquipmentProfile } from "./equipment.js";
 import { getWorldYieldMultiplier } from "./world.js";
 import { recordProduction } from "./productionhub.js";
+import { initMashHouse, renderMashHouse, handleMashHouseClick, advanceMashHouseDay } from "./mashhouse.js";
 
 const $ = (s) => document.querySelector(s);
 const el = (tag, cls, value) => { const n = document.createElement(tag); if (cls) n.className = cls; if (value !== undefined) n.textContent = value; return n; };
@@ -92,10 +93,11 @@ function renderFarms(s,root) {
 export function renderFeaturePack(s) {
   ensure(s); const root=$("#featurePack"); if(!root)return; root.replaceChildren();
   const intro=el("p","feature-intro","Новые технологические системы: качество продукции, специализация, рыночная конъюнктура, выдержка и развитие фермы.");root.append(intro);
-  renderDistillation(s,root); renderSpecialization(s,root); renderMarket(s,root); renderAging(s,root); renderFarms(s,root);
+  renderMashHouse(s,root); renderDistillation(s,root); renderSpecialization(s,root); renderMarket(s,root); renderAging(s,root); renderFarms(s,root);
 }
 export function initFeaturePack(s,{render,notify,earnExperience}) {
   ensure(s);
+  initMashHouse(s,{notify});
   const nav=$(".navigation"), game=$("#game"); if(!nav||!game)return;
   if(!$("#featurePack")) {
     const tab=btn("⚗️ Винокурня","tab","featurePack");tab.dataset.tab="featurePack";nav.append(tab);
@@ -105,8 +107,9 @@ export function initFeaturePack(s,{render,notify,earnExperience}) {
   registerCartHandler("barrelAging",(current,item)=>{if((current.barrelAging||[]).length<3){const input=item.payload?.inputItem||"spirit";current.barrelAging.push({remaining:3,quality:Math.max(45,Number(current.distillation.quality)||65),ready:false,inputItem:input,outputItem:input==="honey_spirit"?"aged_honey_spirit":"aged_spirit"});}});
   $("#featurePack").addEventListener("click",e=>{
     const b=e.target.closest("button");if(!b)return;
+    if(handleMashHouseClick(s,b,{notify,render:()=>{render();renderFeaturePack(s);}}))return;
     if(b.dataset.mashType){s.mashType=b.dataset.mashType;}
-    if(b.dataset.distillStart){const item={sugar:"braga",fruit:"fruit_braga",grain:"grain_braga",honey:"honey_braga"}[s.mashType]||"braga";if((s.inventory[item]||0)<3||s.distillation.result>0)return;removeInventory(s,item,3);s.distillation.active=true;s.distillation.mashType=s.mashType;s.distillation.resultItem=s.mashType==="honey"?"honey_spirit":"spirit";notify("Игровая перегонка запущена. Выбери режим контроля качества.");}
+    if(b.dataset.distillStart){const item={sugar:"braga",fruit:"fruit_braga",grain:"grain_braga",honey:"honey_braga"}[s.mashType]||"braga";if((s.inventory[item]||0)<3||s.distillation.result>0)return;const qualityLot=(s.qualityLots||[]).find(lot=>lot.item===item&&lot.quality!==null&&lot.quality!==undefined&&Number.isFinite(Number(lot.quality)));if(qualityLot)s.bragaQuality=Number(qualityLot.quality);removeInventory(s,item,3);s.distillation.active=true;s.distillation.mashType=s.mashType;s.distillation.resultItem=s.mashType==="honey"?"honey_spirit":"spirit";notify("Игровая перегонка запущена. Выбери режим контроля качества.");}
     if(b.dataset.distillCut){if(!s.distillation.active)return;const mode=b.dataset.distillCut;const bonus=s.specialization==="artisan"?8:0;const values={careful:{quality:24,output:2},balanced:{quality:8,output:3},yield:{quality:-12,output:4}};const v=values[mode];const profile=getEquipmentProfile(s,s.mashType);const equipmentBonus=(Number(s.equipmentTier)||0)*4;const baseQuality=Number(s.bragaQuality)||55;s.distillation={active:false,quality:Math.max(20,Math.min(100,Math.round(baseQuality+v.quality+bonus+equipmentBonus+profile.quality+(Number(s.lab?.qualityBonus)||0)+(Number(s.story?.petrovichQualityBonus)||0)))),result:Math.max(1,Math.round((v.output+profile.output)*(Number(s.processCenter?.outputMultiplier)||1))),mashType:s.mashType,resultItem:s.mashType==="honey"?"honey_spirit":"spirit",stillMode:profile.mode,flavour:profile.flavour};s.story ??= {};s.story.petrovichQualityBonus=0;notify(`Перегонка завершена: ${s.distillation.result} ед., качество ${s.distillation.quality}/100.`);earnExperience(14);}
     if(b.dataset.distillCollect){const n=s.distillation.result;const got=addInventory(s,s.distillation.resultItem||"spirit",n);if(got===n)s.distillation.result=0;else s.distillation.result-=got;if(got){recordProduction(s,{name:s.distillation.resultItem==="honey_spirit"?"Медовый дистиллят":"Спирт-сырец",amount:got,item:s.distillation.resultItem||"spirit",process:"Перегонка",quality:s.distillation.quality});notify(`На склад помещено ${got} ед. спирта-сырца.`);}}
     if(b.dataset.specialize){if(s.specialization||(s.skillPoints||0)<3)return;s.skillPoints-=3;s.specialization=b.dataset.specialize;notify(`Выбрана специализация: ${SPECIALIZATIONS.find(x=>x.id===s.specialization).name}.`);}
@@ -120,6 +123,7 @@ export function initFeaturePack(s,{render,notify,earnExperience}) {
 }
 export function advanceFeaturePackDay(s,notify) {
   ensure(s);
+  advanceMashHouseDay(s,notify);
   const swing=(Math.random()-.48)*.18;
   s.market.multiplier=Math.max(.78,Math.min(1.32,(s.market.multiplier||1)+swing));
   s.market.trend=swing>.025?"спрос растёт":swing<-.025?"спрос падает":"ровный";
