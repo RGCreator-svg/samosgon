@@ -30,6 +30,8 @@ try{
   await page.locator("#startGame").click();
   await page.locator("#homestead-scene").waitFor({state:"visible"});
   assert.ok(await page.locator("#homestead-scene").count()===1,"Prototype SVG scene is missing");
+  assert.equal(await page.locator(".pumpkin-mascot").count(),1,"There must be exactly one interactive pumpkin mascot");
+  assert.equal(await page.locator("#scene-pumpkin").isVisible(),false,"Decorative duplicate pumpkin should be hidden");
   const pumpkin=page.locator(".pumpkin-mascot img");
   await pumpkin.waitFor({state:"visible"});
   const imageLoaded=await pumpkin.evaluate(img=>img.complete&&img.naturalWidth>0);
@@ -42,17 +44,36 @@ try{
   await cartToggle.click();
   assert.ok(await page.locator("#sharedPurchaseCart").evaluate(el=>el.classList.contains("is-open")),"Cart launcher did not open the cart");
 
-  // Cart actions must work globally, including repairs outside the economy tab.
+  // Repair labor is charged directly; only required materials appear in the cart.
+  await page.locator("#devToggle").click();
+  await page.locator('#devForm [name="money"]').fill("1000");
+  await page.locator("#devForm .dev-apply").click();
   await page.locator("#repairHouse").click();
-  assert.match(await page.locator("#materialCart").innerText(),/Ремонт дома/,"House repair was not queued");
+  assert.match(await page.locator("#materialCart").innerText(),/Пиломатериалы|Краска|Крепёж/i,"House repair materials were not queued");
+  assert.doesNotMatch(await page.locator("#materialCart").innerText(),/Ремонт дома|30 монет/,"Repair service fee leaked into the material cart");
+  assert.equal(await page.locator("#money").innerText(),"970","House repair labor fee was not charged immediately");
   await page.locator("#materialCart [data-economy-action='pay']").click();
   assert.match(await page.locator("#notifications").innerText(),/корзина оплачена/i,"Cart payment did not execute");
+
   await page.locator('.navigation [data-tab="farm"]').click();
   await page.locator("#repairGarden").click();
-  assert.match(await page.locator("#materialCart").innerText(),/Расчистка огорода/,"Garden clearing was not queued");
+  assert.match(await page.locator("#materialCart").innerText(),/Пиломатериалы|Крепёж/i,"Garden clearing materials were not queued");
+  assert.doesNotMatch(await page.locator("#materialCart").innerText(),/Расчистка огорода/,"Garden service leaked into the material cart");
   await page.locator("#materialCart [data-economy-action='pay']").click();
   await page.locator("#harvestVegetables").click();
-  assert.match(await page.locator("#notifications").innerText(),/Урожай собран/i,"Vegetable harvest did not execute");
+
+  await page.locator('.navigation [data-tab="orchard"]').click();
+  await page.locator("#restoreOrchard").click();
+  assert.match(await page.locator("#materialCart").innerText(),/Пиломатериалы|Инструмент|Крепёж/i,"Orchard restoration materials were not queued");
+  assert.doesNotMatch(await page.locator("#materialCart").innerText(),/Восстановление сада/,"Orchard service leaked into the material cart");
+  await page.locator("#materialCart [data-economy-action='pay']").click();
+  await page.locator("#harvestFruit").click();
+
+  await page.locator('.navigation [data-tab="barn"]').click();
+  await page.locator("#repairStill").click();
+  assert.match(await page.locator("#materialCart").innerText(),/Металлические заготовки|Инструмент|Крепёж/i,"Still repair materials were not queued");
+  assert.doesNotMatch(await page.locator("#materialCart").innerText(),/Ремонт аппарата/,"Still service leaked into the material cart");
+  await page.locator("#materialCart [data-economy-action='pay']").click();
 
   // Scene hotspots use the existing game's tab controller.
   await page.locator("#scene-tree").click({force:true});
