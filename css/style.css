@@ -2415,3 +2415,27 @@ button:disabled {
   background: rgba(169, 121, 66, .1);
   font-weight: 650;
 }
+
+
+/* Центральная бродильня: рецептуры, загрузка чанов и ход партий. */
+.mash-house-card{grid-column:1/-1}
+.mash-house-summary{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:12px 0;padding:11px 13px;border:1px solid #766343;border-radius:9px;background:#211f18;color:#e7d3a6}
+.mash-house-summary span{color:#b9b19c;font-size:.84rem}
+.mash-recipe-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.mash-recipe{display:flex;flex-direction:column;gap:6px;min-width:0;padding:13px;border:1px solid #5d5743;border-radius:10px;background:linear-gradient(145deg,#30362b,#20251f)}
+.mash-recipe h4{margin:0;color:#e8d3a3}
+.mash-recipe p{margin:0;color:#c5bead;font-size:.84rem;line-height:1.4}
+.mash-recipe .mash-recipe-meta{color:#d6bd83;font-size:.77rem}
+.mash-recipe button{margin-top:auto}
+.mash-batch-list{display:grid;gap:8px;margin-top:14px}
+.mash-batch-list>h4{margin:4px 0;color:#e5d2a5}
+.mash-batch-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border:1px solid #55513f;border-radius:9px;background:#1e241d}
+.mash-batch-row.is-ready{border-color:#78905e;background:linear-gradient(90deg,#34402c,#20251f)}
+.mash-batch-info{display:grid;gap:5px;flex:1;min-width:0}
+.mash-batch-info b{color:#e6d4a9}
+.mash-batch-info span{color:#bcb5a2;font-size:.82rem}
+.mash-progress{height:7px;overflow:hidden;border-radius:10px;background:#111610}
+.mash-progress span{display:block;height:100%;border-radius:10px;background:linear-gradient(90deg,#7b9c55,#d1bd76);transition:width .25s ease}
+@media(max-width:760px){.mash-recipe-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:520px){.mash-recipe-grid{grid-template-columns:1fr}.mash-house-summary,.mash-batch-row{align-items:stretch;flex-direction:column}.mash-recipe button,.mash-batch-row button{width:100%}}
+@media(prefers-reduced-motion:reduce){.mash-progress span{transition:none}}
