@@ -106,7 +106,12 @@ export function renderBlendWorkshop(state,root) {
     row.append(ratioPanel);
     const button=el("button","","Смешать партию");
     button.type="button";button.dataset.blend=recipe.id;
-    button.disabled=!hasInventory(state,recipe.ingredients);
+    const updateAvailability=()=>{
+      const chosen={[ids[0]]:Number(ratioPanel.querySelector("[data-blend-ratio=a]")?.value)||1,[ids[1]]:Number(ratioPanel.querySelector("[data-blend-ratio=b]")?.value)||1};
+      button.disabled=!hasInventory(state,chosen);
+    };
+    ratioPanel.addEventListener("change",updateAvailability);
+    updateAvailability();
     row.append(button);card.append(row);
   }
   const history=el("div","blend-history");
