@@ -2488,3 +2488,6 @@ button:disabled {
 .still-receiver.auto_takeoff{border-color:#9bc58d;box-shadow:0 0 12px #9bc58d66}
 .still-mounted-module{transition:transform .2s ease,filter .2s ease}
 @media(max-width:560px){.blend-ratio-panel{display:grid;grid-template-columns:1fr 1fr}.blend-ratio-field select{width:100%}}
+
+.blend-brand-reputation{margin:0;padding:9px 11px;border-left:3px solid #b89959;border-radius:4px;background:#29281f;color:#e4cc94;font-size:.86rem}
+.passport-brand{display:block;margin-top:5px;color:#d9c18b;font-size:.8rem}
