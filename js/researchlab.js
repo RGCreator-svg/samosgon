@@ -102,6 +102,7 @@ function render(s){
  const analysis=el("section","lab-analysis-panel");analysis.append(el("h3","","Последний протокол анализа"));
  if(s.lab.lastAnalysis){const a=s.lab.lastAnalysis;analysis.append(el("p","lab-analysis-caption",a.name+" · День "+a.day+" · "+a.note));const meters=el("div","lab-meters");[["Аромат",a.aroma],["Чистота",a.purity],["Стабильность",a.stability]].forEach(([name,value])=>{const m=el("div","lab-meter");m.append(el("div","lab-meter-head",name),el("div","lab-meter-track"));const fill=el("i","lab-meter-fill");fill.style.width=value+"%";m.querySelector(".lab-meter-track").append(fill);m.append(el("b","",value+"/100"));meters.append(m);});analysis.append(meters);}else analysis.append(el("p","lab-analysis-caption","Протоколов пока нет. Выберите образец и проведите первый анализ."));
  root.append(analysis);
+ renderRecipes(s,root);
  renderHerbalRecipes(s,root);
  root.append(el("h3","","Экспериментальная лаборатория"));
  const expGrid=el("div","lab-experiments");
