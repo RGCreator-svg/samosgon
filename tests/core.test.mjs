@@ -18,6 +18,8 @@ const { advanceGameDay } = await import("../js/gameLoop.js");
 const { ensureGrandmaStory, runGrandmaQuestDev, runPetrovichEncounterDev, resolvePetrovichEncounter } = await import("../js/grandmaNotes.js");
 const { ensureMashHouse, getMashCapacity, startMashBatch, advanceMashHouseDay, MASH_RECIPES } = await import("../js/mashhouse.js");
 const { resolveDistillationChoice, calculateDistillationResult } = await import("../js/featurepack.js");
+const { blendBatch, calculateBlendProfile } = await import("../js/blending.js");
+const { recordProduction } = await import("../js/productionhub.js");
 
 test("legacy saves migrate without losing inventory and receive legacy quality lots", () => {
   stored = JSON.stringify({
@@ -256,4 +258,37 @@ test("distillation result reflects installed cooling modules and artisan special
   const improved=calculateDistillationResult(state);
   assert.ok(improved.quality>basic.quality);
   assert.equal(improved.output,basic.output);
+});
+
+
+test("blending consumes multiple source lots and creates a flavored quality passport", () => {
+  const state=createInitialState();
+  state.inventory={spirit:2,aged_spirit:1};
+  state.qualityLots=[
+    {item:"spirit",remaining:2,quality:84,passportId:"spirit-p"},
+    {item:"aged_spirit",remaining:1,quality:92,passportId:"aged-p"}
+  ];
+  state.productionLog=[
+    {passport:{id:"spirit-p",flavorProfile:{body:58,aroma:72,notes:["фруктовый"]}}},
+    {passport:{id:"aged-p",flavorProfile:{body:88,aroma:66,notes:["дубовый"]}}}
+  ];
+  const result=blendBatch(state,"orchard_blend",recordProduction);
+  assert.ok(result);
+  assert.equal(result.output,2);
+  assert.equal(state.inventory.spirit,0);
+  assert.equal(state.inventory.aged_spirit,0);
+  assert.equal(state.inventory.orchard_blend,2);
+  assert.ok(result.score>84);
+  assert.ok(result.profile.notes.includes("фруктовый акцент"));
+  const passport=state.productionLog[0].passport;
+  assert.equal(passport.process,"Купажирование");
+  assert.equal(passport.flavorProfile.body,result.profile.body);
+  assert.equal(state.qualityLots.at(-1).item,"orchard_blend");
+});
+
+test("blend recipes cannot start without every required source product", () => {
+  const state=createInitialState();
+  state.inventory={spirit:2};
+  assert.equal(blendBatch(state,"house_blend",recordProduction),null);
+  assert.equal(state.inventory.spirit,2);
 });
