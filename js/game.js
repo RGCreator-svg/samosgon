@@ -134,7 +134,7 @@ initOrders(state, {
   earnExperience
 });
 
-initDevTools(state, { render, notify, onStoryTest: (area) => { discoverRepairStory(state, area, notify); render(); }, onQuestTest: () => { runGrandmaQuestDev(state, notify); render(); }, onPetrovichTest: () => { runPetrovichEncounterDev(state, notify); render(); } });
+initDevTools(state, { render, notify, onStoryTest: (area) => { discoverRepairStory(state, area, notify); render(); }, onQuestTest: () => { runGrandmaQuestDev(state, notify); render(); }, onPetrovichTest: () => { runPetrovichEncounterDev(state, notify); render(); }, onEquipmentTest: () => { const ids=["dimroth_condenser","shell_condenser","direct_cooler","glass_column","copper_column","stainless_column","insulated_column","liquid_takeoff","vapor_takeoff","auto_takeoff","digital_sensor","flow_meter","copper_mesh","stainless_mesh"]; state.equipmentTier=4; state.equipmentModuleInventory??=[]; ids.forEach(id=>{if(!state.equipmentModules.includes(id)&&!state.equipmentModuleInventory.includes(id))state.equipmentModuleInventory.push(id);}); render(); notify("DEV: новые модули оборудования выданы на склад. Можно собирать разные конфигурации."); } });
 initEconomy(state, { render, notify });
 initEquipment(state, { render, notify });
 initExpansion(state, { render, notify, earnExperience });
