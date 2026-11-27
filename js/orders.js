@@ -345,7 +345,8 @@ function addOrdersInterface() {
   style.textContent = $style;
   document.head.append(style);
 
-      const button = event.target.closest("[data-tab]");
+  navigation.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-tab]");
     if (!button || button.dataset.tab !== "orders") return;
 
     document.querySelectorAll(".tab-content").forEach((tab) => {
