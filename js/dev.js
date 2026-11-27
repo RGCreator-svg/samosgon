@@ -1,3 +1,5 @@
+import { setInventoryCount } from "./economy.js";
+
 const SAVE_KEY = "samosgon_2_save";
 
 const FIELDS = [
@@ -143,7 +145,7 @@ export function initDevTools(state, { render, notify }) {
     INVENTORY.forEach(([key]) => {
       const input = form.elements.namedItem("inventory." + key);
       const value = Number(input?.value);
-      if (Number.isFinite(value)) state.inventory[key] = Math.max(0, Math.min(999999, Math.floor(value)));
+      if (Number.isFinite(value)) setInventoryCount(state, key, Math.max(0, Math.min(999999, Math.floor(value))));
     });
 
     render();
