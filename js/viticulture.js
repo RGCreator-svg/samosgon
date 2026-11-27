@@ -124,7 +124,7 @@ export function initViticulture(s,{render:renderGame,notify}) {
   });
   registerCartHandler("viticultureSupply",(state,item)=>{
     const supply=SUPPLIES.find(x=>x.id===item.payload?.id);
-    if(supply)state.inventory[supply.id]=(Number(state.inventory[supply.id])||0)+item.quantity;
+    if(supply){const accepted=addInventory(state,supply.id,item.quantity);if(accepted<item.quantity)notify("Склад переполнен: принято "+accepted+" из "+item.quantity+" ед. поставки.");}
   });
   registerCartHandler("viticultureBatch",(state,item)=>{
     const recipe=item.payload?.recipe;
