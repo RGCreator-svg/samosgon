@@ -68,6 +68,7 @@ export function discoverRepairStory(state, action, notify = () => {}) {
     story.discovered.push(freshNote.id);
     story.unlocked.push(freshNote.id);
     notify(`📖 Найдена записка: «${freshNote.title}». Загляните в бабушкины записки.`);
+    maybeStartPetrovichEncounter(story);
     return { type:"note", id:freshNote.id, title:freshNote.title };
   }
 
@@ -78,6 +79,7 @@ export function discoverRepairStory(state, action, notify = () => {}) {
     story.findings.unshift({ id:find.id, area, title:find.title, text:find.text, reward:find.reward, day:state.day });
     story.findings = story.findings.slice(0,30);
     notify(`🔎 ${find.title}! ${find.reward}`);
+    maybeStartPetrovichEncounter(story);
     return { type:"find", id:find.id, title:find.title };
   }
 
@@ -88,6 +90,7 @@ export function discoverRepairStory(state, action, notify = () => {}) {
     "В углу лежала инструкция. К сожалению, от утюга. Но бумага крепкая."
   ];
   notify(`🧹 ${AREA_LABELS[area]}: ${quips[Math.floor(Math.random()*quips.length)]}`);
+  maybeStartPetrovichEncounter(story);
   return null;
 }
 
@@ -136,7 +139,7 @@ const PETROVICH_ENCOUNTERS = {
   distill_help: {
     title: "Петрович вызвался помочь с партией",
     text: "Петрович заглянул в сарай: «Я, конечно, не технолог, но аппарат твой знаю ещё с тех времён, когда он был просто кучей железа». Он предлагает помочь с текущей игровой перегонкой.",
-    choices: [{id:"accept",label:"Принять помощь",relation:9,result:"Петрович помог подготовить партию. Следующая перегонка получит небольшой бонус качества.",apply:s=>{s.story.petrovichQualityBonus=Math.min(8,(Number(s.story.petrovichQualityBonus)||0)+5);s.parts.fasteners=(Number(s.parts?.fasteners)||0)+1;}},{id:"decline",label:"Работать самостоятельно",relation:-2,result:"Петрович пожал плечами: «Ну смотри, мастер». Он оставил тебе на верстаке крепёж.",apply:s=>{s.parts.fasteners=(Number(s.parts?.fasteners)||0)+1;}}]
+    choices: [{id:"accept",label:"Принять помощь",relation:9,result:"Петрович помог подготовить партию. Следующая перегонка получит небольшой бонус качества.",apply:s=>{s.story.petrovichQualityBonus=Math.min(8,(Number(s.story.petrovichQualityBonus)||0)+5);s.parts ??= {};s.parts.fasteners=(Number(s.parts.fasteners)||0)+1;}},{id:"decline",label:"Работать самостоятельно",relation:-2,result:"Петрович пожал плечами: «Ну смотри, мастер». Он оставил тебе на верстаке крепёж.",apply:s=>{s.parts.fasteners=(Number(s.parts?.fasteners)||0)+1;}}]
   },
   mash_supply: {
     title: "Петрович принёс сырьё для брожения",
@@ -300,7 +303,7 @@ export function renderGrandmaNotes(state, notify = () => {}, onUpdate = () => {}
   const relation = Number(story.petrovichRelation)||0;
   const relationCard = document.createElement("p");
   relationCard.className = "petrovich-relation";
-  relationCard.textContent = `🧔 Отношения с Петровичем: ${relation}/100 · ${relation>=25?"дружеские":relation<=-25?"натянутые":"нейтральные"} · бонус следующей перегонки: ${Number(story.petrovichQualityBonus)||0>0?"+":""}${Number(story.petrovichQualityBonus)||0} к качеству`;
+  relationCard.textContent = `🧔 Отношения с Петровичем: ${relation}/100 · ${relation>=25?"дружеские":relation<=-25?"натянутые":"нейтральные"} · бонус следующей перегонки: ${(Number(story.petrovichQualityBonus)||0)>0?"+":""}${Number(story.petrovichQualityBonus)||0} к качеству`;
   root.append(relationCard);
   const activeQuest = QUEST_STEPS[story.questStep];
   if (activeQuest) {
