@@ -2453,3 +2453,20 @@ button:disabled {
 .distillation-stage-track span.is-done{border-color:#70865a;background:#303d2a;color:#d4e5bd}
 .feature-card .distillation-stage-track+button{margin:4px}
 @media(max-width:520px){.distillation-stage-track{grid-template-columns:repeat(2,minmax(0,1fr))}.mash-temp-panel{align-items:stretch;flex-direction:column}.mash-temp-option{width:100%}}
+
+
+/* Купажная мастерская и вкусовые паспорта. */
+.blend-workshop{display:grid;gap:12px;margin:18px 0;padding:16px;border:1px solid #8a7047;border-radius:13px;background:linear-gradient(145deg,#332f24,#22271f);color:#e8ddc5}
+.blend-workshop>h3,.blend-workshop>h4{margin:0;color:#e7c98e}
+.blend-workshop>p{margin:0;color:#c7bda7;line-height:1.5}
+.blend-recipe{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 14px;align-items:center;padding:12px;border:1px solid #5e5945;border-radius:9px;background:#20251f}
+.blend-recipe h4,.blend-recipe p,.blend-recipe small{grid-column:1}
+.blend-recipe h4{margin:0;color:#e4d0a2}
+.blend-recipe p{margin:0;color:#bdb5a3;font-size:.86rem}
+.blend-recipe small{color:#c7b17d;font-size:.76rem}
+.blend-recipe button{grid-column:2;grid-row:1/4;white-space:nowrap}
+.blend-recipe button:disabled{opacity:.4;cursor:not-allowed}
+.blend-history{display:grid;gap:5px;padding:10px;border-radius:8px;background:#1c211b}
+.blend-history p,.blend-history small{margin:0;color:#c5b99e;font-size:.82rem}
+.passport-flavor{display:block;margin-top:6px;color:#d6bd83;font-size:.8rem}
+@media(max-width:560px){.blend-recipe{grid-template-columns:1fr}.blend-recipe h4,.blend-recipe p,.blend-recipe small,.blend-recipe button{grid-column:1;grid-row:auto}.blend-recipe button{width:100%}}
