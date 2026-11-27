@@ -24,6 +24,7 @@ const { recordProduction } = await import("../js/productionhub.js");
 const { BERRY_CROPS, HERB_CROPS, GARDEN_CROPS, ensureBerryGarden, plantBerryBush, advanceBerryGardenDay, harvestBerryBush } = await import("../js/berries.js");
 const { HERBAL_FORMULAS, runHerbalFormula } = await import("../js/researchlab.js");
 const { ensureProductionPlant, getStillCapacity, startStillBatch, resolveStillChoice, STILL_MODELS } = await import("../js/productionplant.js");
+const { ensureCellar, startAging, ageBarrelsOneDay, BARREL_WOODS } = await import("../js/cellar.js");
 
 test("berry garden grows seasonal bushes, harvests repeat crops and respects warehouse capacity", () => {
   const state=createInitialState();
@@ -479,4 +480,26 @@ test("multi-apparatus production plant runs independent staged batches", () => {
   assert.ok(first.active.output>=1);
   assert.equal(plant.units[1].active.ready,false);
   assert.equal(STILL_MODELS.stainless.output,1);
+});
+
+
+test("cellar barrels age separate batches, apply wood profiles and preserve quality",()=>{
+  const state=createInitialState();
+  state.viticulture={buildings:["wineCellar"],batches:[],nextId:1};
+  state.inventory.spirit=2;
+  state.inventory.honey_spirit=1;
+  state.qualityLots=[{item:"spirit",remaining:2,quality:76,passportId:null},{item:"honey_spirit",remaining:1,quality:81,passportId:null}];
+  const cellar=ensureCellar(state);
+  assert.equal(cellar.barrels.length,2);
+  assert.equal(startAging(state,1,"spirit"),true);
+  assert.equal(startAging(state,2,"honey_spirit"),true);
+  assert.equal(state.inventory.spirit,1);
+  for(let i=0;i<4;i++)ageBarrelsOneDay(state,()=>{});
+  assert.equal(cellar.barrels[0].active.ready,true);
+  assert.equal(cellar.barrels[1].active.ready,false);
+  const aged=cellar.barrels[0].active;
+  assert.ok(aged.quality>76);
+  assert.ok(aged.flavorProfile.notes.includes(BARREL_WOODS.oak.note));
+  ageBarrelsOneDay(state,()=>{});
+  assert.equal(cellar.barrels[1].active.ready,true);
 });
