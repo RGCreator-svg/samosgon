@@ -70,6 +70,8 @@ export const ITEMS = [
     price: 68,
     description: "Продукт, созревший в игровой бочке."
   }
+  ,{ id:"sugar", name:"Сахар", emoji:"🧂", price:10, description:"Сырьё для классической сахарной браги." }
+  ,{ id:"grain", name:"Зерно", emoji:"🌾", price:14, description:"Сырьё для отдельной зерновой браги." }
   ,{ id:"grapes", name:"Виноград", emoji:"🍇", price:18, description:"Сырьё для винодельни; можно вырастить или купить." }
   ,{ id:"honey", name:"Мёд", emoji:"🍯", price:28, description:"Сырьё пасеки для медовухи и медового дистиллята." }
   ,{ id:"yeast", name:"Винные дрожжи", emoji:"🧫", price:16, description:"Игровой ингредиент для винных и медовых партий." }
