@@ -2727,3 +2727,17 @@ body {
 .dispatch-service{margin-top:10px;font-size:.8rem}
 .dispatch-expansion{margin-top:14px}
 @media(max-width:760px){.dispatch-still-grid{grid-template-columns:1fr}.dispatch-summary{grid-template-columns:repeat(2,minmax(0,1fr))}.dispatch-still-head{align-items:flex-start;flex-direction:column}}
+
+
+/* Погреб выдержки и бочковые партии */
+.cellar-barrel-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin:14px 0}
+.cellar-barrel-card{min-width:0;padding:16px;border:1px solid #9a784e;border-radius:14px;background:linear-gradient(150deg,#51402d,#29271f);box-shadow:inset 0 1px #f5dfaa33,0 5px 0 #19150f}
+.cellar-barrel-card h3{margin-top:0;color:#f1d39a}
+.cellar-wood-options,.cellar-product-options{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}
+.cellar-wood-options button,.cellar-product-options button{margin:0;font-size:.82rem}
+.cellar-wood-options button.selected{background:linear-gradient(180deg,#e7c887,#b38b50);color:#352719}
+.cellar-progress,.cellar-quality{color:#e6d3ad;font-size:.9rem}
+.cellar-meter{height:12px;overflow:hidden;border-radius:20px;background:#1c1c17;border:1px solid #796344}
+.cellar-meter span{display:block;height:100%;background:linear-gradient(90deg,#8a6a3e,#e0bd78);transition:width .25s}
+.revision-label{display:inline-block;vertical-align:middle;margin-left:8px;padding:4px 8px;border:1px solid #b28a55;border-radius:7px;background:#35291e;color:#f2d39a;font-size:.42em;letter-spacing:.12em}
+@media(max-width:760px){.cellar-barrel-grid{grid-template-columns:1fr}}
