@@ -162,7 +162,7 @@ function render(s) {
   root.append(standards);
 }
 
-export function initProductionHub(s) {
+export function initProductionHub(s,{notify=()=>{}}={}) {
   ensure(s);
   const nav=$(".navigation"), game=$("#game");
   if(!nav||!game)return;
@@ -180,7 +180,7 @@ export function initProductionHub(s) {
     hub.dataset.blendBound="1";
     hub.addEventListener("click",event=>{
       const button=event.target.closest("[data-blend]");if(!button)return;
-      const result=handleBlendClick(s,button,recordProduction);
+      const result=handleBlendClick(s,button,recordProduction,notify);
       if(result)render(s);
     });
   }
