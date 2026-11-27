@@ -61,12 +61,33 @@ export function getStorageCapacity(state) {
   return [30, 80, 180, 350][level];
 }
 
+export function getInventoryCount(state, itemId) {
+  return Math.max(0, Math.floor(Number(state.inventory?.[itemId]) || 0));
+}
+
 export function addInventory(state, itemId, amount) {
-  const currentTotal = Object.values(state.inventory || {}).reduce((sum, value) => sum + (Number(value) || 0), 0);
+  if (!itemId || !Number.isFinite(Number(amount)) || Number(amount) <= 0) return 0;
+  state.inventory ??= {};
+  const currentTotal = Object.values(state.inventory).reduce((sum, value) => sum + (Number(value) || 0), 0);
   const free = Math.max(0, getStorageCapacity(state) - currentTotal);
-  const accepted = Math.max(0, Math.min(Math.floor(amount), free));
-  state.inventory[itemId] = (Number(state.inventory[itemId]) || 0) + accepted;
+  const accepted = Math.max(0, Math.min(Math.floor(Number(amount)), free));
+  state.inventory[itemId] = getInventoryCount(state, itemId) + accepted;
   return accepted;
+}
+
+export function removeInventory(state, itemId, amount = 1, options = {}) {
+  const requested = Math.max(0, Math.floor(Number(amount) || 0));
+  if (!itemId || requested === 0) return 0;
+  state.inventory ??= {};
+  const removed = Math.min(requested, getInventoryCount(state, itemId));
+  if (!removed) return 0;
+  if (options.consumeQuality !== false) consumeQualityLots(state, itemId, removed);
+  state.inventory[itemId] = getInventoryCount(state, itemId) - removed;
+  return removed;
+}
+
+export function hasInventory(state, requirements = {}) {
+  return Object.entries(requirements).every(([id, amount]) => getInventoryCount(state, id) >= Math.max(0, Number(amount) || 0));
 }
 
 function ensureState(state) {
