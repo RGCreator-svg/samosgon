@@ -51,7 +51,7 @@ try{
   assert.ok(await page.locator(".player-profile #xpBar").count()===1,"XP progress must be shown inside player profile");
   assert.ok(await page.locator("#wellDevelopmentAction").isVisible(),"Well development task is missing");
   assert.match(await page.locator("#wellDevelopmentDetails").innerText(),/пиломатериалы|инструмент/i,"Well digging requirements are not displayed");
-  await page.locator('.prototype-bottom [data-tab="productionHub"]').click({force:true});
+  await page.locator('.prototype-bottom [data-tab="productionHub"]').click();
   assert.equal(await page.locator("#productionHub").evaluate(el=>el.classList.contains("hidden")),false,"Production shortcut did not open the production dispatcher");
   assert.ok(await page.locator("#productionHub").innerText().then(text=>text.includes("Производственный центр")),"Production dispatcher did not render");
   await page.locator('.navigation [data-tab="home"]').click();
