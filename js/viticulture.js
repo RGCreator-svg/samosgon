@@ -68,7 +68,7 @@ function render(s) {
     b.append(line);
   });
 
-  const supply=card(root,"🧺 Поставщик сырья и тары","Закупайте сырьё для браги, виноделия и медоварения. Повторные позиции объединяются в общей корзине.");
+  const supply=card(root,"🧺 Склад сырья и поставщик","Закупайте сырьё для браги, виноделия и медоварения. Повторные позиции объединяются в общей корзине.");
   const grid=el("div","economy-grid");
   SUPPLIES.forEach(item=>{
     const c=el("article","economy-card");
