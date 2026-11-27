@@ -3373,3 +3373,11 @@ body { margin:0; font-family:"Segoe UI", "Comic Sans MS", sans-serif; background
   #game .prototype-task { top:175px; right:5px; width:118px; padding:6px; }
   #game .tab-content:not(.hidden) { left:65px; top:230px; transform:none; width:calc(100vw - 132px); max-height:calc(100vh - 340px); }
 }
+
+/* REV 9.1 — keep prototype shortcuts and event dock visible at every viewport */
+#game .prototype-side { display:flex !important; }
+@media(max-width:900px) {
+  #game .tab-content:not(.hidden) ~ .game-footer-dock .event-console {
+    visibility:visible !important; pointer-events:auto !important;
+  }
+}
