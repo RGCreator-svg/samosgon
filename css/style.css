@@ -3246,3 +3246,7 @@ body { margin:0; font-family:"Segoe UI", "Comic Sans MS", sans-serif; background
     max-height:calc(100vh - 350px); z-index:35;
   }
 }
+
+@media(max-width:900px) {
+  #game .tab-content:not(.hidden) ~ .event-console { visibility:hidden; pointer-events:none; }
+}
