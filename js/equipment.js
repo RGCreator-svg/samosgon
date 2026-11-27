@@ -78,8 +78,18 @@ if(slot&&!slotFree)c.append(node("small","tech-locked",pending?"В корзин�
 else if(s.equipmentTier<m.tier)c.append(node("small","tech-locked","Сначала улучшите аппарат до нужной ступени."));}
 grid.append(c);});root.append(grid);});
 }
+const PRODUCTION_LINES = {
+ sugar:{name:"Сахарная · чистая серия",tag:"neutral",modules:["sugar_tank","stainless_column","stainless_mesh","auto_cooling","auto_takeoff","digital_sensor"]},
+ fruit:{name:"Фруктовая · ароматный сад",tag:"fruit",modules:["fruit_filter","copper_head","copper_column","copper_mesh","dimroth_condenser","glass_column","sight_glass"]},
+ grain:{name:"Зерновая · ремесленная",tag:"grain",modules:["grain_screen","false_bottom","mixer","copper_head","copper_mesh","shell_condenser","flow_meter"]},
+ honey:{name:"Медовая · янтарный резерв",tag:"honey",modules:["oak_module","copper_head","glass_column","sight_glass","shell_condenser","auto_takeoff","carbon_filter"]}
+};
 export function getEquipmentProfile(s,mashType="sugar"){
  const owned=new Set(s.equipmentModules||[]),has=id=>owned.has(id);
+ const line=PRODUCTION_LINES[mashType]||PRODUCTION_LINES.sugar;
+ const fitted=line.modules.filter(has).length;
+ const lineageQuality=fitted>=4?7:fitted>=2?3:0;
+ const lineageOutput=fitted>=5?1:0;
  let mode="pot",quality=0,output=0,flavour=0,stability=0,wear=0;
  if((has("plate_column")||has("glass_column")||has("copper_column")||has("stainless_column")||has("packed_column"))&&has("dephlegmator"))mode=has("packed_column")?"rectification":"hybrid";
  if(has("copper_head")||has("copper_mesh"))flavour+=8;
@@ -107,7 +117,7 @@ export function getEquipmentProfile(s,mashType="sugar"){
  if(mode==="hybrid"){quality+=8;output-=1;}
  if(mode==="rectification"){quality+=18;flavour-=8;}
  if(mashType==="fruit")flavour+=12;if(mashType==="grain")flavour+=8;if(mashType==="honey")flavour+=10;
- return {mode,quality,output,flavour,stability,wear,installed:owned.size};
+ return {mode,quality:quality+lineageQuality,output:output+lineageOutput,flavour,stability,wear,installed:owned.size,lineage:line.name,lineageTag:line.tag,lineageModules:fitted,lineageTotal:line.modules.length,lineageQuality,lineageOutput};
 }
 function renderVisualAssembly(s){
   const root=$("#equipmentVisual");
@@ -140,8 +150,8 @@ function renderVisualAssembly(s){
   const peripheralMarkup=[...owned].filter(id=>peripheralModules[id]).map(id=>`<span class="still-mounted-module" data-module-visual="${id}"><i>${peripheralModules[id][0]}</i><b>${peripheralModules[id][1]}</b></span>`).join("");
   const previousModules=lastAssemblyModules;
   root.innerHTML=`<div class="still-scene still-scene-2d" data-mode="${rect?"rectification":hybrid?"hybrid":"pot"}" data-finish="${s.equipmentFinish||"rustic"}">
-    <div class="still-scene-heading"><div><span class="still-kicker">МАСТЕРСКАЯ · КОНСТРУКТОР</span><h3>${stage}</h3></div><span class="still-mode">${status}</span></div>
-    <div class="still-workbench" role="img" aria-label="Анимированная 2D-модель аппарата с установленными модулями">
+    <div class="still-scene-heading"><div><span class="still-kicker">МАСТЕРСКАЯ · КОНСТРУКТОР</span><h3>${stage}</h3><small class="still-lineage" data-lineage="${getEquipmentProfile(s,s.mashType||"sugar").lineageTag}">${getEquipmentProfile(s,s.mashType||"sugar").lineage}</small></div><span class="still-mode">${status}</span></div>
+    <div class="still-workbench" data-lineage="${getEquipmentProfile(s,s.mashType||"sugar").lineageTag}" role="img" aria-label="Анимированная 2D-модель аппарата с установленными модулями">
       <div class="workbench-wall"><span class="wall-pipe wall-pipe-one"></span><span class="wall-pipe wall-pipe-two"></span><span class="wall-hook"></span><span class="wall-shelf"></span></div>
       <div class="still-floor-shadow"></div>
       <div class="still-unit">
