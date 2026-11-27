@@ -2528,3 +2528,8 @@ button:disabled {
 .berry-plot-row span{flex:1;color:#d4c9ad}
 .berry-plot-row button{margin-left:auto}
 @media(max-width:600px){.berry-plot-row{align-items:flex-start;flex-direction:column}.berry-plot-row button{margin-left:0}}
+
+/* Травы и пряности в общем ягодно-травяном участке */
+.berry-crop-card[data-crop-kind="herb"]{border-color:#7c8960;background:linear-gradient(145deg,#30392a,#22291f)}
+.berry-crop-card[data-crop-kind="herb"] h4{color:#b8d19a}
+.berry-crop-card[data-crop-kind="herb"]::after{content:"ТРАВЫ И ПРЯНОСТИ";display:block;margin-top:8px;color:#9eaf83;font-size:.68rem;letter-spacing:.08em}
