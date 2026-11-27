@@ -21,7 +21,7 @@ const { resolveDistillationChoice, calculateDistillationResult } = await import(
 const { blendBatch, calculateBlendProfile } = await import("../js/blending.js");
 const { getEquipmentProfile, EQUIPMENT_MODULES } = await import("../js/equipment.js");
 const { recordProduction } = await import("../js/productionhub.js");
-const { BERRY_CROPS, ensureBerryGarden, plantBerryBush, advanceBerryGardenDay, harvestBerryBush } = await import("../js/berries.js");
+const { BERRY_CROPS, HERB_CROPS, GARDEN_CROPS, ensureBerryGarden, plantBerryBush, advanceBerryGardenDay, harvestBerryBush } = await import("../js/berries.js");
 
 test("berry garden grows seasonal bushes, harvests repeat crops and respects warehouse capacity", () => {
   const state=createInitialState();
@@ -390,4 +390,13 @@ test("custom blend ratios change ingredient demand, output and passport", () => 
   assert.equal(state.inventory.aged_spirit,0);
   assert.equal(state.productionLog[0].passport.ratio,"spirit:4 + aged_spirit:3");
   assert.equal(state.blendReputation,result.score);
+});
+
+
+test("herb and spice garden supports seasonal crops, repeat harvests and shared six-plot capacity", () => {
+const state=createInitialState();state.viticulture={buildings:["berryGarden"],batches:[],nextId:1};state.skills=["berry_growing","herb_gardening"];state.world={season:"summer",weather:"cloudy"};
+assert.equal(HERB_CROPS.length,6);assert.equal(GARDEN_CROPS.length,BERRY_CROPS.length+HERB_CROPS.length);
+const mint=plantBerryBush(state,"mint");assert.ok(mint);for(let i=0;i<2;i++)advanceBerryGardenDay(state);assert.equal(mint.ready,true);assert.equal(harvestBerryBush(state,mint.id).harvested,3);assert.equal(mint.remaining,2);
+const juniper=plantBerryBush(state,"juniper");assert.ok(juniper);for(let i=0;i<5;i++)advanceBerryGardenDay(state);assert.equal(juniper.ready,true);assert.equal(harvestBerryBush(state,juniper.id).wrongSeason,true);state.world.season="autumn";assert.equal(harvestBerryBush(state,juniper.id).harvested,2);
+for(let i=0;i<4;i++)assert.ok(plantBerryBush(state,"thyme"));assert.equal(ensureBerryGarden(state).plots.length,6);assert.equal(plantBerryBush(state,"linden"),null);
 });
