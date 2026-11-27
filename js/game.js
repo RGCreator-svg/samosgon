@@ -8,7 +8,7 @@ import { renderAll, renderAdvisor, reactGrishkaToEvent } from "./ui.js";
 import { initOrders, advanceOrdersDay } from "./orders.js";
 import { initDevTools } from "./dev.js";
 import { startNewDay } from "./events.js";
-import { initEconomy, renderEconomy, advanceDeliveries, addInventory, removeInventory, queuePurchase, registerCartHandler } from "./economy.js";
+import { initEconomy, renderEconomy, advanceDeliveries, addInventory, removeInventory, queuePurchase, registerCartHandler, PARTS } from "./economy.js";
 import { initEquipment, renderEquipment } from "./equipment.js";
 import { initExpansion, renderExpansion, advanceExpansionDay } from "./expansion.js";
 import { initFeaturePack, renderFeaturePack, advanceFeaturePackDay, getMarketMultiplier } from "./featurepack.js";
@@ -62,7 +62,9 @@ function notify(message) {
 }
 
 function render() {
+  state.waterSystem ??= { level: 0 };
   renderAll(state);
+  renderWaterDevelopment();
   renderGrandmaNotes(state, notify, render);
   renderEconomy(state);
   renderEquipment(state);
@@ -95,6 +97,51 @@ function showTab(tabId) {
   });
   window.dispatchEvent(new CustomEvent("samosgon:tab-change", { detail: tabId }));
 }
+
+// Поэтапное развитие водоснабжения: колодец → насос → водонапорная башня.
+state.waterSystem ??= { level: 0 };
+function renderWaterDevelopment() {
+  const level=Math.max(0,Math.min(3,Number(state.waterSystem?.level)||0));
+  const stages=[
+    {name:"Колодец",desc:"Собственная шахта с доступом к грунтовой воде.",cost:60,parts:{timber:2,tools:1},skill:null,button:"⛏ Вырыть колодец"},
+    {name:"Насосная система",desc:"Механический насос подаёт воду к грядкам и постройкам.",cost:180,parts:{metal:2,pump:1},skill:"handyman",button:"⚙️ Установить насос"},
+    {name:"Водонапорная башня",desc:"Резервуар создаёт запас и стабильное давление воды.",cost:500,parts:{metal:5,pump:2,controller:1},skill:"modular_systems",button:"🏗️ Построить водонапорную башню"}
+  ];
+  const status=$("#wellDevelopmentStatus"),details=$("#wellDevelopmentDetails"),button=$("#wellDevelopmentAction");
+  if(!status||!details||!button)return;
+  status.textContent=level===3?"Водоснабжение полностью развито: водонапорная башня обеспечивает запас воды и давление.":stages[level].desc;
+  details.replaceChildren();
+  if(level===3){button.textContent="✓ Водоснабжение улучшено";button.disabled=true;return;}
+  const stage=stages[level];
+  const materialNames={timber:"пиломатериалы",tools:"набор инструментов",metal:"металлические заготовки",pump:"насосный модуль",controller:"контроллер автоматики"};
+  const skillName={handyman:"«Руки из плеч»",modular_systems:"«Модульные системы»"};
+  const skill=document.createElement("p");skill.className="water-requirement";
+  skill.textContent="Навык: "+(stage.skill?(skillName[stage.skill]+" — обязателен"):"специальный навык не требуется");
+  const materials=document.createElement("p");materials.className="water-requirement";
+  materials.textContent="Материалы: "+Object.entries(stage.parts).map(([id,n])=>materialNames[id]+" × "+n+" (на складе: "+(Number(state.parts?.[id])||0)+")").join(", ");
+  const cost=document.createElement("p");cost.className="water-requirement";cost.textContent="Работа: "+stage.cost+" монет";
+  details.append(skill,materials,cost);
+  button.textContent=stage.button;button.disabled=!!(stage.skill&&!state.skills.includes(stage.skill));
+  button.dataset.waterUpgrade=String(level+1);
+}
+$("#wellDevelopmentAction")?.addEventListener("click",()=>{
+  const level=Math.max(0,Math.min(3,Number(state.waterSystem?.level)||0));
+  const stages=[
+    {cost:60,parts:{timber:2,tools:1},skill:null,name:"Колодец"},
+    {cost:180,parts:{metal:2,pump:1},skill:"handyman",name:"Насосная система"},
+    {cost:500,parts:{metal:5,pump:2,controller:1},skill:"modular_systems",name:"Водонапорная башня"}
+  ];
+  const stage=stages[level];if(!stage)return;
+  if(stage.skill&&!state.skills.includes(stage.skill)){notify("Для этого этапа нужен навык: "+stage.skill+".");return;}
+  if(state.money<stage.cost){notify("Для строительства «"+stage.name+"» нужно "+stage.cost+" монет.");return;}
+  const missing=Object.entries(stage.parts).filter(([id,n])=>(Number(state.parts?.[id])||0)<n);
+  if(missing.length){notify("Не хватает материалов для «"+stage.name+"»: "+missing.map(([id,n])=>(PARTS.find(p=>p.id===id)?.name||id)+" × "+(n-(Number(state.parts?.[id])||0))).join(", ")+".");return;}
+  state.money-=stage.cost;Object.entries(stage.parts).forEach(([id,n])=>{state.parts[id]-=n;});
+  state.waterSystem.level=level+1;
+  earnExperience([15,30,60][level]);
+  notify("Готово: "+stage.name+" построен. Затраты: "+stage.cost+" монет; материалы списаны со склада.");
+  render();
+});
 
 // Переезд в деревню
 $("#startGame")?.addEventListener("click", () => {
@@ -249,7 +296,10 @@ function queueHomesteadRepair(action, name, cost, parts) {
   }
   state.money -= cost;
   queuePurchase(state, { key, kind:"homesteadRepair", name, cost:0, parts, payload:{ action } });
-  notify(`${name}: работа оплачена (${cost} монет). В корзину добавлены только необходимые материалы.`);
+  const materialNames=Object.fromEntries(PARTS.map(part=>[part.id,part.name]));
+  const materialSummary=Object.entries(parts).map(([id,qty])=>(materialNames[id]||id)+" × "+qty).join(", ");
+  const skillSummary=state.skills.includes("handyman")?"Навык «Руки из плеч» изучен: действует скидка на работу.":"Навык «Руки из плеч» не изучен: доступен как улучшение для снижения стоимости ремонта.";
+  notify(`${name}. Работа: ${cost} монет. Материалы: ${materialSummary}. ${skillSummary} Материалы добавлены в корзину, работа оплачена отдельно.`);
   render();
 }
 
