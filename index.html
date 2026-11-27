@@ -48,18 +48,11 @@
   <span class="hud-chip hud-day">📅 <small>ДЕНЬ</small> <b id="day">1</b></span>
   <span class="hud-chip hud-coins">🪙 <small>МОНЕТЫ</small> <b id="money">80</b></span>
   <span class="hud-chip hud-level">⭐ <small>УРОВЕНЬ</small> <b id="level">1</b></span>
+  <div class="xp-panel" aria-label="Прогресс опыта"><div class="xp-heading"><span>XP</span><b><span id="xpValue">0</span>/<span id="xpNext">100</span></b></div><div class="xp-track"><div id="xpBar"></div></div></div>
   <span class="hud-chip hud-season">🌦 <small>УСАДЬБА</small> <b id="hudSeason">Весна</b></span>
 </div>
 
-<div class="xp-panel">
-  <div class="xp-heading">
-    <span>⭐ Опыт до следующего уровня</span>
-    <b><span id="xpValue">0</span> / <span id="xpNext">100</span> XP</b>
-  </div>
-  <div class="xp-track">
-    <div id="xpBar"></div>
-  </div>
-</div>
+
     </header>
 
     <svg id="homestead-scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
@@ -444,6 +437,7 @@
       </div>
     </details>
 
+    <div class="game-footer-dock" aria-label="Журнал и помощник">
     <div class="pumpkin-console-anchor">
       <div class="pumpkin-mascot" id="pumpkinMascot" role="button" tabindex="0" aria-label="Поговорить с тыквой">
         <div class="pumpkin-bubble" id="pumpkinSay">Тыква наблюдает за хозяйством. И явно что-то задумала.</div>
@@ -454,6 +448,7 @@
       <h2>▣ Журнал событий</h2>
       <div id="notifications"></div>
     </section>
+    </div>
 
   </main>
 
