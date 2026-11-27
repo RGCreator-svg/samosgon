@@ -2491,3 +2491,15 @@ button:disabled {
 
 .blend-brand-reputation{margin:0;padding:9px 11px;border-left:3px solid #b89959;border-radius:4px;background:#29281f;color:#e4cc94;font-size:.86rem}
 .passport-brand{display:block;margin-top:5px;color:#d9c18b;font-size:.8rem}
+
+
+/* Производственные линии аппарата: отдельная визуальная идентичность и бонусы комплектации */
+.still-lineage{display:inline-flex;margin-top:5px;padding:3px 9px;border-radius:999px;background:#4b4935;color:#e8d39c;font-size:.76rem;letter-spacing:.03em}
+.still-lineage[data-lineage="fruit"]{background:#55402f;color:#f1c18d}
+.still-lineage[data-lineage="grain"]{background:#4b4930;color:#e7d28d}
+.still-lineage[data-lineage="honey"]{background:#62451f;color:#ffd98a}
+.still-lineage[data-lineage="neutral"]{background:#34464a;color:#c6e4e5}
+.still-workbench[data-lineage="fruit"] .still-boiler{filter:drop-shadow(0 0 10px #b9783b55)}
+.still-workbench[data-lineage="grain"] .still-boiler{filter:drop-shadow(0 0 10px #a78b4255)}
+.still-workbench[data-lineage="honey"] .still-boiler{filter:drop-shadow(0 0 12px #d69a3155)}
+.still-workbench[data-lineage="neutral"] .still-boiler{filter:drop-shadow(0 0 9px #8ebac055)}
