@@ -116,7 +116,7 @@ function renderVisualAssembly(s){
   const has=id=>owned.has(id);
   const tier=Math.max(0,Math.min(4,Number(s.equipmentTier)||0));
   const rect=has("packed_column")&&has("dephlegmator");
-  const hybrid=!rect&&has("plate_column")&&has("dephlegmator");
+  const hybrid=!rect&&["plate_column","glass_column","copper_column","stainless_column"].some(has)&&has("dephlegmator");
   const column=["packed_column","plate_column","glass_column","copper_column","stainless_column"].some(has);
   const columnModule=["packed_column","plate_column","glass_column","copper_column","stainless_column"].find(has)||"plate_column";
   const copper=has("copper_head");
@@ -136,7 +136,7 @@ function renderVisualAssembly(s){
   if(condenser)labels.push(({dimroth_condenser:"спиральный холодильник",shell_condenser:"кожухотрубный холодильник",direct_cooler:"прямоточный холодильник",basic_condenser:"базовый холодильник"})[[...owned].find(id=>["dimroth_condenser","shell_condenser","direct_cooler","basic_condenser"].includes(id))]);
   if(has("liquid_takeoff"))labels.push("жидкостный узел");if(has("vapor_takeoff"))labels.push("паровой узел");if(has("auto_takeoff"))labels.push("автоматический отбор");
   if(receiver)labels.push("узел приёма");
-  const peripheralModules={airlock:["◉","Гидрозатвор"],ferment_thermo:["🌡","Термометр"],cooling_jacket:["❄","Рубашка охлаждения"],mixer:["⟳","Мешалка"],sugar_tank:["▤","Смесительный бак"],fruit_filter:["◈","Фильтр сусла"],grain_screen:["▦","Зерновая корзина"],false_bottom:["▥","Фальшдно"],carbon_filter:["✧","Финишный фильтр"],oak_module:["▰","Бочка выдержки"]};
+  const peripheralModules={digital_sensor:["⌁","Цифровой датчик"],flow_meter:["◌","Индикатор потока"],copper_mesh:["▦","Медная насадка"],stainless_mesh:["▦","Нержавеющая насадка"],insulated_column:["▥","Теплоизоляция"],airlock:["◉","Гидрозатвор"],ferment_thermo:["🌡","Термометр"],cooling_jacket:["❄","Рубашка охлаждения"],mixer:["⟳","Мешалка"],sugar_tank:["▤","Смесительный бак"],fruit_filter:["◈","Фильтр сусла"],grain_screen:["▦","Зерновая корзина"],false_bottom:["▥","Фальшдно"],carbon_filter:["✧","Финишный фильтр"],oak_module:["▰","Бочка выдержки"]};
   const peripheralMarkup=[...owned].filter(id=>peripheralModules[id]).map(id=>`<span class="still-mounted-module" data-module-visual="${id}"><i>${peripheralModules[id][0]}</i><b>${peripheralModules[id][1]}</b></span>`).join("");
   const previousModules=lastAssemblyModules;
   root.innerHTML=`<div class="still-scene still-scene-2d" data-mode="${rect?"rectification":hybrid?"hybrid":"pot"}" data-finish="${s.equipmentFinish||"rustic"}">
