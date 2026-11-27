@@ -2359,3 +2359,27 @@ button:disabled {
   background: #34412b;
   line-height: 1.5;
 }
+
+
+/* Petrovich's branching story encounters */
+.petrovich-encounter {
+  border-color: rgba(177, 126, 65, .55);
+  background: linear-gradient(145deg, rgba(255, 247, 224, .96), rgba(238, 224, 193, .94));
+}
+.petrovich-encounter h3 { color: #75502d; }
+.petrovich-encounter button {
+  margin: 5px 7px 3px 0;
+  border: 1px solid #a98250;
+  border-radius: 9px;
+  padding: 8px 12px;
+  background: #fffaf0;
+  color: #563c25;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 650;
+}
+.petrovich-encounter button:hover { background: #ead6ad; transform: translateY(-1px); }
+.petrovich-encounter button:focus-visible { outline: 3px solid #bd8b45; outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) {
+  .petrovich-encounter button:hover { transform: none; }
+}
