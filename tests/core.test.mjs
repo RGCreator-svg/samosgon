@@ -195,8 +195,11 @@ test("mash house supports multiple recipes and independent concurrent vats", () 
   assert.equal(startMashBatch(state, "sugar"), true);
   assert.equal(startMashBatch(state, "fruit"), true);
   assert.equal(startMashBatch(state, "grain"), false);
-  assert.equal(house.batches.length, 2);
-  assert.deepEqual(house.batches.map(batch => batch.outputItem), ["braga", "fruit_braga"]);
+  state.buildings.production = 1;
+  assert.equal(getMashCapacity(state), 3);
+  assert.equal(startMashBatch(state, "grain"), true);
+  assert.equal(house.batches.length, 3);
+  assert.deepEqual(house.batches.map(batch => batch.outputItem), ["braga", "fruit_braga", "grain_braga"]);
   assert.deepEqual(MASH_RECIPES.map(recipe => recipe.id), ["sugar", "fruit", "grain"]);
 });
 
