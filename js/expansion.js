@@ -232,9 +232,7 @@ export function initExpansion(state, { render, notify, earnExperience }) {
     game.append(section);
   }
 
-  nav.addEventListener("click", event => {
-    if (!event.target.closest('[data-tab="expansion"]')) return;
-    document.querySelectorAll(".tab-content").forEach(tab => tab.classList.toggle("hidden", tab.id !== "expansion"));
+      document.querySelectorAll(".tab-content").forEach(tab => tab.classList.toggle("hidden", tab.id !== "expansion"));
     nav.querySelectorAll("[data-tab]").forEach(item => item.classList.toggle("active", item.dataset.tab === "expansion"));
   });
 
