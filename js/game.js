@@ -107,11 +107,12 @@ if (state.gameStarted) {
   $("#game")?.classList.add("hidden");
 }
 
-// Переключение разделов
-$$("[data-tab]").forEach((button) => {
-  button.addEventListener("click", () => {
-    showTab(button.dataset.tab);
-  });
+// Единый делегированный обработчик работает и для вкладок,
+ // которые подключаются динамически отдельными игровыми модулями.
+$(".navigation")?.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-tab]");
+  if (!button) return;
+  showTab(button.dataset.tab);
 });
 
 // Опыт и уровень
