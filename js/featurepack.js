@@ -172,7 +172,7 @@ export function initFeaturePack(s,{render,notify,earnExperience}) {
         earnExperience(14);
       }
     }
-    if(b.dataset.distillCollect){const n=s.distillation.result;const got=addInventory(s,s.distillation.resultItem||"spirit",n);if(got===n)s.distillation.result=0;else s.distillation.result-=got;if(got){recordProduction(s,{name:s.distillation.resultItem==="honey_spirit"?"Медовый дистиллят":"Спирт-сырец",amount:got,item:s.distillation.resultItem||"spirit",process:"Перегонка",quality:s.distillation.quality});notify(`На склад помещено ${got} ед. спирта-сырца.`);}}
+    if(b.dataset.distillCollect){const n=s.distillation.result;const got=addInventory(s,s.distillation.resultItem||"spirit",n);if(got===n)s.distillation.result=0;else s.distillation.result-=got;if(got){recordProduction(s,{name:s.distillation.resultItem==="honey_spirit"?"Медовый дистиллят":"Спирт-сырец",amount:got,item:s.distillation.resultItem||"spirit",process:"Перегонка",quality:s.distillation.quality,mashType:s.distillation.mashType});notify(`На склад помещено ${got} ед. спирта-сырца.`);}}
     if(b.dataset.equipmentService){
       if(s.maintenance>=100)return;
       queuePurchase(s,{key:"equipment-service",kind:"equipmentService",name:"Обслуживание установки",cost:Math.max(10,Math.ceil((100-s.maintenance)*1.5)),payload:{}});
