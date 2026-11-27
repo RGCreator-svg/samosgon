@@ -139,12 +139,12 @@ const PETROVICH_ENCOUNTERS = {
   distill_help: {
     title: "Петрович вызвался помочь с партией",
     text: "Петрович заглянул в сарай: «Я, конечно, не технолог, но аппарат твой знаю ещё с тех времён, когда он был просто кучей железа». Он предлагает помочь с текущей игровой перегонкой.",
-    choices: [{id:"accept",label:"Принять помощь",relation:9,result:"Петрович помог подготовить партию. Следующая перегонка получит небольшой бонус качества.",apply:s=>{s.story.petrovichQualityBonus=Math.min(8,(Number(s.story.petrovichQualityBonus)||0)+5);s.parts ??= {};s.parts.fasteners=(Number(s.parts.fasteners)||0)+1;}},{id:"decline",label:"Работать самостоятельно",relation:-2,result:"Петрович пожал плечами: «Ну смотри, мастер». Он оставил тебе на верстаке крепёж.",apply:s=>{s.parts.fasteners=(Number(s.parts?.fasteners)||0)+1;}}]
+    choices: [{id:"accept",label:"Принять помощь",relation:9,result:"Петрович помог подготовить партию. Следующая перегонка получит небольшой бонус качества.",apply:s=>{s.story.petrovichQualityBonus=Math.min(8,(Number(s.story.petrovichQualityBonus)||0)+5);s.parts ??= {};s.parts.fasteners=(Number(s.parts.fasteners)||0)+1;}},{id:"decline",label:"Работать самостоятельно",relation:-2,result:"Петрович пожал плечами: «Ну смотри, мастер». Он оставил тебе на верстаке крепёж.",apply:s=>{s.parts ??= {};s.parts.fasteners=(Number(s.parts.fasteners)||0)+1;}}]
   },
   mash_supply: {
     title: "Петрович принёс сырьё для брожения",
     text: "Петрович прикатил тележку: «Нашёл у себя лишнее. Для твоей браги сгодится. Только не спрашивай, почему мешок подписан “не трогать до весны”».",
-    choices: [{id:"accept",label:"Принять ингредиенты",relation:8,result:"Петрович поделился запасами: на склад поступили дрожжи и немного зернового сырья.",apply:s=>{addInventory(s,"yeast",2);addInventory(s,"grain",2);}},{id:"refuse",label:"Отказаться от сомнительного мешка",relation:-1,result:"Петрович забрал мешок, но оставил две монеты «за отказ от ответственности».",apply:s=>{s.money=(Number(s.money)||0)+2;}}]
+    choices: [{id:"accept",label:"Принять ингредиенты",relation:8,result:"Петрович поделился запасами: на склад поступили дрожжи и две единицы зерновой браги.",apply:s=>{addInventory(s,"yeast",2);addInventory(s,"grain_braga",2);}},{id:"refuse",label:"Отказаться от сомнительного мешка",relation:-1,result:"Петрович забрал мешок, но оставил две монеты «за отказ от ответственности».",apply:s=>{s.money=(Number(s.money)||0)+2;}}]
   },
   bad_advice: {
     title: "Петрович — эксперт по перегонке",
