@@ -38,7 +38,7 @@ export function ensureMashHouse(state) {
 }
 
 export function getMashCapacity(state) {
-  return 2 + Math.max(0,Number(state.buildings?.production)||0) + (state.skills?.includes("clean_barrel") ? 1 : 0);
+  return 2 + Math.max(0,Math.min(3,Number(state.buildings?.production)||0));
 }
 
 export function startMashBatch(state,recipeId) {
