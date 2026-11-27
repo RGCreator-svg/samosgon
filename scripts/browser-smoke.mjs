@@ -47,6 +47,7 @@ try{
   assert.match(await page.locator("#materialCart").innerText(),/Ремонт дома/,"House repair was not queued");
   await page.locator("#materialCart [data-economy-action='pay']").click();
   assert.match(await page.locator("#notifications").innerText(),/корзина оплачена/i,"Cart payment did not execute");
+  await page.locator('.navigation [data-tab="farm"]').click();
   await page.locator("#repairGarden").click();
   assert.match(await page.locator("#materialCart").innerText(),/Расчистка огорода/,"Garden clearing was not queued");
   await page.locator("#materialCart [data-economy-action='pay']").click();
