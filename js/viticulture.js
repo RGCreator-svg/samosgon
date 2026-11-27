@@ -163,9 +163,7 @@ export function initViticulture(s,{render:renderGame,notify}) {
       notify("Производственная партия добавлена в общую корзину.");renderGame();return;
     }
   });
-  nav.addEventListener("click",event=>{
-    if(!event.target.closest('[data-tab="viticulture"]'))return;
-    document.querySelectorAll(".tab-content").forEach(x=>x.classList.toggle("hidden",x.id!=="viticulture"));
+      document.querySelectorAll(".tab-content").forEach(x=>x.classList.toggle("hidden",x.id!=="viticulture"));
     nav.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x.dataset.tab==="viticulture"));
   });
   render(s);
