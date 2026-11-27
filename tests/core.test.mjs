@@ -307,6 +307,28 @@ test("equipment catalog offers distinct columns, cooling, takeoff and sensor mod
   assert.ok(profile.wear<0);
 });
 
+test("apparatus specializations reward coherent sugar, fruit, grain and honey production lines", () => {
+  const state=createInitialState();
+  const plain=getEquipmentProfile(state,"fruit");
+  state.equipmentModules=["fruit_filter","copper_head"];
+  const developing=getEquipmentProfile(state,"fruit");
+  state.equipmentModules.push("copper_column","copper_mesh");
+  const specialized=getEquipmentProfile(state,"fruit");
+  assert.equal(developing.lineage,"Фруктовая · ароматный сад");
+  assert.equal(developing.lineageModules,2);
+  assert.equal(developing.lineageQuality,3);
+  assert.equal(specialized.lineageModules,4);
+  assert.equal(specialized.lineageQuality,7);
+  assert.ok(specialized.quality>plain.quality);
+  assert.equal(specialized.lineageTag,"fruit");
+  state.equipmentModules=["grain_screen","false_bottom","mixer","shell_condenser"];
+  assert.equal(getEquipmentProfile(state,"grain").lineageQuality,7);
+  state.equipmentModules=["oak_module","copper_head","glass_column","sight_glass"];
+  assert.equal(getEquipmentProfile(state,"honey").lineageQuality,7);
+  state.equipmentModules=["sugar_tank","stainless_column","stainless_mesh","auto_cooling"];
+  assert.equal(getEquipmentProfile(state,"sugar").lineageQuality,7);
+});
+
 test("custom blend ratios change ingredient demand, output and passport", () => {
   const state=createInitialState();
   state.inventory={spirit:4,aged_spirit:3};
