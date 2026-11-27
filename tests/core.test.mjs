@@ -178,7 +178,7 @@ test("Petrovich remembers choices and can improve a distillation batch", () => {
   resolvePetrovichEncounter(state, "keep", notify);
   assert.equal(state.story.petrovichRelation, 5);
 
-  for (let i = 0; i < 2; i++) runPetrovichEncounterDev(state, notify);
+  for (let i = 0; i < 3; i++) runPetrovichEncounterDev(state, notify);
   assert.equal(state.story.pendingPetrovich, "distill_help");
   resolvePetrovichEncounter(state, "accept", notify);
   assert.equal(state.story.petrovichQualityBonus, 5);
