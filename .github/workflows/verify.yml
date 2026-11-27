@@ -18,3 +18,9 @@ jobs:
           node-version: 22
       - name: Run syntax and core tests
         run: npm run verify
+      - name: Install Playwright and Chromium
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Run browser interaction checks
+        run: node scripts/browser-smoke.mjs
