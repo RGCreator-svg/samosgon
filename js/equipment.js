@@ -117,24 +117,25 @@ function renderVisualAssembly(s){
   const tier=Math.max(0,Math.min(4,Number(s.equipmentTier)||0));
   const rect=has("packed_column")&&has("dephlegmator");
   const hybrid=!rect&&has("plate_column")&&has("dephlegmator");
-  const column=has("packed_column")||has("plate_column");
-  const columnModule=has("packed_column")?"packed_column":"plate_column";
+  const column=["packed_column","plate_column","glass_column","copper_column","stainless_column"].some(has);
+  const columnModule=["packed_column","plate_column","glass_column","copper_column","stainless_column"].find(has)||"plate_column";
   const copper=has("copper_head");
   const arm=has("lyne_arm");
-  const condenser=has("basic_condenser");
-  const receiver=has("fraction_receiver");
+  const condenser=["basic_condenser","dimroth_condenser","shell_condenser","direct_cooler"].some(has);
+  const receiver=["fraction_receiver","liquid_takeoff","vapor_takeoff","auto_takeoff"].some(has);
   const glass=has("sight_glass");
-  const sensor=has("safety_monitor")||has("auto_cooling");
-  const cooling=has("auto_cooling")||has("cooling_jacket");
+  const sensor=["safety_monitor","auto_cooling","digital_sensor","flow_meter"].some(has);
+  const cooling=["auto_cooling","cooling_jacket","dimroth_condenser","shell_condenser","direct_cooler"].some(has);
   const stage=rect?"Ректификационная колонна":hybrid?"Гибридный аппарат":tier>=2?"Улучшенный перегонный куб":"Старый перегонный куб";
   const status=rect?"Колонный режим":hybrid?"Гибридная конфигурация":copper&&condenser?"Перегонный аппарат": "Базовая конфигурация";
   const labels=[];
   if(copper)labels.push("медный шлем");
   if(arm)labels.push("паропровод");
-  if(column)labels.push(rect?"насадочная колонна":"тарельчатая секция");
+  if(column)labels.push(({packed_column:"насадочная колонна",plate_column:"тарельчатая секция",glass_column:"стеклянная колонна",copper_column:"медная колонна",stainless_column:"нержавеющая колонна"})[columnModule]);
   if(has("dephlegmator"))labels.push("дефлегматор");
-  if(condenser)labels.push("холодильник");
-  if(receiver)labels.push("приёмник");
+  if(condenser)labels.push(({dimroth_condenser:"спиральный холодильник",shell_condenser:"кожухотрубный холодильник",direct_cooler:"прямоточный холодильник",basic_condenser:"базовый холодильник"})[[...owned].find(id=>["dimroth_condenser","shell_condenser","direct_cooler","basic_condenser"].includes(id))]);
+  if(has("liquid_takeoff"))labels.push("жидкостный узел");if(has("vapor_takeoff"))labels.push("паровой узел");if(has("auto_takeoff"))labels.push("автоматический отбор");
+  if(receiver)labels.push("узел приёма");
   const peripheralModules={airlock:["◉","Гидрозатвор"],ferment_thermo:["🌡","Термометр"],cooling_jacket:["❄","Рубашка охлаждения"],mixer:["⟳","Мешалка"],sugar_tank:["▤","Смесительный бак"],fruit_filter:["◈","Фильтр сусла"],grain_screen:["▦","Зерновая корзина"],false_bottom:["▥","Фальшдно"],carbon_filter:["✧","Финишный фильтр"],oak_module:["▰","Бочка выдержки"]};
   const peripheralMarkup=[...owned].filter(id=>peripheralModules[id]).map(id=>`<span class="still-mounted-module" data-module-visual="${id}"><i>${peripheralModules[id][0]}</i><b>${peripheralModules[id][1]}</b></span>`).join("");
   const previousModules=lastAssemblyModules;
@@ -166,6 +167,12 @@ function renderVisualAssembly(s){
     <div class="still-progress"><span>Развитие оборудования</span><b>${tier+1} / 5 ступеней · ${(s.equipmentModules||[]).length} модулей</b></div>
     <div class="still-progress-track"><i style="width:${(tier+1)*20}%"></i></div>
   </div>`;
+  const columnNode=root.querySelector(".still-column");
+  if(columnNode){columnNode.classList.add(columnModule);if(has("glass_column"))columnNode.dataset.material="glass";else if(has("copper_column"))columnNode.dataset.material="copper";else if(has("stainless_column"))columnNode.dataset.material="steel";}
+  const condenserNode=root.querySelector(".still-condenser");
+  if(condenserNode){const kind=[...owned].find(id=>["dimroth_condenser","shell_condenser","direct_cooler"].includes(id))||"basic_condenser";condenserNode.classList.add(kind);condenserNode.dataset.moduleVisual=kind;}
+  const receiverNode=root.querySelector(".still-receiver");
+  if(receiverNode){const kind=[...owned].find(id=>["liquid_takeoff","vapor_takeoff","auto_takeoff"].includes(id))||"fraction_receiver";receiverNode.classList.add(kind);receiverNode.dataset.moduleVisual=kind;}
   if(previousModules){
     const added=[...owned].filter(id=>!previousModules.has(id));
     const removed=[...previousModules].filter(id=>!owned.has(id));
