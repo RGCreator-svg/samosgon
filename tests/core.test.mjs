@@ -17,6 +17,7 @@ const { addInventory, removeInventory, setInventoryCount, hasInventory } = await
 const { advanceGameDay } = await import("../js/gameLoop.js");
 const { ensureGrandmaStory, runGrandmaQuestDev, runPetrovichEncounterDev, resolvePetrovichEncounter } = await import("../js/grandmaNotes.js");
 const { ensureMashHouse, getMashCapacity, startMashBatch, advanceMashHouseDay, MASH_RECIPES } = await import("../js/mashhouse.js");
+const { resolveDistillationChoice, calculateDistillationResult } = await import("../js/featurepack.js");
 
 test("legacy saves migrate without losing inventory and receive legacy quality lots", () => {
   stored = JSON.stringify({
@@ -220,4 +221,39 @@ test("mash fermentation advances by game days and becomes collectable once ready
   advanceMashHouseDay(state, notify);
   assert.equal(messages.length, 1);
   assert.equal(batch.outputItem, "grain_braga");
+});
+
+
+test("distillation requires four deliberate game stages before producing a batch", () => {
+  const state = createInitialState();
+  state.mashType = "sugar";
+  state.bragaQuality = 70;
+  state.distillation = { active:true, phase:"stabilization", qualityPoints:0, outputPoints:0, completedStages:[] };
+  const choices = ["precise","steady","precise","steady"];
+  const expected = ["heads","heart","tails",null];
+  choices.forEach((choice,index)=>{
+    const result=resolveDistillationChoice(state.distillation,choice);
+    assert.equal(result.valid,true);
+    assert.equal(result.phase,expected[index]);
+    assert.equal(result.done,index===3);
+  });
+  assert.deepEqual(state.distillation.completedStages,["stabilization","heads","heart","tails"]);
+  assert.equal(state.distillation.qualityPoints,8);
+  const result=calculateDistillationResult(state);
+  assert.equal(result.quality,78);
+  assert.equal(result.output,3);
+  assert.equal(resolveDistillationChoice(state.distillation,"invalid").valid,false);
+});
+
+test("distillation result reflects installed cooling modules and artisan specialization", () => {
+  const state=createInitialState();
+  state.mashType="fruit";
+  state.bragaQuality=60;
+  state.distillation={qualityPoints:0,outputPoints:0};
+  const basic=calculateDistillationResult(state);
+  state.equipmentModules=["auto_cooling","safety_monitor","basic_condenser"];
+  state.specialization="artisan";
+  const improved=calculateDistillationResult(state);
+  assert.ok(improved.quality>basic.quality);
+  assert.equal(improved.output,basic.output);
 });
