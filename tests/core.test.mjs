@@ -16,6 +16,7 @@ const { loadGame, saveGame, createInitialState } = await import("../js/engine.js
 const { addInventory, removeInventory, setInventoryCount, hasInventory } = await import("../js/economy.js");
 const { advanceGameDay } = await import("../js/gameLoop.js");
 const { ensureGrandmaStory, runGrandmaQuestDev, runPetrovichEncounterDev, resolvePetrovichEncounter } = await import("../js/grandmaNotes.js");
+const { ensureMashHouse, getMashCapacity, startMashBatch, advanceMashHouseDay, MASH_RECIPES } = await import("../js/mashhouse.js");
 
 test("legacy saves migrate without losing inventory and receive legacy quality lots", () => {
   stored = JSON.stringify({
@@ -183,4 +184,37 @@ test("Petrovich remembers choices and can improve a distillation batch", () => {
   resolvePetrovichEncounter(state, "accept", notify);
   assert.equal(state.story.petrovichQualityBonus, 5);
   assert.equal(state.parts.fasteners, 1);
+});
+
+
+test("mash house supports multiple recipes and independent concurrent vats", () => {
+  const state = createInitialState();
+  state.skills = ["ferment"];
+  const house = ensureMashHouse(state);
+  assert.equal(getMashCapacity(state), 2);
+  assert.equal(startMashBatch(state, "sugar"), true);
+  assert.equal(startMashBatch(state, "fruit"), true);
+  assert.equal(startMashBatch(state, "grain"), false);
+  assert.equal(house.batches.length, 2);
+  assert.deepEqual(house.batches.map(batch => batch.outputItem), ["braga", "fruit_braga"]);
+  assert.deepEqual(MASH_RECIPES.map(recipe => recipe.id), ["sugar", "fruit", "grain"]);
+});
+
+test("mash fermentation advances by game days and becomes collectable once ready", () => {
+  const state = createInitialState();
+  state.skills = ["ferment", "patient_master"];
+  const messages = [];
+  const notify = message => messages.push(message);
+  assert.equal(startMashBatch(state, "grain"), true);
+  const batch = state.mashHouse.batches[0];
+  assert.equal(batch.totalDays, 3);
+  advanceMashHouseDay(state, notify);
+  assert.equal(batch.remaining, 2);
+  advanceMashHouseDay(state, notify);
+  advanceMashHouseDay(state, notify);
+  assert.equal(batch.ready, true);
+  assert.equal(batch.remaining, 0);
+  advanceMashHouseDay(state, notify);
+  assert.equal(messages.length, 1);
+  assert.equal(batch.outputItem, "grain_braga");
 });
