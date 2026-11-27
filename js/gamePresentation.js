@@ -115,6 +115,7 @@ function startPhaserScene() {
 
       // Условный герой — графический спрайт без внешних изображений.
       this.player = this.add.container(width*.34,height*.84).setDepth(9);
+      window.__samosgonScene = this;
       const avatar = this.add.graphics();
       avatar.fillStyle(0x263b32,1); avatar.fillEllipse(0,17,25,8);
       avatar.fillStyle(0x4b6680,1); avatar.fillRoundedRect(-8,-2,16,20,5);
@@ -144,6 +145,7 @@ function startPhaserScene() {
       this.handleTabChange=(event)=>this.markActive(event.detail);
       window.addEventListener("samosgon:tab-change",this.handleTabChange);
       this.events.once("shutdown",()=>{
+        if(window.__samosgonScene===this) delete window.__samosgonScene;
         window.removeEventListener("samosgon:tab-change",this.handleTabChange);
         this.scale.off("resize",this.handleResize,this);
       });
