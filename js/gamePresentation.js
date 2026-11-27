@@ -97,4 +97,5 @@ export function initGamePresentation(){
     if(warehouse){warehouse.open=!warehouse.open;warehouse.scrollIntoView({block:"nearest",behavior:"smooth"});}
   });
   document.querySelector("#bottomMarket")?.addEventListener("click",()=>openTab("market"));
+  document.querySelector(".prototype-bottom [data-tab=\"productionHub\"]")?.addEventListener("click",()=>openTab("productionHub"));
 }
