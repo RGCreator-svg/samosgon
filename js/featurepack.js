@@ -27,6 +27,8 @@ function ensure(s) {
   s.market ??= { multiplier:1, trend:"ровный", lastShiftDay:0 };
   s.specialization ??= null;
   s.distillation ??= { active:false, quality:0, result:0 };
+  if(s.distillation.active && !s.distillation.phase)s.distillation.phase="stabilization";
+  s.maintenance=Math.max(0,Math.min(100,Number(s.maintenance??100)));
   s.mashType ??= "sugar";
   s.bragaQuality = Math.max(0, Math.min(100, Number(s.bragaQuality ?? 55)));
   s.barrelAging ??= [];
@@ -46,15 +48,27 @@ function renderDistillation(s, root) {
   [["sugar","🍬 Сахарная"],["fruit","🍎 Фруктовая"],["grain","🌾 Зерновая"],["honey","🍯 Медовая"]].forEach(([id,label])=>{const b=btn(label,"mashType",id,s.distillation.active || (id==="honey" && !s.skills.includes("honey_distillation")));if(s.mashType===id)b.classList.add("selected");mashPicker.append(b);});c.append(mashPicker);
   c.append(el("p","module-meta",`Конфигурация: ${{pot:"Перегонный аппарат",hybrid:"Гибридная колонна",rectification:"Ректификационная колонна"}[profile.mode]} · Бонус модулей к качеству: +${profile.quality}`));
   if (s.distillation.active) {
-    c.append(el("p","","Выбери стиль отсечения начальной фракции:"));
-    c.append(btn("Осторожный режим · меньше выхода, выше качество","distill-cut","careful"));
-    c.append(btn("Сбалансированный режим","distill-cut","balanced"));
-    c.append(btn("На максимальный выход · качество под вопросом","distill-cut","yield"));
+    const phases={
+      stabilization:{title:"Подготовка аппарата",text:"Игровой этап: выбери, насколько внимательно система стабилизирует процесс.",choices:[["precise","Точный контроль"],["steady","Ровный темп"],["fast","Быстрый запуск"]]},
+      heads:{title:"Начальная фракция",text:"Условный игровой выбор: аккуратность против общего выхода.",choices:[["precise","Аккуратное отделение"],["steady","Сбалансированно"],["fast","Собрать больше"]]},
+      heart:{title:"Основная фракция",text:"Главная игровая часть партии. Реши, что важнее: качество, баланс или количество.",choices:[["precise","Приоритет качества"],["steady","Баланс качества и выхода"],["fast","Приоритет выхода"]]},
+      tails:{title:"Завершение партии",text:"Финальный игровой выбор влияет на итоговый объём и стабильность результата.",choices:[["precise","Завершить аккуратно"],["steady","Обычное завершение"],["fast","Продлить сбор"]]}
+    };
+    const phase=phases[s.distillation.phase]||phases.stabilization;
+    c.append(el("h4","","Этап: "+phase.title),el("p","",phase.text));
+    const track=el("div","distillation-stage-track");
+    [["stabilization","Подготовка"],["heads","Начальная"],["heart","Основная"],["tails","Завершение"]].forEach(([id,label])=>{const step=el("span",id===s.distillation.phase?"is-current":(s.distillation.completedStages||[]).includes(id)?"is-done":"",label);track.append(step);});
+    c.append(track);
+    phase.choices.forEach(([id,label])=>c.append(btn(label,"distill-cut",id)));
+    c.append(el("p","feature-meta", "Условная игровая симуляция: здесь нет реальных температур, режимов или технологических инструкций."));
   } else {
-    c.append(el("p","","Для запуска требуется 3 единицы выбранного типа браги. Это абстрактная игровая операция, без реальных технологических параметров."));
-    c.append(btn("Запустить игровую перегонку (3 браги)","distill-start","yes",mashCount<3 || s.distillation.result>0));
+    c.append(el("p","","Для запуска требуется 3 единицы выбранного типа браги. Перегонка проходит в четыре игровых этапа; решения меняют условные качество и выход."));
+    c.append(btn("Запустить перегонку","distill-start","yes",mashCount<3 || s.distillation.result>0));
   }
-  if (s.distillation.result>0) c.append(el("p","feature-success",`Получено игрового спирта-сырца: ${s.distillation.result} ед. Забери результат на склад.`),btn("Забрать на склад","distill-collect","yes"));
+  if (s.distillation.result>0) c.append(el("p","feature-success",`Получено игрового спирта-сырца: ${s.distillation.result} ед. Качество: ${s.distillation.quality}/100. Забери результат на склад.`),btn("Забрать на склад","distill-collect","yes"));
+  const service=card(root,"🔧 Обслуживание установки","Состояние оборудования влияет на паспорта качества. Работа постепенно изнашивает установку; обслуживание возвращает её в форму.");
+  service.append(el("p","feature-meta",`Текущее состояние: ${s.maintenance}% · Бонус качества зависит от состояния узлов.`));
+  service.append(btn("Обслужить установку · "+Math.max(10,Math.ceil((100-s.maintenance)*1.5))+" монет","equipment-service","repair",s.maintenance>=100||s.distillation.active));
 }
 function renderSpecialization(s,root) {
   const c=card(root,"🌟 Профессиональная специализация","Один выбор на всю партию. Открывается при наличии 3 очков навыков; выбор задаёт долгосрочный стиль развития.");
@@ -103,15 +117,53 @@ export function initFeaturePack(s,{render,notify,earnExperience}) {
     const tab=btn("⚗️ Винокурня","tab","featurePack");tab.dataset.tab="featurePack";nav.append(tab);
     const section=el("section","tab-content panel hidden");section.id="featurePack";section.innerHTML="<h2>⚗️ Винокурня и производство</h2><p class=\"feature-meta\">Главный производственный цикл: сырьё → брага → перегонка → выдержка → готовый продукт.</p>";game.append(section);
   }
-    registerCartHandler("farmUpgrade",(current,item)=>{const farm=FARMS.find(x=>x.id===item.payload?.id);if(farm&&!current.farmUpgrades.includes(farm.id)){current.farmUpgrades.push(farm.id);earnExperience(20);}});
+    registerCartHandler("equipmentService",(current)=>{current.maintenance=100;notify("Установка обслужена. Состояние восстановлено до 100%.");});
+  registerCartHandler("farmUpgrade",(current,item)=>{const farm=FARMS.find(x=>x.id===item.payload?.id);if(farm&&!current.farmUpgrades.includes(farm.id)){current.farmUpgrades.push(farm.id);earnExperience(20);}});
   registerCartHandler("barrelAging",(current,item)=>{if((current.barrelAging||[]).length<3){const input=item.payload?.inputItem||"spirit";current.barrelAging.push({remaining:3,quality:Math.max(45,Number(current.distillation.quality)||65),ready:false,inputItem:input,outputItem:input==="honey_spirit"?"aged_honey_spirit":"aged_spirit"});}});
   $("#featurePack").addEventListener("click",e=>{
     const b=e.target.closest("button");if(!b)return;
     if(handleMashHouseClick(s,b,{notify,render:()=>{render();renderFeaturePack(s);}}))return;
     if(b.dataset.mashType){s.mashType=b.dataset.mashType;}
-    if(b.dataset.distillStart){const item={sugar:"braga",fruit:"fruit_braga",grain:"grain_braga",honey:"honey_braga"}[s.mashType]||"braga";if((s.inventory[item]||0)<3||s.distillation.result>0)return;const qualityLot=(s.qualityLots||[]).find(lot=>lot.item===item&&lot.quality!==null&&lot.quality!==undefined&&Number.isFinite(Number(lot.quality)));if(qualityLot)s.bragaQuality=Number(qualityLot.quality);removeInventory(s,item,3);s.distillation.active=true;s.distillation.mashType=s.mashType;s.distillation.resultItem=s.mashType==="honey"?"honey_spirit":"spirit";notify("Игровая перегонка запущена. Выбери режим контроля качества.");}
-    if(b.dataset.distillCut){if(!s.distillation.active)return;const mode=b.dataset.distillCut;const bonus=s.specialization==="artisan"?8:0;const values={careful:{quality:24,output:2},balanced:{quality:8,output:3},yield:{quality:-12,output:4}};const v=values[mode];const profile=getEquipmentProfile(s,s.mashType);const equipmentBonus=(Number(s.equipmentTier)||0)*4;const baseQuality=Number(s.bragaQuality)||55;s.distillation={active:false,quality:Math.max(20,Math.min(100,Math.round(baseQuality+v.quality+bonus+equipmentBonus+profile.quality+(Number(s.lab?.qualityBonus)||0)+(Number(s.story?.petrovichQualityBonus)||0)))),result:Math.max(1,Math.round((v.output+profile.output)*(Number(s.processCenter?.outputMultiplier)||1))),mashType:s.mashType,resultItem:s.mashType==="honey"?"honey_spirit":"spirit",stillMode:profile.mode,flavour:profile.flavour};s.story ??= {};s.story.petrovichQualityBonus=0;notify(`Перегонка завершена: ${s.distillation.result} ед., качество ${s.distillation.quality}/100.`);earnExperience(14);}
+    if(b.dataset.distillStart){const item={sugar:"braga",fruit:"fruit_braga",grain:"grain_braga",honey:"honey_braga"}[s.mashType]||"braga";if((s.inventory[item]||0)<3||s.distillation.result>0)return;const qualityLot=(s.qualityLots||[]).find(lot=>lot.item===item&&lot.quality!==null&&lot.quality!==undefined&&Number.isFinite(Number(lot.quality)));if(qualityLot)s.bragaQuality=Number(qualityLot.quality);removeInventory(s,item,3);s.distillation={active:true,phase:"stabilization",completedStages:[],quality:0,result:0,outputPoints:0,qualityPoints:0,mashType:s.mashType,resultItem:s.mashType==="honey"?"honey_spirit":"spirit"};notify("Перегонка запущена. Пройди четыре игровых этапа.");}
+    if(b.dataset.distillCut){
+      if(!s.distillation.active)return;
+      const phase=s.distillation.phase||"stabilization",choice=b.dataset.distillCut;
+      const impacts={
+        stabilization:{precise:[2,0],steady:[1,0],fast:[-2,1]},
+        heads:{precise:[3,-1],steady:[1,0],fast:[-2,1]},
+        heart:{precise:[3,0],steady:[1,1],fast:[-3,2]},
+        tails:{precise:[2,0],steady:[0,1],fast:[-3,2]}
+      };
+      const impact=impacts[phase]?.[choice];
+      if(!impact)return;
+      s.distillation.qualityPoints=(Number(s.distillation.qualityPoints)||0)+impact[0];
+      s.distillation.outputPoints=(Number(s.distillation.outputPoints)||0)+impact[1];
+      s.distillation.completedStages??=[];
+      s.distillation.completedStages.push(phase);
+      const order=["stabilization","heads","heart","tails"],index=order.indexOf(phase);
+      if(index<order.length-1){s.distillation.phase=order[index+1];notify("Игровой этап завершён. Следующий: "+({heads:"начальная фракция",heart:"основная фракция",tails:"завершение партии"}[s.distillation.phase])+".");}
+      else{
+        const profile=getEquipmentProfile(s,s.mashType);
+        const owned=new Set(s.equipmentModules||[]);
+        const coolingBonus=(owned.has("auto_cooling")?3:0)+(owned.has("safety_monitor")?2:0)+(owned.has("basic_condenser")?1:0);
+        const equipmentBonus=(Number(s.equipmentTier)||0)*4;
+        const baseQuality=Number(s.bragaQuality)||55;
+        const artisan=s.specialization==="artisan"?8:0;
+        const finalQuality=Math.max(20,Math.min(100,Math.round(baseQuality+(Number(s.distillation.qualityPoints)||0)+artisan+equipmentBonus+profile.quality+coolingBonus+(Number(s.lab?.qualityBonus)||0)+(Number(s.story?.petrovichQualityBonus)||0))));
+        const output=Math.max(1,Math.round((2+(Number(s.distillation.outputPoints)||0)+profile.output)*(Number(s.processCenter?.outputMultiplier)||1)));
+        s.distillation={...s.distillation,active:false,phase:null,quality:finalQuality,result:output,stillMode:profile.mode,flavour:profile.flavour};
+        s.maintenance=Math.max(0,(Number(s.maintenance)||100)-(owned.has("safety_monitor")?1:3));
+        s.story??={};s.story.petrovichQualityBonus=0;
+        notify("Перегонка завершена: "+output+" ед., качество "+finalQuality+"/100. Износ установки: "+(100-s.maintenance)+"%.");
+        earnExperience(14);
+      }
+    }
     if(b.dataset.distillCollect){const n=s.distillation.result;const got=addInventory(s,s.distillation.resultItem||"spirit",n);if(got===n)s.distillation.result=0;else s.distillation.result-=got;if(got){recordProduction(s,{name:s.distillation.resultItem==="honey_spirit"?"Медовый дистиллят":"Спирт-сырец",amount:got,item:s.distillation.resultItem||"spirit",process:"Перегонка",quality:s.distillation.quality});notify(`На склад помещено ${got} ед. спирта-сырца.`);}}
+    if(b.dataset.equipmentService){
+      if(s.maintenance>=100)return;
+      queuePurchase(s,{key:"equipment-service",kind:"equipmentService",name:"Обслуживание установки",cost:Math.max(10,Math.ceil((100-s.maintenance)*1.5)),payload:{}});
+      notify("Обслуживание добавлено в общую корзину.");
+    }
     if(b.dataset.specialize){if(s.specialization||(s.skillPoints||0)<3)return;s.skillPoints-=3;s.specialization=b.dataset.specialize;notify(`Выбрана специализация: ${SPECIALIZATIONS.find(x=>x.id===s.specialization).name}.`);}
     if(b.dataset.eventChoice!==undefined){const event=EVENTS.find(x=>x.id===s.featureEvent?.id);const choice=event?.choices[Number(b.dataset.eventChoice)];if(!choice || ((choice.money||0)<0 && s.money<Math.abs(choice.money)))return;s.money=Math.max(0,s.money+(choice.money||0));s.reputation=Math.max(0,Math.min(100,(s.reputation||0)+(choice.reputation||0)));s.market.multiplier=Math.max(.75,Math.min(1.35,s.market.multiplier+(choice.market||0)));s.maintenance=Math.max(0,Math.min(100,(s.maintenance||100)+(choice.maintenance||0)));if(choice.xp)earnExperience(choice.xp);notify(`Решение принято: «${event.title}».`);s.featureEvent=null;}
     if(b.dataset.ageStart){const input=b.dataset.ageStart==="honey"?"honey_spirit":"spirit";if((s.inventory[input]||0)<2||s.barrelAging.length>=3)return;queuePurchase(s,{key:"barrel-aging:"+input,kind:"barrelAging",name:input==="honey_spirit"?"Выдержка медового дистиллята":"Выдержка спирта-сырца",cost:20,consume:{[input]:2},payload:{inputItem:input}});notify("Закладка бочки добавлена в общую корзину.");}
