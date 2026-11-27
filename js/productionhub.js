@@ -65,11 +65,27 @@ function render(s) {
   root.replaceChildren();
   root.append(el("p", "feature-intro", "Единый диспетчер хозяйства: здесь собраны активные партии из сарая, винодельни, перегонки и бочек. Это обзор игрового производства, а не отдельная производственная механика."));
 
+  const distillFocus = el("article","production-distill-focus");
+  distillFocus.append(el("h3","","⚗️ Главное дело — самогоноварение"));
+  const mashItem = ({sugar:"braga",fruit:"fruit_braga",grain:"grain_braga",honey:"honey_braga"})[s.mashType] || "braga";
+  const mashNames = {sugar:"сахарная",fruit:"фруктовая",grain:"зерновая",honey:"медовая"};
+  const focusText = s.distillation?.active
+    ? "Перегонка запущена: выбери игровой режим контроля качества."
+    : (Number(s.distillation?.result)||0)>0
+      ? "Партия готова к сбору: "+s.distillation.result+" ед. · качество "+(s.distillation.quality||0)+"/100."
+      : "Выбрана "+(mashNames[s.mashType]||"сахарная")+" брага. На складе: "+(s.inventory?.[mashItem]||0)+" ед. Для старта нужно 3 ед.";
+  distillFocus.append(el("p","",focusText));
+  const distillButton=el("button","production-distill-button","Перейти в винокурню");
+  distillButton.type="button";
+  distillButton.dataset.tab="featurePack";
+  distillFocus.append(distillButton);
+  root.append(distillFocus);
+
   const batches = [];
   if (s.production?.active) batches.push({name:"Базовая брага",stage:"Брожение",left:s.production.daysLeft||0,done:false,detail:"Сахарная линия"});
   if (s.production?.ready) batches.push({name:"Базовая брага",stage:"Готова",left:0,done:true,detail:"Можно забрать в сарае"});
   (s.viticulture?.batches||[]).forEach(job => batches.push({name:job.name,stage:job.ready?"Готова":job.stage==="aging"?"Выдержка":"Брожение",left:job.remaining||0,done:!!job.ready,detail:"Винодельня · выход "+(job.output||0)+" ед."}));
-  if (s.distillation?.active) batches.push({name:"Перегонка · "+({sugar:"сахарная",fruit:"фруктовая",grain:"зерновая",honey:"медовая"}[s.distillation.mashType]||"сырьевая")+" партия",stage:"Контроль качества",left:null,done:false,detail:"Выберите режим перегонки во вкладке «Технологии»"});
+  if (s.distillation?.active) batches.push({name:"Перегонка · "+({sugar:"сахарная",fruit:"фруктовая",grain:"зерновая",honey:"медовая"}[s.distillation.mashType]||"сырьевая")+" партия",stage:"Контроль качества",left:null,done:false,detail:"Выберите режим во вкладке «Винокурня»"});
   if ((s.distillation?.result||0)>0) batches.push({name:"Спирт-сырец",stage:"Ожидает сбора",left:0,done:true,detail:(s.distillation.result||0)+" ед. · качество "+(s.distillation.quality||0)+"/100"});
   (s.barrelAging||[]).forEach((barrel,i)=>batches.push({name:barrel.outputItem==="aged_honey_spirit"?"Медовый дистиллят · бочка":"Спирт-сырец · бочка",stage:barrel.ready?"Готова":"Выдержка",left:barrel.remaining||0,done:!!barrel.ready,detail:"Бочка "+(i+1)+" · качество "+(barrel.quality||0)+"/100"}));
 
