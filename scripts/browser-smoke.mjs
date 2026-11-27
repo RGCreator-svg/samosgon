@@ -4,7 +4,6 @@ import { readFile, stat } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
-import crypto from "node:crypto";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const mime = { ".html":"text/html; charset=utf-8", ".js":"text/javascript; charset=utf-8", ".css":"text/css; charset=utf-8", ".json":"application/json; charset=utf-8" };
@@ -52,19 +51,19 @@ try {
   assert.equal(await page.locator("#orchard").evaluate(el=>el.classList.contains("hidden")), false, "Orchard menu item did not open orchard tab");
 
   // Compare rendered frames to confirm that click-to-move changes the game canvas.
-  const before = await canvas.screenshot();
+  const startPosition = await page.evaluate(() => ({ x:window.__samosgonScene.player.x, y:window.__samosgonScene.player.y }));
   await page.mouse.click(box.x + box.width*.34, box.y + box.height*.91);
   await page.waitForTimeout(900);
-  const after = await canvas.screenshot();
-  assert.notEqual(crypto.createHash("sha256").update(before).digest("hex"), crypto.createHash("sha256").update(after).digest("hex"), "Click-to-move did not change the rendered frame");
+  const clickPosition = await page.evaluate(() => ({ x:window.__samosgonScene.player.x, y:window.__samosgonScene.player.y }));
+  assert.ok(Math.hypot(clickPosition.x-startPosition.x,clickPosition.y-startPosition.y)>5, "Click-to-move did not change the player position");
 
-  // Keyboard movement must change the rendered frame as well.
-  const beforeKey = await canvas.screenshot();
+  // Keyboard movement must update the player's world position as well.
+  const beforeKey = await page.evaluate(() => ({ x:window.__samosgonScene.player.x, y:window.__samosgonScene.player.y }));
   await page.keyboard.down("ArrowRight");
   await page.waitForTimeout(350);
   await page.keyboard.up("ArrowRight");
-  const afterKey = await canvas.screenshot();
-  assert.notEqual(crypto.createHash("sha256").update(beforeKey).digest("hex"), crypto.createHash("sha256").update(afterKey).digest("hex"), "Keyboard movement did not change the rendered frame");
+  const afterKey = await page.evaluate(() => ({ x:window.__samosgonScene.player.x, y:window.__samosgonScene.player.y }));
+  assert.ok(afterKey.x>beforeKey.x+10, "Keyboard movement did not move the player to the right");
 
   // Narrow viewport: canvas remains present and usable.
   await page.setViewportSize({ width:390,height:844 });
