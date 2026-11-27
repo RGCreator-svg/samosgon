@@ -172,7 +172,8 @@ export function initProcessCenter(s,{render:renderGame,notify,earnExperience}) {
       notify("Симуляция установки завершена: "+score+"/100. Эффект будет учтён в следующих паспортах качества.");earnExperience(4);renderGame();return;
     }
   });
-    render(s);
+  nav.addEventListener("click",e=>{const b=e.target.closest('[data-tab="processCenter"]');if(!b)return;document.querySelectorAll(".tab-content").forEach(x=>x.classList.toggle("hidden",x.id!=="processCenter"));nav.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x===b));});
+  render(s);
 }
 
 export function renderProcessCenter(s){render(s);}
