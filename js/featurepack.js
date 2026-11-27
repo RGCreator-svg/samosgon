@@ -101,8 +101,7 @@ export function initFeaturePack(s,{render,notify,earnExperience}) {
     const tab=btn("🧭 Технологии","tab","featurePack");tab.dataset.tab="featurePack";nav.append(tab);
     const section=el("section","tab-content panel hidden");section.id="featurePack";game.append(section);
   }
-  nav.addEventListener("click",e=>{if(!e.target.closest('[data-tab="featurePack"]'))return;document.querySelectorAll(".tab-content").forEach(x=>x.classList.toggle("hidden",x.id!=="featurePack"));nav.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x.dataset.tab==="featurePack"));});
-  registerCartHandler("farmUpgrade",(current,item)=>{const farm=FARMS.find(x=>x.id===item.payload?.id);if(farm&&!current.farmUpgrades.includes(farm.id)){current.farmUpgrades.push(farm.id);earnExperience(20);}});
+    registerCartHandler("farmUpgrade",(current,item)=>{const farm=FARMS.find(x=>x.id===item.payload?.id);if(farm&&!current.farmUpgrades.includes(farm.id)){current.farmUpgrades.push(farm.id);earnExperience(20);}});
   registerCartHandler("barrelAging",(current,item)=>{if((current.barrelAging||[]).length<3){const input=item.payload?.inputItem||"spirit";current.barrelAging.push({remaining:3,quality:Math.max(45,Number(current.distillation.quality)||65),ready:false,inputItem:input,outputItem:input==="honey_spirit"?"aged_honey_spirit":"aged_spirit"});}});
   $("#featurePack").addEventListener("click",e=>{
     const b=e.target.closest("button");if(!b)return;
