@@ -82,7 +82,7 @@ export function getEquipmentProfile(s,mashType="sugar"){
  const owned=new Set(s.equipmentModules||[]),has=id=>owned.has(id);
  let mode="pot",quality=0,output=0,flavour=0,stability=0,wear=0;
  if((has("plate_column")||has("glass_column")||has("copper_column")||has("stainless_column")||has("packed_column"))&&has("dephlegmator"))mode=has("packed_column")?"rectification":"hybrid";
- if(has("copper_head")||has("copper_column")||has("copper_mesh"))flavour+=8;
+ if(has("copper_head")||has("copper_mesh"))flavour+=8;
  if(has("sight_glass")||has("glass_column"))quality+=3;
  if(has("auto_cooling")||has("dimroth_condenser"))quality+=6;
  if(has("shell_condenser")){quality+=5;stability+=5;wear-=1;}
