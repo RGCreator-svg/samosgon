@@ -75,6 +75,11 @@ export function startStillBatch(state,unitId,mashType,baseQuality=null){
 }
 export function initProductionPlant(state,{notify=()=>{},render=()=>{},earnExperience=()=>{}}={}){
   const plant=ensureProductionPlant(state);
+  const nav=$(".navigation"),game=$("#game");
+  if(nav&&game&&!$("#productionPlant")){
+    const tab=el("button","","🏭 Производственный цех");tab.type="button";tab.dataset.tab="productionPlant";nav.append(tab);
+    const section=el("section","tab-content panel hidden");section.id="productionPlant";section.innerHTML="<h2>🏭 Производственный цех</h2>";game.append(section);
+  }
   registerCartHandler("productionStillUnlock",(current,item)=>{
     const target=Number(item.payload?.unitId)||0;
     const data=ensureProductionPlant(current);
@@ -93,7 +98,17 @@ export function initProductionPlant(state,{notify=()=>{},render=()=>{},earnExper
     const button=event.target.closest("[data-still-action]");
     if(!button)return;
     const unitId=Number(button.dataset.unitId),action=button.dataset.stillAction;
-    const data=ensureProductionPlant(state),unit=data.units.find(entry=>entry.id===unitId);
+    const data=ensureProductionPlant(state);
+    if(action==="unlock"){
+      const target=Number(button.closest("[data-unlock-unit]")?.dataset.unlockUnit)||data.nextId;
+      const offers={2:{cost:700,parts:{metal:4,tools:1},model:"stainless"},3:{cost:1800,parts:{metal:8,pump:2,controller:1},model:"glass"}};
+      const offer=offers[target];
+      if(!offer||data.units.length>=getStillCapacity(state)||data.units.some(entry=>entry.id===target))return;
+      queuePurchase(state,{key:"production-still-unlock:"+target,kind:"productionStillUnlock",name:"Установка аппарата №"+target,cost:offer.cost,parts:offer.parts,payload:{unitId:target,model:offer.model}});
+      notify("Новый аппарат и необходимые детали добавлены в общую корзину.");
+      render();return;
+    }
+    const unit=data.units.find(entry=>entry.id===unitId);
     if(!unit)return;
     if(action==="model"){
       if(unit.active)return;
@@ -156,7 +171,6 @@ export function advanceProductionPlantDay(state,notify=()=>{}){
 function renderUnit(state,unit){
   const model=STILL_MODELS[unit.model],card=el("article","dispatch-still-card");
   const head=el("div","dispatch-still-head");
-  head.append(el("div","","<unused>"));
   const title=el("h3",""," "+model.icon+" "+unit.name);
   head.replaceChildren(title,el("span","dispatch-maintenance","Обслуживание "+unit.maintenance+"%"));
   card.append(head,el("p","dispatch-model-desc",model.description));
@@ -209,8 +223,6 @@ export function renderProductionPlant(state){
   const summary=el("div","dispatch-summary");
   const active=plant.units.filter(unit=>unit.active&&!unit.active.ready).length;
   const ready=plant.units.filter(unit=>unit.active?.ready).length;
-  summary.append(el("div","","<unused>"));
-  summary.replaceChildren();
   [[plant.units.length,"Аппаратов"],[active,"В работе"],[ready,"Готово к сбору"],[capacity,"Доступно мест"]].forEach(([value,label])=>{const tile=el("div","dispatch-kpi");tile.append(el("b","",String(value)),el("span","",label));summary.append(tile);});
   root.append(summary);
   const grid=el("div","dispatch-still-grid");
