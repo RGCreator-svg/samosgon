@@ -76,7 +76,8 @@ function render(s){
 export function initResearchLab(s,{render:renderGame,notify,earnExperience}){
  ensure(s);const nav=$(".navigation"),game=$("#game");if(!nav||!game)return;
  if(!$("#researchLab")){const tab=el("button","","🧪 Лаборатория");tab.dataset.tab="researchLab";nav.append(tab);const section=el("section","tab-content panel hidden");section.id="researchLab";section.append(el("h2","","🧪 Лаборатория и исследования"));game.append(section);}
-  $("#researchLab").addEventListener("click",e=>{
+ nav.addEventListener("click",e=>{if(!e.target.closest('[data-tab="researchLab"]'))return;document.querySelectorAll(".tab-content").forEach(x=>x.classList.toggle("hidden",x.id!=="researchLab"));nav.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x.dataset.tab==="researchLab"));});
+ $("#researchLab").addEventListener("click",e=>{
 
   const recipeType=e.target.closest("[data-recipe-type]");if(recipeType){s.lab.recipeDraft.type=recipeType.dataset.recipeType;renderGame();return;}
   const ratioButton=e.target.closest("[data-ratio]");if(ratioButton){const k=ratioButton.dataset.ratio;s.lab.recipeDraft[k]=Math.max(1,Math.min(4,(Number(s.lab.recipeDraft[k])||1)+Number(ratioButton.dataset.delta)));renderGame();return;}
