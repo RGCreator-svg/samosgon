@@ -21,7 +21,7 @@ function makePassport(entry, s, type = "production") {
     productName:String(entry.name||"Партия"),amount:Math.max(0,Number(entry.amount)||0),
     remaining:Math.max(0,Number(entry.amount)||0),sold:0,
     process:String(entry.process||"Производство"),quality:assessment.score,grade:assessment.grade.label,
-    baseQuality:assessment.base,saleModifier:Math.round((1+(assessment.score-60)*.005)*100),aroma:assessment.aroma,purity:assessment.purity,stability:assessment.stability,
+    baseQuality:assessment.base,brandReputation:entry.process==="Купажирование"?(Number(s.blendReputation)||0):null,brandBonus:entry.process==="Купажирование"?Math.round((Number(s.blendReputation)||0)*.08):0,saleModifier:Math.round((1+(assessment.score-60)*.005+(entry.process==="Купажирование"?(Number(s.blendReputation)||0)*.0008:0))*100),aroma:assessment.aroma,purity:assessment.purity,stability:assessment.stability,
     factors:assessment.factors,standardDelta:assessment.standardDelta,flavorProfile,
     recipeId:entry.recipeId||null,recipeName:entry.recipeName||null,ratio:entry.ratio||null,mashType:entry.mashType||null,
     standardId:standard?.trialId||null,standardMatch:assessment.standardMatch
