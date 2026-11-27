@@ -40,19 +40,22 @@
   <div id="game-layout">
   <main id="game" class="hidden">
     <header class="topbar">
-      <div>
-        <h1>Самогон · REV 4</h1>
-        <p>Хозяйство имени последней надежды</p>
+      <div class="player-profile" aria-label="Профиль игрока">
+        <div class="player-avatar" aria-hidden="true">👨‍🌾</div>
+        <div class="player-profile-info">
+          <strong class="player-nickname">Дядя Ваня</strong>
+          <span class="player-level">★ Уровень <b id="level">1</b></span>
+          <div class="xp-panel" aria-label="Прогресс опыта">
+            <div class="xp-heading"><span>ОПЫТ</span><b><span id="xpValue">0</span>/<span id="xpNext">100</span></b></div>
+            <div class="xp-track"><div id="xpBar"></div></div>
+          </div>
+        </div>
       </div>
-<div class="stats homestead-resource-bar">
-  <span class="hud-chip hud-day">📅 <small>ДЕНЬ</small> <b id="day">1</b></span>
-  <span class="hud-chip hud-coins">🪙 <small>МОНЕТЫ</small> <b id="money">80</b></span>
-  <span class="hud-chip hud-level">⭐ <small>УРОВЕНЬ</small> <b id="level">1</b></span>
-  <div class="xp-panel" aria-label="Прогресс опыта"><div class="xp-heading"><span>XP</span><b><span id="xpValue">0</span>/<span id="xpNext">100</span></b></div><div class="xp-track"><div id="xpBar"></div></div></div>
-  <span class="hud-chip hud-season">🌦 <small>УСАДЬБА</small> <b id="hudSeason">Весна</b></span>
-</div>
-
-
+      <div class="stats homestead-resource-bar">
+        <span class="hud-chip hud-day">📅 <small>ДЕНЬ</small> <b id="day">1</b></span>
+        <span class="hud-chip hud-coins">🪙 <small>МОНЕТЫ</small> <b id="money">80</b></span>
+        <span class="hud-chip hud-season">🌦 <small>УСАДЬБА</small> <b id="hudSeason">Весна</b></span>
+      </div>
     </header>
 
     <svg id="homestead-scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
@@ -264,7 +267,17 @@
       <button data-tab="market">🧺 Рынок</button>
       <button data-tab="skills">🌳 Умения</button>
       <button data-tab="notebook">📖 Записки</button>
-    </nav>
+    </nav> 
+    <aside class="prototype-side" aria-label="Игровые цели">
+      <button class="side-btn" type="button" data-tab="milestones"><span class="big">🏆</span>Достижения</button>
+      <button class="side-btn" type="button" data-tab="orders"><span class="big">📜</span>Задания</button>
+      <button class="side-btn" type="button" data-tab="goals"><span class="big">🎯</span>Цели</button>
+    </aside>
+    <aside class="prototype-task" aria-label="Текущая задача">
+      <h4>❗ Текущая задача</h4>
+      <div class="task-row"><span class="task-icon">🏡</span><div>Вернуть жизнь бабушкиному дому<small>Починить дом, расчистить огород и наладить воду</small></div></div>
+    </aside>
+
     <aside class="prototype-task">
       <h4>❗ Задача усадьбы</h4>
       <div class="task-row"><span class="task-icon">🏡</span><div>Вернуть жизнь бабушкиному дому<small>Ремонт, урожай и развитие хозяйства</small></div></div>
@@ -328,7 +341,7 @@
       </div>
       <p id="homeDescription"></p>
       <p>Состояние дома: <b id="houseValue"></b>%</p>
-      <button id="repairHouse">Починить дом — 30 монет</button>
+      <button id="repairHouse">Починить дом — 30 монет</button><p class="action-requirements">Навык: «Руки из плеч» снижает цену до 20 монет. Материалы: пиломатериалы ×1, крепёж ×1, краска ×1.</p>
     </section>
 
     <section id="farm" class="tab-content panel hidden location-panel farm-panel">
@@ -349,8 +362,14 @@
       </p>
       <p>Состояние огорода: <b id="gardenValue"></b>%</p>
       <button id="harvestVegetables">Собрать овощи</button>
-      <button id="repairGarden">Расчистить грядки — 20 монет</button>
-    </section>
+      <button id="repairGarden">Расчистить грядки — 20 монет</button><p class="action-requirements">Навык: «Руки из плеч» снижает цену до 15 монет. Материалы: пиломатериалы ×1, крепёж ×1.</p>
+          <section class="well-development-card" aria-labelledby="wellDevelopmentTitle">
+        <h3 id="wellDevelopmentTitle">💧 Колодец и водоснабжение</h3>
+        <p id="wellDevelopmentStatus">Пока на участке нет колодца. Начните с рытья шахты, затем установите насос и постройте водонапорную башню.</p>
+        <div id="wellDevelopmentDetails"></div>
+        <button id="wellDevelopmentAction" type="button" data-water-upgrade="1">⛏ Вырыть колодец</button>
+      </section>
+</section>
 
     <section id="orchard" class="tab-content panel hidden location-panel orchard-panel">
       <div class="location-scene orchard-scene" role="img" aria-label="Старый фруктовый сад с яблонями и грушами">
@@ -384,8 +403,8 @@
       <p id="barnDescription"></p>
       <p>Состояние сарая: <b id="barnValue"></b>%</p>
       <p>Самогонный аппарат: <b id="stillValue"></b>%</p>
-      <button id="repairBarn">Починить сарай — 30 монет</button>
-      <button id="repairStill">Починить аппарат — 50 монет</button>
+      <button id="repairBarn">Починить сарай — 30 монет</button><p class="action-requirements">Навык: «Руки из плеч» снижает цену до 20 монет. Материалы: пиломатериалы ×2, крепёж ×1, краска ×1.</p>
+      <button id="repairStill">Починить аппарат — 50 монет</button><p class="action-requirements">Навык: «Руки из плеч» снижает цену до 35 монет. Материалы: металлические заготовки ×1, крепёж ×1, инструменты ×1.</p>
 
       <div class="production">
         <h3>Брожение</h3>
@@ -416,6 +435,16 @@
       <div id="skillTree" class="skill-tree"></div>
     </section>
 
+<section id="goals" class="tab-content panel hidden">
+      <h2>🎯 Цели хозяйства</h2>
+      <p>План развития усадьбы: восстановить дом и сарай, расчистить огород и сад, наладить воду, затем расширять производство.</p>
+      <ul class="homestead-goal-list">
+        <li>🏚️ Восстановить бабушкин дом и мастерскую</li>
+        <li>🌱 Поднять огород и вернуть к жизни фруктовый сад</li>
+        <li>💧 Вырыть колодец, установить насос и построить водонапорную башню</li>
+        <li>⚗️ Развивать производственные линии и улучшать качество партий</li>
+      </ul>
+    </section>
     <section id="notebook" class="tab-content panel hidden">
       <h2>📖 Бабушкины записки</h2>
       <p>Семейный архив, советы по хозяйству и вещи, которые бабушка явно не хотела показывать Петровичу.</p>
