@@ -116,6 +116,10 @@ export const ITEMS = [
 ,{id:"meadow_tincture",name:"Луговая настойка",emoji:"🌼",price:154,description:"Авторский травяной купаж с цветочными нотами."}
 ,{id:"juniper_tincture",name:"Можжевеловая настойка",emoji:"🫒",price:168,description:"Пряная игровая настойка с хвойным характером."}
 ,{id:"rosehip_tincture",name:"Шиповниковая настойка",emoji:"🌹",price:142,description:"Осенняя настойка с мягким фруктовым профилем."}
+  ,{id:"berry_reserve_tincture",name:"Ягодный бархат",emoji:"🍷",price:184,description:"Авторская смесь смородиновой и малиновой настоек."}
+  ,{id:"herbal_spice_tincture",name:"Лесная пряность",emoji:"🌿",price:198,description:"Авторская смесь мятной и можжевеловой настоек."}
+  ,{id:"meadow_reserve_tincture",name:"Луговой резерв",emoji:"🌼",price:206,description:"Цветочно-фруктовый купаж травяных настоек."}
+
 ];
 
 export const SKILL_BRANCHES = [
