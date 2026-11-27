@@ -330,48 +330,110 @@ export function renderXP(state) {
   setBar("#xpBar", progress);
 }
 
-export function renderWarehouse(state) {
+export let warehouseStateRef = null;
+let warehouseShowEmpty = false;
+
+const WAREHOUSE_GROUPS = [
+  { id: "farm", title: "🌱 Урожай и сырьё", items: ["potato", "carrot", "cabbage", "apple", "pear", "grapes", "honey"] },
+  { id: "fermentation", title: "🫙 Брожение", items: ["braga", "fruit_braga", "grain_braga", "honey_braga"] },
+  { id: "products", title: "⚗️ Готовая продукция", items: ["spirit", "aged_spirit", "honey_spirit", "aged_honey_spirit", "wine", "mead", "apple_cider", "pear_wine", "fruit_wine", "orchard_blush", "golden_vintage", "pear_honey_reserve"] },
+  { id: "supplies", title: "🧰 Материалы и тара", items: ["yeast", "yeast_nutrient", "water", "bottles", "corks", "labels"] }
+];
+
+function renderWarehouse(state) {
   const warehouse = $("#warehouseItems");
   if (!warehouse) return;
+  warehouseStateRef = state;
 
-  warehouse.innerHTML = "";
+  const search = $("#warehouseSearch");
+  const showEmpty = $("#warehouseShowEmpty");
+  if (showEmpty && !showEmpty.dataset.bound) {
+    showEmpty.dataset.bound = "true";
+    showEmpty.addEventListener("change", () => {
+      warehouseShowEmpty = showEmpty.checked;
+      if (warehouseStateRef) renderWarehouse(warehouseStateRef);
+    });
+  }
+  if (search && !search.dataset.bound) {
+    search.dataset.bound = "true";
+    search.addEventListener("input", () => {
+      if (warehouseStateRef) renderWarehouse(warehouseStateRef);
+    });
+  }
+  if (showEmpty) showEmpty.checked = warehouseShowEmpty;
 
-  let total = 0;
+  const openGroups = new Set([...warehouse.querySelectorAll("details[open]")].map(node => node.dataset.group));
+  const query = (search?.value || "").trim().toLocaleLowerCase("ru");
+  warehouse.replaceChildren();
 
-  ITEMS.forEach((item) => {
-    const quantity = Math.max(
-      0,
-      Number(state.inventory?.[item.id]) || 0
-    );
+  const total = Object.values(state.inventory || {}).reduce((sum, value) => sum + Math.max(0, Number(value) || 0), 0);
+  setText("#warehouseTotal", `${total} / ${getStorageCapacity(state)} шт.`);
 
-    total += quantity;
+  const groupedIds = new Set(WAREHOUSE_GROUPS.flatMap(group => group.items));
+  const groups = [...WAREHOUSE_GROUPS, {
+    id: "other", title: "📦 Прочее",
+    items: ITEMS.filter(item => !groupedIds.has(item.id)).map(item => item.id)
+  }];
 
-    const card = document.createElement("div");
-    card.className = "warehouse-item";
+  groups.forEach(group => {
+    const entries = group.items
+      .map(id => ITEMS.find(item => item.id === id))
+      .filter(Boolean)
+      .filter(item => {
+        const quantity = Math.max(0, Number(state.inventory?.[item.id]) || 0);
+        return (warehouseShowEmpty || quantity > 0) &&
+          (!query || item.name.toLocaleLowerCase("ru").includes(query) || item.id.includes(query));
+      });
+    if (!entries.length) return;
 
-    const iconFile = ({
-      braga: "flaticon-filter.png", fruit_braga: "flaticon-filter.png", grain_braga: "flaticon-filter.png", honey_braga: "flaticon-filter.png",
-      spirit: "flaticon-distillation.png", honey_spirit: "flaticon-distillation.png", aged_spirit: "icon_barrel.png", aged_honey_spirit: "icon_barrel.png",
-      water: "flaticon-kettle.png"
-    })[item.id];
-    const icon = iconFile ? document.createElement("img") : document.createElement("span");
-    icon.className = "warehouse-icon";
-    if (iconFile) { icon.src = "assets/images/ui/" + iconFile; icon.alt = ""; icon.loading = "lazy"; }
-    else icon.textContent = item.emoji;
+    const count = entries.reduce((sum, item) => sum + Math.max(0, Number(state.inventory?.[item.id]) || 0), 0);
+    const section = document.createElement("details");
+    section.className = "warehouse-category";
+    section.dataset.group = group.id;
+    section.open = openGroups.has(group.id) || (!!query && entries.length > 0);
 
-    const name = document.createElement("span");
-    name.className = "warehouse-name";
-    name.textContent = item.name;
+    const summary = document.createElement("summary");
+    summary.className = "warehouse-category-summary";
+    const title = document.createElement("strong");
+    title.textContent = group.title;
+    const meta = document.createElement("span");
+    meta.textContent = `${entries.length} поз. · ${count} шт.`;
+    summary.append(title, meta);
 
-    const count = document.createElement("b");
-    count.className = "warehouse-count";
-    count.textContent = `${quantity} шт.`;
-
-    card.append(icon, name, count);
-    warehouse.appendChild(card);
+    const list = document.createElement("div");
+    list.className = "warehouse-grid";
+    entries.forEach(item => {
+      const quantity = Math.max(0, Number(state.inventory?.[item.id]) || 0);
+      const iconFile = ({
+        braga: "flaticon-filter.png", fruit_braga: "flaticon-filter.png", grain_braga: "flaticon-filter.png", honey_braga: "flaticon-filter.png",
+        spirit: "flaticon-distillation.png", honey_spirit: "flaticon-distillation.png", aged_spirit: "icon_barrel.png", aged_honey_spirit: "icon_barrel.png",
+        water: "flaticon-kettle.png"
+      })[item.id];
+      const card = document.createElement("div");
+      card.className = `warehouse-item${quantity === 0 ? " is-empty" : ""}`;
+      const icon = iconFile ? document.createElement("img") : document.createElement("span");
+      icon.className = "warehouse-icon";
+      if (iconFile) { icon.src = "assets/images/ui/" + iconFile; icon.alt = ""; icon.loading = "lazy"; }
+      else icon.textContent = item.emoji;
+      const name = document.createElement("span");
+      name.className = "warehouse-name";
+      name.textContent = item.name;
+      const amount = document.createElement("b");
+      amount.className = "warehouse-count";
+      amount.textContent = `${quantity} шт.`;
+      card.append(icon, name, amount);
+      list.append(card);
+    });
+    section.append(summary, list);
+    warehouse.append(section);
   });
 
-  setText("#warehouseTotal", `${total} / ${getStorageCapacity(state)}`);
+  if (!warehouse.children.length) {
+    const empty = document.createElement("p");
+    empty.className = "warehouse-empty";
+    empty.textContent = query ? "По этому запросу ничего не найдено." : "На складе пока пусто. Первые запасы появятся после сбора урожая или закупки.";
+    warehouse.append(empty);
+  }
 }
 
 export function renderProduction(state) {
