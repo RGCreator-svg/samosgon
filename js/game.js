@@ -257,14 +257,14 @@ function queueHomesteadRepair(action, name, cost, parts) {
 // Расчистка огорода: инструменты, доски и крепёж.
 $("#repairGarden")?.addEventListener("click", () => {
   const cost=state.skills.includes("handyman")?15:20;
-  queueHomesteadRepair("garden", "Расчистка огорода", cost, { timber:1, fasteners:1, tools:1 });
+  queueHomesteadRepair("garden", "Расчистка огорода", cost, { timber:1, fasteners:1 });
 });
 
 // Восстановление сада: инструменты, доски и крепёж.
 $("#restoreOrchard")?.addEventListener("click", () => {
   if(state.orchardRestored)return;
   const cost=state.skills.includes("handyman")?30:40;
-  queueHomesteadRepair("orchard", "Восстановление сада", cost, { timber:2, fasteners:1, tools:2 });
+  queueHomesteadRepair("orchard", "Восстановление сада", cost, { timber:2, fasteners:1, tools:1 });
 });
 
 // Сбор фруктов
@@ -296,21 +296,21 @@ $("#harvestFruit")?.addEventListener("click", () => {
 $("#repairHouse")?.addEventListener("click", () => {
   if(state.house>=100)return;
   const cost=state.skills.includes("handyman")?20:30;
-  queueHomesteadRepair("house", "Ремонт дома", cost, { timber:2, fasteners:2, paint:1 });
+  queueHomesteadRepair("house", "Ремонт дома", cost, { timber:1, fasteners:1, paint:1 });
 });
 
 // Ремонт сарая: доски, гвозди и краска.
 $("#repairBarn")?.addEventListener("click", () => {
   if(state.barn>=100)return;
   const cost=state.skills.includes("handyman")?20:30;
-  queueHomesteadRepair("barn", "Ремонт сарая", cost, { timber:3, fasteners:2, paint:1 });
+  queueHomesteadRepair("barn", "Ремонт сарая", cost, { timber:2, fasteners:1, paint:1 });
 });
 
 // Ремонт аппарата: металлические заготовки, крепёж и инструменты.
 $("#repairStill")?.addEventListener("click", () => {
   if(state.still>=100)return;
   const cost=state.skills.includes("handyman")?35:50;
-  queueHomesteadRepair("still", "Ремонт аппарата", cost, { metal:2, fasteners:2, tools:1 });
+  queueHomesteadRepair("still", "Ремонт аппарата", cost, { metal:1, fasteners:1, tools:1 });
 });
 
 // Запуск базовой партии браги через общую корзину.
