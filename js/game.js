@@ -1,6 +1,6 @@
 import { consumeQualityForSale } from "./quality.js";
 import { advanceGameDay } from "./gameLoop.js";
-import { discoverRepairStory, renderGrandmaNotes, runGrandmaQuestDev } from "./grandmaNotes.js";
+import { discoverRepairStory, renderGrandmaNotes, runGrandmaQuestDev, runPetrovichEncounterDev } from "./grandmaNotes.js";
 
 import { loadGame, saveGame, addXP } from "./engine.js";
 import { ITEMS, SKILL_BRANCHES } from "./data.js";
@@ -134,7 +134,7 @@ initOrders(state, {
   earnExperience
 });
 
-initDevTools(state, { render, notify, onStoryTest: (area) => { discoverRepairStory(state, area, notify); render(); }, onQuestTest: () => { runGrandmaQuestDev(state, notify); render(); } });
+initDevTools(state, { render, notify, onStoryTest: (area) => { discoverRepairStory(state, area, notify); render(); }, onQuestTest: () => { runGrandmaQuestDev(state, notify); render(); }, onPetrovichTest: () => { runPetrovichEncounterDev(state, notify); render(); } });
 initEconomy(state, { render, notify });
 initEquipment(state, { render, notify });
 initExpansion(state, { render, notify, earnExperience });
