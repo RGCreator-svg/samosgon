@@ -338,9 +338,9 @@ export let warehouseStateRef = null;
 let warehouseShowEmpty = false;
 
 const WAREHOUSE_GROUPS = [
-  { id: "farm", title: "🌱 Урожай и сырьё", items: ["potato", "carrot", "cabbage", "apple", "pear", "grapes", "honey"] },
+  { id: "farm", title: "🌱 Урожай и сырьё", items: ["potato", "carrot", "cabbage", "apple", "pear", "grapes", "honey", "blackcurrant", "raspberry", "blueberry", "cranberry"] },
   { id: "fermentation", title: "🫙 Брожение", items: ["braga", "fruit_braga", "grain_braga", "honey_braga"] },
-  { id: "products", title: "⚗️ Готовая продукция", items: ["spirit", "aged_spirit", "honey_spirit", "aged_honey_spirit", "wine", "mead", "apple_cider", "pear_wine", "fruit_wine", "orchard_blush", "golden_vintage", "pear_honey_reserve"] },
+  { id: "products", title: "⚗️ Готовая продукция", items: ["spirit", "aged_spirit", "honey_spirit", "aged_honey_spirit", "wine", "mead", "apple_cider", "pear_wine", "fruit_wine", "orchard_blush", "golden_vintage", "pear_honey_reserve", "blackcurrant_tincture", "raspberry_tincture", "blueberry_tincture", "forest_tincture"] },
   { id: "supplies", title: "🧰 Материалы и тара", items: ["yeast", "yeast_nutrient", "water", "bottles", "corks", "labels"] }
 ];
 
