@@ -6,7 +6,16 @@ export const BERRY_CROPS = [
   {id:"blueberry",name:"Черника",emoji:"🫐",description:"Медленно приживается, зато ценится в авторских купажах.",seedCost:42,growDays:4,regrowDays:3,yield:3,seasons:["summer"]},
   {id:"cranberry",name:"Клюква",emoji:"🔴",description:"Поздняя ягода для осенних сборов и лесных купажей.",seedCost:30,growDays:4,regrowDays:3,yield:3,seasons:["autumn"]}
 ];
-
+export const HERB_CROPS = [
+{id:"mint",herb:true,name:"Мята",emoji:"🌿",description:"Свежая зелень для прохладного травяного профиля.",seedCost:24,growDays:2,regrowDays:2,yield:3,seasons:["spring","summer"]},
+{id:"st_johns_wort",herb:true,name:"Зверобой",emoji:"🌼",description:"Летняя трава для золотистых авторских сборов.",seedCost:28,growDays:3,regrowDays:3,yield:2,seasons:["summer"]},
+{id:"thyme",herb:true,name:"Чабрец",emoji:"🌱",description:"Пряная трава с выразительным характером.",seedCost:30,growDays:3,regrowDays:2,yield:2,seasons:["summer","autumn"]},
+{id:"linden",herb:true,name:"Липовый цвет",emoji:"🌸",description:"Нежный цветочный компонент летних купажей.",seedCost:34,growDays:4,regrowDays:4,yield:2,seasons:["summer"]},
+{id:"rosehip",herb:true,name:"Шиповник",emoji:"🌹",description:"Осенние плоды для тёплого фруктово-травяного профиля.",seedCost:32,growDays:4,regrowDays:3,yield:3,seasons:["autumn"]},
+{id:"juniper",herb:true,name:"Можжевельник",emoji:"🫒",description:"Ароматная хвойная ягода для пряных игровых настоек.",seedCost:40,growDays:5,regrowDays:4,yield:2,seasons:["autumn"]}
+];
+export const GARDEN_CROPS=[...BERRY_CROPS,...HERB_CROPS];
+const findCrop=id=>GARDEN_CROPS.find(item=>item.id===id);
 const SEASONS=["spring","summer","autumn","winter"];
 export function ensureBerryGarden(state){
   state.viticulture??={buildings:[],batches:[],nextId:1};
@@ -16,7 +25,7 @@ export function ensureBerryGarden(state){
   return state.viticulture.berryGarden;
 }
 export function plantBerryBush(state,berryId){
-  const crop=BERRY_CROPS.find(item=>item.id===berryId);
+  const crop=findCrop(berryId);
   const garden=ensureBerryGarden(state);
   if(!crop||garden.plots.length>=6)return null;
   const plot={id:garden.nextPlotId++,berryId,remaining:crop.growDays,ready:false,readyAmount:0};
@@ -31,7 +40,7 @@ export function advanceBerryGardenDay(state){
     if(plot.ready)return;
     plot.remaining=Math.max(0,(Number(plot.remaining)||0)-1);
     if(plot.remaining===0){
-      const crop=BERRY_CROPS.find(item=>item.id===plot.berryId);
+      const crop=findCrop(plot.berryId);
       if(!crop)return;
       const weather=state.world?.weather;
       const weatherBonus=weather==="rain"?1:weather==="heat"?-1:0;
