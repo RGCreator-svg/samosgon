@@ -67,7 +67,7 @@ export function calculateDistillationResult(state){
   const artisan=state.specialization==="artisan"?8:0;
   const quality=Math.max(20,Math.min(100,Math.round(baseQuality+(Number(state.distillation.qualityPoints)||0)+artisan+equipmentBonus+profile.quality+Math.min(5,Number(profile.stability)||0)+coolingBonus+(Number(state.lab?.qualityBonus)||0)+(Number(state.story?.petrovichQualityBonus)||0))));
   const output=Math.max(1,Math.round((2+(Number(state.distillation.outputPoints)||0)+profile.output)*(Number(state.processCenter?.outputMultiplier)||1)));
-  return {quality,output,stillMode:profile.mode,flavour:profile.flavour,stability:profile.stability,maintenanceSave:profile.wear};
+  return {quality,output,stillMode:profile.mode,flavour:profile.flavour,stability:profile.stability,maintenanceSave:profile.wear,lineage:profile.lineage,lineageTag:profile.lineageTag,lineageModules:profile.lineageModules,lineageQuality:profile.lineageQuality,lineageOutput:profile.lineageOutput};
 }
 
 function renderDistillation(s, root) {
@@ -164,7 +164,7 @@ export function initFeaturePack(s,{render,notify,earnExperience}) {
       if(!result.done){notify("Игровой этап завершён. Следующий этап: "+({heads:"начальная фракция",heart:"основная фракция",tails:"завершение партии"}[result.phase])+".");}
       else{
         const outcome=calculateDistillationResult(s);
-        s.distillation={...s.distillation,active:false,phase:null,quality:outcome.quality,result:outcome.output,stillMode:outcome.stillMode,flavour:outcome.flavour};
+        s.distillation={...s.distillation,active:false,phase:null,quality:outcome.quality,result:outcome.output,stillMode:outcome.stillMode,flavour:outcome.flavour,lineage:outcome.lineage,lineageTag:outcome.lineageTag,lineageModules:outcome.lineageModules,lineageQuality:outcome.lineageQuality,lineageOutput:outcome.lineageOutput};
         const owned=new Set(s.equipmentModules||[]);
         s.maintenance=Math.max(0,(Number(s.maintenance)||100)-Math.max(0,(owned.has("safety_monitor")?1:3)+(Number(outcome.maintenanceSave)||0)));
         s.story??={};s.story.petrovichQualityBonus=0;
@@ -172,7 +172,7 @@ export function initFeaturePack(s,{render,notify,earnExperience}) {
         earnExperience(14);
       }
     }
-    if(b.dataset.distillCollect){const n=s.distillation.result;const got=addInventory(s,s.distillation.resultItem||"spirit",n);if(got===n)s.distillation.result=0;else s.distillation.result-=got;if(got){recordProduction(s,{name:s.distillation.resultItem==="honey_spirit"?"Медовый дистиллят":"Спирт-сырец",amount:got,item:s.distillation.resultItem||"spirit",process:"Перегонка",quality:s.distillation.quality,mashType:s.distillation.mashType});notify(`На склад помещено ${got} ед. спирта-сырца.`);}}
+    if(b.dataset.distillCollect){const n=s.distillation.result;const got=addInventory(s,s.distillation.resultItem||"spirit",n);if(got===n)s.distillation.result=0;else s.distillation.result-=got;if(got){recordProduction(s,{name:s.distillation.resultItem==="honey_spirit"?"Медовый дистиллят":"Спирт-сырец",amount:got,item:s.distillation.resultItem||"spirit",process:"Перегонка",quality:s.distillation.quality,mashType:s.distillation.mashType,equipmentLineage:s.distillation.lineage,equipmentSynergy:s.distillation.lineageModules});notify(`На склад помещено ${got} ед. спирта-сырца.`);}}
     if(b.dataset.equipmentService){
       if(s.maintenance>=100)return;
       queuePurchase(s,{key:"equipment-service",kind:"equipmentService",name:"Обслуживание установки",cost:Math.max(10,Math.ceil((100-s.maintenance)*1.5)),payload:{}});
