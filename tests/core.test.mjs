@@ -19,6 +19,7 @@ const { ensureGrandmaStory, runGrandmaQuestDev, runPetrovichEncounterDev, resolv
 const { ensureMashHouse, getMashCapacity, startMashBatch, advanceMashHouseDay, MASH_RECIPES } = await import("../js/mashhouse.js");
 const { resolveDistillationChoice, calculateDistillationResult } = await import("../js/featurepack.js");
 const { blendBatch, calculateBlendProfile } = await import("../js/blending.js");
+const { getEquipmentProfile, EQUIPMENT_MODULES } = await import("../js/equipment.js");
 const { recordProduction } = await import("../js/productionhub.js");
 
 test("legacy saves migrate without losing inventory and receive legacy quality lots", () => {
@@ -291,4 +292,38 @@ test("blend recipes cannot start without every required source product", () => {
   state.inventory={spirit:2};
   assert.equal(blendBatch(state,"house_blend",recordProduction),null);
   assert.equal(state.inventory.spirit,2);
+});
+
+ 
+test("equipment catalog offers distinct columns, cooling, takeoff and sensor modules", () => {
+  const ids=new Set(EQUIPMENT_MODULES.map(module=>module.id));
+  for(const id of ["glass_column","copper_column","stainless_column","dimroth_condenser","shell_condenser","direct_cooler","liquid_takeoff","vapor_takeoff","auto_takeoff","digital_sensor","flow_meter","copper_mesh","stainless_mesh"])assert.ok(ids.has(id),id);
+  const state=createInitialState();
+  state.equipmentModules=["glass_column","shell_condenser","auto_takeoff","copper_mesh","digital_sensor"];
+  const profile=getEquipmentProfile(state,"fruit");
+  assert.ok(profile.quality>=15);
+  assert.ok(profile.stability>=10);
+  assert.ok(profile.flavour>=10);
+  assert.ok(profile.wear<0);
+});
+
+test("custom blend ratios change ingredient demand, output and passport", () => {
+  const state=createInitialState();
+  state.inventory={spirit:4,aged_spirit:3};
+  state.qualityLots=[
+    {item:"spirit",remaining:4,quality:86,passportId:"fresh"},
+    {item:"aged_spirit",remaining:3,quality:90,passportId:"aged"}
+  ];
+  state.productionLog=[
+    {passport:{id:"fresh",flavorProfile:{body:56,aroma:66,notes:["свежий"]}}},
+    {passport:{id:"aged",flavorProfile:{body:82,aroma:75,notes:["древесный"]}}}
+  ];
+  const result=blendBatch(state,"house_blend",recordProduction,{a:4,b:3});
+  assert.ok(result);
+  assert.equal(result.output,6);
+  assert.equal(state.inventory.house_blend,6);
+  assert.equal(state.inventory.spirit,0);
+  assert.equal(state.inventory.aged_spirit,0);
+  assert.equal(state.productionLog[0].passport.ratio,"spirit:4 + aged_spirit:3");
+  assert.equal(state.blendReputation,result.score);
 });
