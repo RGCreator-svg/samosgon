@@ -1,5 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readdir } from "node:fs/promises";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
 
 let stored = null;
 let writes = 0;
@@ -101,4 +104,13 @@ test("daily simulation runs phases in a fixed order and applies needs", () => {
   assert.equal(state.energy, 100);
   assert.ok(phases.includes("new-day"));
   assert.ok(phases.includes("xp"));
+});
+
+test("all feature modules can be imported as one dependency graph", async () => {
+  const directory = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../js");
+  const files = (await readdir(directory)).filter(file => file.endsWith(".js") && file !== "game.js");
+  for (const file of files) {
+    await import(new URL("../js/" + file, import.meta.url));
+  }
+  assert.ok(files.length >= 15);
 });
