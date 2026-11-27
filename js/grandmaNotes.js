@@ -175,7 +175,7 @@ export function runGrandmaQuestDev(state, notify = () => {}) {
   return performGrandmaQuestAction(state,notify,true);
 }
 
-export function renderGrandmaNotes(state, notify = () => {}) {
+export function renderGrandmaNotes(state, notify = () => {}, onUpdate = () => {}) {
   const root = document.querySelector("#grandmaNotes");
   if (!root) return;
   const story = ensureGrandmaStory(state);
@@ -261,7 +261,7 @@ export function renderGrandmaNotes(state, notify = () => {}) {
       const button = event.target.closest("[data-grandma-quest]");
       if (!button) return;
       performGrandmaQuestAction(state, notify);
-      renderGrandmaNotes(state, notify);
+      onUpdate();
     });
   }
 }
