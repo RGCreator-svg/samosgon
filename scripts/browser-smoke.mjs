@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
-const mime={".html":"text/html; charset=utf-8",".js":"text/javascript; charset=utf-8",".css":"text/css; charset=utf-8",".png":"image/png",".json":"application/json; charset=utf-8"};
+const mime={".html":"text/html; charset=utf-8",".js":"text/javascript; charset=utf-8",".css":"text/css; charset=utf-8",".png":"image/png",".svg":"image/svg+xml",".json":"application/json; charset=utf-8"};
 const server=createServer(async(req,res)=>{
   try{
     const pathname=decodeURIComponent(new URL(req.url,"http://localhost").pathname);
@@ -35,7 +35,12 @@ try{
   const imageLoaded=await pumpkin.evaluate(img=>img.complete&&img.naturalWidth>0);
   assert.ok(imageLoaded,"Squash.png pumpkin asset failed to load");
   assert.ok(await page.locator(".navigation button[data-tab]").count()>=10,"Top navigation did not include dynamic game sections");
-  assert.ok(await page.locator(".prototype-side .side-btn").count()===3,"Prototype side controls missing");
+  assert.equal(await page.locator(".prototype-side .side-btn").count(),0,"Duplicate side shortcuts should be removed");
+  const cartToggle=page.locator("#cartToggle");
+  await cartToggle.waitFor({state:"visible"});
+  assert.ok(await cartToggle.locator("img").evaluate(img=>img.complete&&img.naturalWidth>0),"Cart illustration failed to load");
+  await cartToggle.click();
+  assert.ok(await page.locator("#sharedPurchaseCart").evaluate(el=>el.classList.contains("is-open")),"Cart launcher did not open the cart");
 
   // Scene hotspots use the existing game's tab controller.
   await page.locator("#scene-tree").click({force:true});
