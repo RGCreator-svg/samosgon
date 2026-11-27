@@ -22,6 +22,10 @@ const NOTEBOOK = {
     { id:"barn_letter_2", title:"Чертёж неизвестного устройства", text:"«Нарисовала аппарат для автоматической уборки. Ведро, верёвка, колесо и курица. Не получилось. Курица теперь не разговаривает со мной, а ведро требует отдельную комнату»." },
     { id:"barn_letter_3", title:"Заметка на балке", text:"«Не выбрасывай старые бочки. Одну оставь под яблоки, вторую под инструменты, третью — для Петровича, когда он опять скажет: “Я на минутку”»." }
   ],
+  special: [
+    { id:"quest_barn_chest", title:"Записка в сундуке", text:"«Если ты нашёл ключ, значит, сарай наконец-то привели в чувство. В жестяной коробке под старой яблоней лежит рецепт. Не отдавай его Петровичу: он однажды перепутал корицу с удобрением и до сих пор считает это авторским вкусом»." },
+    { id:"quest_orchard_box", title:"Последняя страница", text:"«Вот и встретились снова, мой хороший. Рецепт — семейный, но главное в нём не пропорции, а терпение. А ещё не бери пример с Петровича: он даже чай заваривает методом перебора»." }
+  ],
   still: [
     { id:"still_letter_1", title:"Памятка мастеру", text:"«Любое железо любит уход. Аппарат любит ещё больше. А если он начал стучать — это не музыка, даже если Петрович уже пустился в пляс»." },
     { id:"still_letter_2", title:"Запись о первой партии", text:"«Первая партия получилась так себе. Зато дед сказал, что напиток бодрит. Правда, он сказал это после того, как проснулся на сеновале. Надо будет записать, что именно мы тогда сделали»." }
@@ -46,6 +50,8 @@ export function ensureGrandmaStory(state) {
   state.story.discovered ??= [];
   state.story.findings ??= [];
   state.story.read ??= [];
+  state.story.questStep ??= "locked";
+  state.story.questRewards ??= [];
   return state.story;
 }
 
@@ -82,6 +88,93 @@ export function discoverRepairStory(state, action, notify = () => {}) {
   return null;
 }
 
+const QUEST_STEPS = {
+  floorboard: {
+    title: "Скрипучая половица",
+    description: "В письме под обоями бабушка упомянула половицу у окна. Проверь, что она скрывает.",
+    action: "Осмотреть половицу",
+    requirement: () => true
+  },
+  barnChest: {
+    title: "Сундук в сарае",
+    description: "Ключ найден. Сначала приведи сарай в порядок — бабушка не любила открывать сундуки среди паутины.",
+    action: "Открыть старый сундук",
+    requirement: state => (Number(state.barn)||0) >= 70
+  },
+  orchardBox: {
+    title: "Жестяная коробка под яблоней",
+    description: "В сундуке лежит схема тайника. Нужен восстановленный сад, чтобы найти старую яблоню у колодца.",
+    action: "Раскопать тайник",
+    requirement: state => !!state.orchardRestored
+  }
+};
+
+function unlockSpecialNote(story, id) {
+  if (!story.discovered.includes(id)) story.discovered.push(id);
+  if (!story.unlocked.includes(id)) story.unlocked.push(id);
+}
+
+export function performGrandmaQuestAction(state, notify = () => {}, force = false) {
+  const story = ensureGrandmaStory(state);
+  const step = story.questStep;
+  const quest = QUEST_STEPS[step];
+  if (!quest) return false;
+  if (!force && !quest.requirement(state)) {
+    notify(step === "barnChest"
+      ? "🧹 Сначала восстанови сарай хотя бы до 70% — сундук завален хламом."
+      : "🌳 Сначала восстанови сад: тайник находится у старой яблони.");
+    return false;
+  }
+
+  if (step === "floorboard") {
+    story.questStep = "barnChest";
+    story.keyFound = true;
+    story.findings.unshift({
+      id:"grandma_key", area:"house", title:"Ключ с потайной бородкой",
+      text:"Под половицей лежал маленький латунный ключ. На бирке бабушкиным почерком: «Не для Петровича».",
+      reward:"Открывает сундук в сарае", day:state.day
+    });
+    notify("🗝️ Найден латунный ключ! Бабушка оставила подсказку о сундуке в сарае.");
+  } else if (step === "barnChest") {
+    story.questStep = "orchardBox";
+    story.chestOpened = true;
+    state.money = (Number(state.money)||0) + 20;
+    state.parts.tools = (Number(state.parts?.tools)||0) + 1;
+    unlockSpecialNote(story,"quest_barn_chest");
+    story.findings.unshift({
+      id:"grandma_chest", area:"barn", title:"Бабушкин сундук",
+      text:"Внутри — старый чертёж тайника, инструмент и конверт с монетами. На конверте: «За то, что не бросил дом».",
+      reward:"+20 монет, +1 инструмент", day:state.day
+    });
+    notify("📦 Сундук открыт! Внутри чертёж тайника под старой яблоней.");
+  } else if (step === "orchardBox") {
+    story.questStep = "completed";
+    story.recipeFound = true;
+    story.familyRecipeUnlocked = true;
+    state.money = (Number(state.money)||0) + 35;
+    state.reputation = Math.min(100,(Number(state.reputation)||0)+2);
+    addInventory(state,"apple",4);
+    unlockSpecialNote(story,"quest_orchard_box");
+    story.findings.unshift({
+      id:"grandma_legacy", area:"orchard", title:"Семейная жестяная коробка",
+      text:"Под корнями яблони нашлась коробка с семейным рецептом, старой фотографией и запиской: «Теперь это твоё. Береги дом, сад и себя. И не одалживай Петровичу лопату».",
+      reward:"+35 монет, +4 яблока, +2 репутации · семейный рецепт", day:state.day
+    });
+    notify("🌳 Найдена семейная коробка! Открыт рецепт «Бабушкин яблочный сбор».");
+  }
+  return true;
+}
+
+export function runGrandmaQuestDev(state, notify = () => {}) {
+  const story = ensureGrandmaStory(state);
+  if (story.questStep === "locked") {
+    story.questStep = "floorboard";
+    notify("DEV: сюжетная цепочка бабушки активирована.");
+    return true;
+  }
+  return performGrandmaQuestAction(state,notify,true);
+}
+
 export function renderGrandmaNotes(state) {
   const root = document.querySelector("#grandmaNotes");
   if (!root) return;
@@ -94,6 +187,31 @@ export function renderGrandmaNotes(state) {
   intro.className = "grandma-notes-intro";
   intro.textContent = "Бабушка оставляла подсказки в самых неожиданных местах. Читайте внимательно: между рецептами и ворчанием иногда прячется польза.";
   root.append(intro);
+
+  if (story.questStep === "locked" && story.discovered.includes("house_letter_1")) {
+    story.questStep = "floorboard";
+  }
+  const activeQuest = QUEST_STEPS[story.questStep];
+  if (activeQuest) {
+    const questCard = document.createElement("article");
+    questCard.className = "grandma-quest-card";
+    const questTitle = document.createElement("h3");
+    questTitle.textContent = "🧩 Семейная тайна · " + activeQuest.title;
+    const questText = document.createElement("p");
+    questText.textContent = activeQuest.description;
+    const questButton = document.createElement("button");
+    questButton.type = "button";
+    questButton.dataset.grandmaQuest = "advance";
+    questButton.textContent = activeQuest.action;
+    questButton.disabled = !activeQuest.requirement(state);
+    questCard.append(questTitle,questText,questButton);
+    root.append(questCard);
+  } else if (story.questStep === "completed") {
+    const done = document.createElement("p");
+    done.className = "grandma-quest-complete";
+    done.textContent = "🏆 Семейная тайна раскрыта. Бабушка бы тобой гордилась. Петровичу, разумеется, ничего не рассказываем.";
+    root.append(done);
+  }
 
   const noteHeading = document.createElement("h3");
   noteHeading.textContent = `📜 Записки бабушки · ${notes.length}`;
@@ -136,4 +254,22 @@ export function renderGrandmaNotes(state) {
     card.append(meta, title, body);
     root.append(card);
   });
+
+  if (!root.dataset.questBound) {
+    root.dataset.questBound = "true";
+    root.addEventListener("click", event => {
+      const button = event.target.closest("[data-grandma-quest]");
+      if (!button) return;
+      performGrandmaQuestAction(state, message => {
+        const notifications = document.querySelector("#notifications");
+        if (notifications) {
+          const line = document.createElement("div");
+          line.className = "notification";
+          line.textContent = message;
+          notifications.prepend(line);
+        }
+      });
+      renderGrandmaNotes(state);
+    });
+  }
 }
