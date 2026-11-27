@@ -95,6 +95,9 @@ export const ITEMS = [
   ,{ id:"golden_vintage", name:"Золотой винтаж", emoji:"🥂", price:118, description:"Авторский виноградный сорт с медовым оттенком." }
   ,{ id:"pear_honey_reserve", name:"Грушевый медовый резерв", emoji:"🍐", price:108, description:"Редкий сорт, открытый в лаборатории." }
 
+  ,{id:"house_blend",name:"Деревенский купаж",emoji:"🥃",price:92,description:"Смешанная партия с собственным паспортом качества."}
+  ,{id:"orchard_blend",name:"Садовый купаж",emoji:"🍎",price:108,description:"Купаж с подчёркнутым фруктовым профилем."}
+  ,{id:"honey_blend",name:"Медовый резерв",emoji:"🍯",price:118,description:"Выдержанный купаж с медовыми нотами."}
 ];
 
 export const SKILL_BRANCHES = [
