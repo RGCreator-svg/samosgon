@@ -84,6 +84,7 @@ function render(s) {
   const batches = [];
   if (s.production?.active) batches.push({name:"Базовая брага",stage:"Брожение",left:s.production.daysLeft||0,done:false,detail:"Сахарная линия"});
   if (s.production?.ready) batches.push({name:"Базовая брага",stage:"Готова",left:0,done:true,detail:"Можно забрать в сарае"});
+  (s.mashHouse?.batches||[]).forEach(job=>batches.push({name:job.name,stage:job.ready?"Готова к сбору":"Брожение",left:job.remaining||0,done:!!job.ready,detail:"Бродильня · выход "+(job.output||0)+" ед. · качество "+(job.quality||0)+"/100"}));
   (s.viticulture?.batches||[]).forEach(job => batches.push({name:job.name,stage:job.ready?"Готова":job.stage==="aging"?"Выдержка":"Брожение",left:job.remaining||0,done:!!job.ready,detail:"Винодельня · выход "+(job.output||0)+" ед."}));
   if (s.distillation?.active) batches.push({name:"Перегонка · "+({sugar:"сахарная",fruit:"фруктовая",grain:"зерновая",honey:"медовая"}[s.distillation.mashType]||"сырьевая")+" партия",stage:"Контроль качества",left:null,done:false,detail:"Выберите режим во вкладке «Винокурня»"});
   if ((s.distillation?.result||0)>0) batches.push({name:"Спирт-сырец",stage:"Ожидает сбора",left:0,done:true,detail:(s.distillation.result||0)+" ед. · качество "+(s.distillation.quality||0)+"/100"});
@@ -96,7 +97,7 @@ function render(s) {
 
   const flow = el("div","production-flow");
   stageCard(flow,"flaticon-kettle.png","Сырьё","Урожай, закупки и склад",Object.keys(s.inventory||{}).some(k=>(s.inventory[k]||0)>0)?"stage-done":"stage-wait");
-  stageCard(flow,"flaticon-filter.png","Брожение","Базовая брага и винные партии",batches.some(x=>x.stage==="Брожение")?"stage-active":batches.some(x=>x.done)?"stage-done":"stage-wait");
+  stageCard(flow,"flaticon-filter.png","Брожение","Сахарные, фруктовые, зерновые и винные партии",batches.some(x=>x.stage==="Брожение")?"stage-active":batches.some(x=>x.stage==="Готова к сбору"||x.stage==="Готова")?"stage-done":"stage-wait");
   stageCard(flow,"flaticon-distillation.png","Перегонка","Игровая перегонка и оценка качества",s.distillation?.active?"stage-active":(s.distillation?.result||0)>0?"stage-done":"stage-wait");
   stageCard(flow,"icon_barrel.png","Выдержка","Созревание в бочках и погребе",(s.barrelAging||[]).some(x=>!x.ready)||(s.viticulture?.batches||[]).some(x=>x.stage==="aging"&&!x.ready)?"stage-active":(s.barrelAging||[]).some(x=>x.ready)?"stage-done":"stage-wait");
   stageCard(flow,"icon_flask.png","Готовая продукция","Склад, рынок и заказы",Object.entries(s.inventory||{}).some(([id,n])=>n>0&&["wine","mead","apple_cider","pear_wine","fruit_wine","spirit","aged_spirit","honey_spirit","aged_honey_spirit"].includes(id))?"stage-done":"stage-wait");
