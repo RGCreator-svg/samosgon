@@ -78,12 +78,26 @@ function migrateSave(parsed) {
   for (const [id, amount] of Object.entries(state.inventory)) {
     state.inventory[id] = Math.max(0, Math.floor(Number(amount) || 0));
   }
-  if (!Array.isArray(state.qualityLots)) {
-    state.qualityLots = Object.entries(state.inventory)
-      .filter(([, amount]) => amount > 0)
-      .map(([item, amount]) => ({ item, remaining: amount, quality: null, passportId: null, legacy: true }));
-  }
   if (!Array.isArray(state.productionLog)) state.productionLog = [];
+
+  // Сверяем остатки партий с фактическим количеством товара.
+  // Недостающие записи считаем старым товаром без паспорта качества.
+  const sourceLots = Array.isArray(state.qualityLots) ? state.qualityLots : [];
+  const normalizedLots = [];
+  const accounted = {};
+  for (const lot of sourceLots) {
+    const item = String(lot?.item || "");
+    const available = Math.max(0, (Number(state.inventory[item]) || 0) - (accounted[item] || 0));
+    const quantity = Math.min(available, Math.max(0, Math.floor(Number(lot?.remaining) || 0)));
+    if (!item || !quantity) continue;
+    normalizedLots.push({ ...lot, item, remaining: quantity });
+    accounted[item] = (accounted[item] || 0) + quantity;
+  }
+  for (const [item, amount] of Object.entries(state.inventory)) {
+    const missing = Math.max(0, amount - (accounted[item] || 0));
+    if (missing) normalizedLots.push({ item, remaining: missing, quality: null, passportId: null, legacy: true });
+  }
+  state.qualityLots = normalizedLots;
   return state;
 }
 
