@@ -46,7 +46,7 @@ function makeField(key, label, value, min, max) {
   return wrapper;
 }
 
-export function initDevTools(state, { render, notify }) {
+export function initDevTools(state, { render, notify, onStoryTest = () => {} }) {
   const topbar = document.querySelector(".topbar");
   if (!topbar || document.querySelector("#devToggle")) return;
 
@@ -82,6 +82,31 @@ export function initDevTools(state, { render, notify }) {
   note.className = "dev-warning";
   note.textContent = "Изменения применяются к текущему сохранению. Не злоупотребляйте властью — бабушка всё видит.";
 
+  const storyTools = document.createElement("div");
+  storyTools.className = "dev-story-tools";
+  const storyTitle = document.createElement("h3");
+  storyTitle.textContent = "📖 Сюжет и находки";
+  const storyHint = document.createElement("p");
+  storyHint.textContent = "Проверка записок и случайных находок без прохождения ремонта.";
+  const storySelect = document.createElement("select");
+  storySelect.className = "dev-story-select";
+  [["house","Дом"],["garden","Огород"],["orchard","Сад"],["barn","Сарай"],["still","Аппарат"]].forEach(([value,label]) => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = label;
+    storySelect.append(option);
+  });
+  const storyButton = document.createElement("button");
+  storyButton.type = "button";
+  storyButton.className = "dev-story-test";
+  storyButton.textContent = "Проверить находку";
+  storyButton.addEventListener("click", () => {
+    onStoryTest(storySelect.value);
+    const counts = state.story || {};
+    storyHint.textContent = `Записок: ${(counts.discovered||[]).length} · находок: ${(counts.findings||[]).length}`;
+  });
+  storyTools.append(storyTitle,storyHint,storySelect,storyButton);
+
   const form = document.createElement("form");
   form.id = "devForm";
   const grid = document.createElement("div");
@@ -110,7 +135,7 @@ export function initDevTools(state, { render, notify }) {
 
   actions.append(apply, reset);
   form.append(grid, actions);
-  dialog.append(header, note, form);
+  dialog.append(header, note, storyTools, form);
   modal.append(dialog);
   topbar.append(toggle);
   document.body.append(modal);
