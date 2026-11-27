@@ -1,8 +1,16 @@
 import { assessBatchQuality } from "./quality.js";
+import { renderBlendWorkshop, handleBlendClick } from "./blending.js";
 const $ = selector => document.querySelector(selector);
 const el = (tag, cls, text) => { const node = document.createElement(tag); if (cls) node.className = cls; if (text !== undefined) node.textContent = text; return node; };
 
 function makePassport(entry, s, type = "production") {
+  const flavorDefaults = {
+    spirit:{body:55,aroma:54,notes:["нейтральный","зерновой"]},
+    aged_spirit:{body:72,aroma:68,notes:["дубовый","мягкий"]},
+    honey_spirit:{body:70,aroma:78,notes:["медовый","цветочный"]},
+    aged_honey_spirit:{body:82,aroma:84,notes:["медовый","древесный"]}
+  };
+  const flavorProfile = entry.flavorProfile || flavorDefaults[entry.item] || flavorDefaults.spirit;
   const assessment=assessBatchQuality(s,entry);
   const standard=entry.recipeId?s.lab?.standards?.[entry.recipeId]:null;
   return {
@@ -12,8 +20,8 @@ function makePassport(entry, s, type = "production") {
     remaining:Math.max(0,Number(entry.amount)||0),sold:0,
     process:String(entry.process||"Производство"),quality:assessment.score,grade:assessment.grade.label,
     baseQuality:assessment.base,saleModifier:Math.round((1+(assessment.score-60)*.005)*100),aroma:assessment.aroma,purity:assessment.purity,stability:assessment.stability,
-    factors:assessment.factors,standardDelta:assessment.standardDelta,
-    recipeId:entry.recipeId||null,recipeName:entry.recipeName||null,ratio:entry.ratio||null,
+    factors:assessment.factors,standardDelta:assessment.standardDelta,flavorProfile,
+    recipeId:entry.recipeId||null,recipeName:entry.recipeName||null,ratio:entry.ratio||null,flavorProfile:entry.flavorProfile||null,mashType:entry.mashType||null,
     standardId:standard?.trialId||null,standardMatch:assessment.standardMatch
   };
 }
@@ -115,6 +123,7 @@ function render(s) {
   s.productionLog.slice(0,10).forEach(entry=>{const row=el("div","production-log-row");row.append(el("span","production-log-day","День "+entry.day),el("b","",entry.name),el("span","",entry.process+" · "+entry.amount+" ед."));if(entry.quality!==null)row.append(el("small","","Качество: "+entry.quality+"/100"));archive.append(row);});
   root.append(archive);
 
+  renderBlendWorkshop(s,root);
   root.append(el("h3", "", "Паспорта качества партий"));
   const passports = el("div", "production-passports");
   s.productionLog.slice(0, 12).forEach(entry => {
@@ -126,6 +135,7 @@ function render(s) {
     card.append(head, el("small", "", "№ " + p.id + " · день " + p.day + " · " + p.process));
     const metrics = el("div", "passport-metrics");
     [["Аромат",p.aroma],["Чистота",p.purity],["Стабильность",p.stability]].forEach(([label,value]) => metrics.append(el("span","",label+": "+value)));
+    if(p.flavorProfile)card.append(el("small","passport-flavor","Профиль: тело "+p.flavorProfile.body+" · аромат "+p.flavorProfile.aroma+" · "+(p.flavorProfile.notes||[]).join(", ")));
     card.append(metrics,el("small","passport-sale","Влияние на цену: "+(p.saleModifier>=100?"+":"")+(p.saleModifier-100)+"%"));
     const factors=el("details","passport-factors");factors.append(el("summary","","Разбор оценки качества"));
     (p.factors||[]).forEach(f=>factors.append(el("p","",f.label+": "+(f.value>0?"+":"")+f.value+" · "+f.detail)));
@@ -163,6 +173,15 @@ export function initProductionHub(s) {
     section.innerHTML="<h2>🏭 Производственный центр</h2>";
     game.append(section);
   }
-    render(s);
+  const hub=$("#productionHub");
+  if(!hub.dataset.blendBound){
+    hub.dataset.blendBound="1";
+    hub.addEventListener("click",event=>{
+      const button=event.target.closest("[data-blend]");if(!button)return;
+      const result=handleBlendClick(s,button,recordProduction);
+      if(result)render(s);
+    });
+  }
+  render(s);
 }
 export function renderProductionHub(s){render(s);}
