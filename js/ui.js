@@ -529,66 +529,58 @@ export function renderSkills(state) {
   setText("#skillPoints", state.skillPoints);
   tree.replaceChildren();
 
-  const map = document.createElement("div");
-  map.className = "skill-map-stage";
-  const width = 1120, height = 760, cx = 560, cy = 380;
-  const angles = [-155, -105, -55, 15, 75, 145];
-  const colors = ["#b7d7a2", "#d6bd83", "#a9c8dc", "#d7a3a3", "#c2b0dc", "#d2a879"];
-  const icons = ["🌱", "🫙", "⚙️", "🤖", "🪙", "🔥"];
-  const svgNS = "http://www.w3.org/2000/svg";
-  const svg = document.createElementNS(svgNS, "svg");
-  svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
-  svg.setAttribute("class", "skill-map-lines");
-  svg.setAttribute("aria-hidden", "true");
-  const hub = document.createElementNS(svgNS, "circle");
-  hub.setAttribute("cx", cx); hub.setAttribute("cy", cy); hub.setAttribute("r", "58");
-  hub.setAttribute("class", "skill-hub-ring"); svg.append(hub);
-  const layer = document.createElement("div");
-  layer.className = "skill-map-nodes";
-  const allSkills = SKILL_BRANCHES.flatMap(branch => branch.skills);
-
+  const icons = ["🌱", "🫙", "⚙️", "🤖", "🪙", "🔥", "🍇", "🧪", "🏭"];
   SKILL_BRANCHES.forEach((branch, branchIndex) => {
-    const angle = angles[branchIndex] * Math.PI / 180;
-    const branchColor = colors[branchIndex];
-    let previous = { x: cx, y: cy };
-    branch.skills.forEach((skill, index) => {
-      const radius = 145 + index * Math.min(94, 300 / Math.max(1, branch.skills.length - 1));
-      const x = cx + Math.cos(angle) * radius;
-      const y = cy + Math.sin(angle) * radius;
-      const path = document.createElementNS(svgNS, "path");
-      const mx = (previous.x + x) / 2, my = (previous.y + y) / 2;
-      path.setAttribute("d", `M ${previous.x} ${previous.y} Q ${mx + (branchIndex - 2) * 12} ${my - 12} ${x} ${y}`);
-      path.setAttribute("class", "skill-link");
-      path.setAttribute("stroke", branchColor); svg.append(path);
-      const ring = document.createElementNS(svgNS, "circle");
-      ring.setAttribute("cx", x); ring.setAttribute("cy", y); ring.setAttribute("r", "48");
-      ring.setAttribute("class", "skill-node-halo"); svg.append(ring);
+    const card = document.createElement("section");
+    card.className = "skill-branch skill-branch-list";
+    const unlockedCount = branch.skills.filter(skill => state.skills.includes(skill.id)).length;
 
+    const heading = document.createElement("div");
+    heading.className = "skill-branch-heading";
+    const title = document.createElement("h3");
+    title.textContent = `${icons[branchIndex] || "✨"} ${branch.name.replace(/^\p{Emoji_Presentation}\s*/u, "")}`;
+    const progress = document.createElement("span");
+    progress.className = "skill-branch-progress";
+    progress.textContent = `${unlockedCount} / ${branch.skills.length}`;
+    heading.append(title, progress);
+    card.append(heading);
+
+    const track = document.createElement("div");
+    track.className = "skill-branch-track";
+    branch.skills.forEach((skill, index) => {
       const unlocked = state.skills.includes(skill.id);
       const available = !skill.requires || state.skills.includes(skill.requires);
-      const requiredSkill = allSkills.find(item => item.id === skill.requires);
-      const node = document.createElement("button");
-      node.type = "button";
-      node.className = `skill-orbit-node${unlocked ? " unlocked" : ""}${!available ? " locked" : ""}`;
-      node.dataset.skill = skill.id;
-      node.disabled = unlocked || !available || state.skillPoints < skill.cost;
-      node.style.left = `${x / width * 100}%`; node.style.top = `${y / height * 100}%`;
-      node.style.setProperty("--branch-color", branchColor);
-      node.title = `${skill.name}. ${skill.description} ${unlocked ? "Изучено" : skill.requires && !available ? "Требуется: " + (requiredSkill?.name || skill.requires) : "Стоимость: " + skill.cost + " очков"}`;
-      const icon = document.createElement("span"); icon.className = "skill-orbit-icon"; icon.textContent = unlocked ? "✓" : icons[branchIndex];
-      const label = document.createElement("span"); label.className = "skill-orbit-label"; label.textContent = skill.name;
-      node.append(icon, label); layer.append(node);
-      previous = { x, y };
-    });
-    const label = document.createElement("div");
-    label.className = "skill-branch-label"; label.textContent = branch.name;
-    label.style.left = `${(cx + Math.cos(angle) * 365) / width * 100}%`;
-    label.style.top = `${(cy + Math.sin(angle) * 365) / height * 100}%`;
-    label.style.setProperty("--branch-color", branchColor); layer.append(label);
-  });
-  map.append(svg, layer);
+      const requiredSkill = branch.skills.find(item => item.id === skill.requires);
+      const row = document.createElement("article");
+      row.className = `skill-step${unlocked ? " unlocked" : ""}${!available ? " locked" : ""}`;
 
-  tree.append(map);
+      const marker = document.createElement("span");
+      marker.className = "skill-step-marker";
+      marker.textContent = unlocked ? "✓" : String(index + 1);
+      const info = document.createElement("div");
+      info.className = "skill-step-info";
+      const name = document.createElement("strong");
+      name.textContent = skill.name;
+      const description = document.createElement("p");
+      description.textContent = skill.description;
+      const status = document.createElement("small");
+      status.textContent = unlocked ? "Изучено" : !available
+        ? `Сначала: ${requiredSkill?.name || skill.requires}`
+        : `Стоимость: ${skill.cost} очк.`;
+      info.append(name, description, status);
+
+      const action = document.createElement("button");
+      action.type = "button";
+      action.className = "skill-step-action";
+      action.dataset.skill = skill.id;
+      action.textContent = unlocked ? "Открыто" : "Изучить";
+      action.disabled = unlocked || !available || state.skillPoints < skill.cost;
+      row.append(marker, info, action);
+      track.append(row);
+    });
+    card.append(track);
+    tree.append(card);
+  });
 }
 
 export function renderWorld(state) {
