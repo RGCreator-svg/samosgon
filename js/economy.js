@@ -397,7 +397,9 @@ export function initEconomy(state, { render, notify }) {
     else game.append(section);
   }
 
-      if (!button) return;
+  nav.addEventListener("click", event => {
+    const button = event.target.closest('[data-tab="economy"]');
+    if (!button) return;
     document.querySelectorAll(".tab-content").forEach(tab => tab.classList.toggle("hidden", tab.id !== "economy"));
     nav.querySelectorAll("[data-tab]").forEach(item => item.classList.toggle("active", item === button));
   });
