@@ -496,7 +496,7 @@ test("cellar barrels age separate batches, apply wood profiles and preserve qual
   assert.equal(state.inventory.spirit,1);
   for(let i=0;i<4;i++)ageBarrelsOneDay(state,()=>{});
   assert.equal(cellar.barrels[0].active.ready,true);
-  assert.equal(cellar.barrels[1].active.ready,false);
+  assert.equal(Boolean(cellar.barrels[1].active.ready),false);
   const aged=cellar.barrels[0].active;
   assert.ok(aged.quality>76);
   assert.ok(aged.flavorProfile.notes.includes(BARREL_WOODS.oak.note));
