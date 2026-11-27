@@ -2,9 +2,12 @@
 import { GAME_CONFIG } from "./data.js";
 
 const SAVE_KEY = "samosgon_2_save";
+const SAVE_SCHEMA_VERSION = 1;
+let lastSavedSnapshot = null;
 
 export function createInitialState() {
   return {
+    schemaVersion: SAVE_SCHEMA_VERSION,
     gameStarted: false,
     day: 1,
     money: GAME_CONFIG.startingMoney,
@@ -45,54 +48,76 @@ export function createInitialState() {
   };
 }
 
+function migrateSave(parsed) {
+  const initial = createInitialState();
+  const state = {
+    ...initial,
+    ...parsed,
+    schemaVersion: SAVE_SCHEMA_VERSION,
+    inventory: { ...initial.inventory, ...(parsed.inventory || {}) },
+    production: { ...initial.production, ...(parsed.production || {}) },
+    skills: Array.isArray(parsed.skills) ? parsed.skills : [],
+    buildings: { ...initial.buildings, ...(parsed.buildings || {}) },
+    parts: { ...initial.parts, ...(parsed.parts || {}) },
+    deliveries: Array.isArray(parsed.deliveries) ? parsed.deliveries : [],
+    equipmentTier: Math.max(0, Number(parsed.equipmentTier) || 0),
+    automationTier: Math.max(0, Number(parsed.automationTier) || 0),
+    advancedProduction: {
+      lines: Array.isArray(parsed.advancedProduction?.lines) ? parsed.advancedProduction.lines : [],
+      queue: Array.isArray(parsed.advancedProduction?.queue) ? parsed.advancedProduction.queue : [],
+      nextId: Math.max(1, Number(parsed.advancedProduction?.nextId) || 1)
+    },
+    maintenance: Math.max(0, Math.min(100, Number(parsed.maintenance ?? 100))),
+    story: { unlocked: Array.isArray(parsed.story?.unlocked) ? parsed.story.unlocked : [] },
+    advancedContracts: {
+      offer: parsed.advancedContracts?.offer || null,
+      completed: Math.max(0, Number(parsed.advancedContracts?.completed) || 0)
+    }
+  };
+
+  for (const [id, amount] of Object.entries(state.inventory)) {
+    state.inventory[id] = Math.max(0, Math.floor(Number(amount) || 0));
+  }
+  if (!Array.isArray(state.qualityLots)) {
+    state.qualityLots = Object.entries(state.inventory)
+      .filter(([, amount]) => amount > 0)
+      .map(([item, amount]) => ({ item, remaining: amount, quality: null, passportId: null, legacy: true }));
+  }
+  if (!Array.isArray(state.productionLog)) state.productionLog = [];
+  return state;
+}
+
 export function loadGame() {
   try {
     const saved = localStorage.getItem(SAVE_KEY);
-    if (!saved) return createInitialState();
-
+    if (!saved) {
+      const fresh = createInitialState();
+      lastSavedSnapshot = null;
+      return fresh;
+    }
     const parsed = JSON.parse(saved);
-    const initial = createInitialState();
-
-    return {
-      ...initial,
-      ...parsed,
-      inventory: {
-        ...initial.inventory,
-        ...(parsed.inventory || {})
-      },
-      production: {
-        ...initial.production,
-        ...(parsed.production || {})
-      },
-      skills: Array.isArray(parsed.skills) ? parsed.skills : [],
-      buildings: { ...initial.buildings, ...(parsed.buildings || {}) },
-      parts: { ...initial.parts, ...(parsed.parts || {}) },
-      deliveries: Array.isArray(parsed.deliveries) ? parsed.deliveries : [],
-      equipmentTier: Math.max(0, Number(parsed.equipmentTier) || 0),
-      automationTier: Math.max(0, Number(parsed.automationTier) || 0),
-      advancedProduction: {
-        lines: Array.isArray(parsed.advancedProduction?.lines) ? parsed.advancedProduction.lines : [],
-        queue: Array.isArray(parsed.advancedProduction?.queue) ? parsed.advancedProduction.queue : [],
-        nextId: Math.max(1, Number(parsed.advancedProduction?.nextId) || 1)
-      },
-      maintenance: Math.max(0, Math.min(100, Number(parsed.maintenance ?? 100))),
-      story: { unlocked: Array.isArray(parsed.story?.unlocked) ? parsed.story.unlocked : [] },
-      advancedContracts: {
-        offer: parsed.advancedContracts?.offer || null,
-        completed: Math.max(0, Number(parsed.advancedContracts?.completed) || 0)
-      }
-    };
+    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("Некорректный формат сохранения");
+    const state = migrateSave(parsed);
+    lastSavedSnapshot = JSON.stringify(state);
+    return state;
   } catch (error) {
     console.error("Не удалось загрузить сохранение:", error);
+    lastSavedSnapshot = null;
     return createInitialState();
   }
 }
 
 export function saveGame(state) {
   try {
-    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+    state.schemaVersion = SAVE_SCHEMA_VERSION;
+    const snapshot = JSON.stringify(state);
+    if (snapshot === lastSavedSnapshot) return false;
+    localStorage.setItem(SAVE_KEY, snapshot);
+    lastSavedSnapshot = snapshot;
+    return true;
   } catch (error) {
     console.error("Не удалось сохранить игру:", error);
+    return false;
   }
 }
 
