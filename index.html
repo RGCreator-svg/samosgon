@@ -62,7 +62,206 @@
 </div>
     </header>
 
-    <section id="game-world" class="game-world" aria-label="Игровая сцена"><div class="art-placeholder world-fallback"><span>ИГРОВАЯ СЦЕНА</span><small>Сгенерировать при доступности лимита</small></div></section>
+    <svg id="homestead-scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMax slice">
+    <!-- небо и холмы -->
+    <rect width="1600" height="900" fill="url(#sky)"/>
+    <defs>
+      <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#6dbef2"/><stop offset="0.55" stop-color="#bfe3f8"/>
+      </linearGradient>
+      <linearGradient id="grass" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#a4d05e"/><stop offset="1" stop-color="#7cb540"/>
+      </linearGradient>
+      <linearGradient id="roof" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#b5722e"/><stop offset="1" stop-color="#8a5220"/>
+      </linearGradient>
+      <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#e8b366"/><stop offset="1" stop-color="#c98f42"/>
+      </linearGradient>
+    </defs>
+    <!-- облака -->
+    <g fill="#ffffff" opacity="0.9">
+      <ellipse cx="300" cy="120" rx="70" ry="26"/><ellipse cx="360" cy="105" rx="55" ry="22"/>
+      <ellipse cx="1150" cy="90" rx="80" ry="28"/><ellipse cx="1220" cy="110" rx="55" ry="20"/>
+      <ellipse class="bird" cx="700" cy="70" rx="26" ry="10" opacity="0.8"/>
+    </g>
+    <!-- дальняя деревня и церковь -->
+    <g opacity="0.85">
+      <rect x="1380" y="250" width="14" height="60" fill="#e8e0d0"/>
+      <polygon points="1373,250 1401,250 1387,215" fill="#4a6a9a"/>
+      <rect x="1290" y="290" width="50" height="34" fill="#e8e0d0"/>
+      <polygon points="1283,290 1347,290 1315,262" fill="#a05a2a"/>
+      <rect x="1450" y="300" width="44" height="30" fill="#f0e8d8"/>
+      <polygon points="1443,300 1501,300 1472,276" fill="#b06a30"/>
+    </g>
+    <!-- земля -->
+    <rect y="560" width="1600" height="340" fill="url(#grass)"/>
+    <path d="M0,620 Q400,585 800,625 T1600,610 L1600,900 L0,900 Z" fill="#8fbf52"/>
+    <path d="M540,900 L1120,900 L1030,660 Q800,635 640,665 Z" fill="#c9a06a"/>
+    <path d="M600,900 L1080,900 L1010,672 Q800,648 660,676 Z" fill="#dcb87e"/>
+
+    <!-- ---- ДОМ (кликабельный) ---- -->
+    <g id="scene-house" class="clickable" data-tip="Дом">
+      <rect x="240" y="380" width="300" height="180" rx="6" fill="url(#wall)" stroke="#8a5220" stroke-width="4"/>
+      <!-- брёвна -->
+      <g stroke="#a06a2a" stroke-width="2.5" opacity="0.6">
+        <line x1="240" y1="410" x2="540" y2="410"/><line x1="240" y1="440" x2="540" y2="440"/>
+        <line x1="240" y1="470" x2="540" y2="470"/><line x1="240" y1="500" x2="540" y2="500"/>
+        <line x1="240" y1="530" x2="540" y2="530"/>
+      </g>
+      <!-- крыша -->
+      <polygon points="215,385 565,385 390,270" fill="url(#roof)" stroke="#6b3d14" stroke-width="4"/>
+      <g stroke="#6b3d14" stroke-width="2" opacity="0.5">
+        <line x1="250" y1="382" x2="390" y2="283"/><line x1="310" y1="382" x2="415" y2="288"/><line x1="370" y1="380" x2="445" y2="295"/><line x1="440" y1="378" x2="470" y2="308"/>
+      </g>
+      <!-- труба + дым -->
+      <rect x="470" y="292" width="26" height="55" fill="#b5563e" stroke="#7a3222" stroke-width="3"/>
+      <circle class="smoke" cx="483" cy="285" r="9" fill="#eee" opacity="0.6"/>
+      <circle class="smoke" cx="490" cy="285" r="12" fill="#eee" opacity="0.5" style="animation-delay:1s"/>
+      <!-- окно с синими ставнями -->
+      <rect x="300" y="410" width="52" height="56" rx="4" fill="#bfe3f8" stroke="#6b431f" stroke-width="3"/>
+      <rect x="286" y="404" width="14" height="66" rx="3" fill="#5a8fc4" stroke="#3d6a9a" stroke-width="2"/>
+      <rect x="352" y="404" width="14" height="66" rx="3" fill="#5a8fc4" stroke="#3d6a9a" stroke-width="2"/>
+      <line x1="326" y1="410" x2="326" y2="466" stroke="#6b431f" stroke-width="2"/>
+      <line x1="300" y1="438" x2="352" y2="438" stroke="#6b431f" stroke-width="2"/>
+      <!-- дверь -->
+      <rect x="430" y="440" width="52" height="120" rx="6" fill="#7a4a20" stroke="#5a3410" stroke-width="3"/>
+      <circle cx="472" cy="500" r="4" fill="#f0c04a"/>
+      <!-- окно второе -->
+      <rect x="490" y="420" width="36" height="40" rx="3" fill="#bfe3f8" stroke="#6b431f" stroke-width="3"/>
+      <!-- фонарь -->
+      <rect x="395" y="400" width="4" height="26" fill="#4a3418"/>
+      <circle cx="397" cy="432" r="8" fill="#ffe27a" stroke="#8a6a2a" stroke-width="2"/>
+    </g>
+
+    <!-- ---- ЯБЛОНЯ (кликабельная — сбор урожая) ---- -->
+    <g id="scene-tree" class="clickable" data-tip="Яблоня">
+      <rect x="806" y="440" width="30" height="110" rx="8" fill="#8a5a30" stroke="#6b431f" stroke-width="3"/>
+      <path d="M820,470 Q760,430 720,460 M822,470 Q880,425 925,455 M820,455 Q800,410 760,410" stroke="#6b431f" stroke-width="7" fill="none"/>
+      <circle cx="800" cy="380" r="72" fill="#5a9a2a"/>
+      <circle cx="748" cy="412" r="52" fill="#4e8a24"/>
+      <circle cx="878" cy="408" r="56" fill="#4e8a24"/>
+      <circle cx="822" cy="352" r="48" fill="#66a832"/>
+      <circle cx="770" cy="368" r="14" fill="#ff5a3c" stroke="#c63818" stroke-width="2"/>
+      <circle cx="846" cy="392" r="14" fill="#ff5a3c" stroke="#c63818" stroke-width="2"/>
+      <circle cx="880" cy="360" r="13" fill="#ff5a3c" stroke="#c63818" stroke-width="2"/>
+      <circle cx="806" cy="428" r="13" fill="#ff5a3c" stroke="#c63818" stroke-width="2"/>
+      <circle cx="742" cy="396" r="12" fill="#ff5a3c" stroke="#c63818" stroke-width="2"/>
+    </g>
+
+    <!-- ---- АМБАР-ВИНОКУРНЯ (кликабельный) ---- -->
+    <g id="scene-barn" class="clickable" data-tip="Винокурня">
+      <rect x="1080" y="360" width="330" height="200" rx="6" fill="url(#wall)" stroke="#8a5220" stroke-width="4"/>
+      <polygon points="1055,365 1435,365 1245,255" fill="url(#roof)" stroke="#6b3d14" stroke-width="4"/>
+      <g stroke="#6b3d14" stroke-width="2" opacity="0.5">
+        <line x1="1090" y1="362" x2="1235" y2="268"/><line x1="1160" y1="362" x2="1265" y2="276"/><line x1="1240" y1="360" x2="1295" y2="285"/><line x1="1320" y1="360" x2="1340" y2="300"/>
+      </g>
+      <!-- ворота -->
+      <rect x="1160" y="400" width="170" height="160" fill="#7a4a20" stroke="#5a3410" stroke-width="4"/>
+      <line x1="1245" y1="400" x2="1245" y2="560" stroke="#5a3410" stroke-width="4"/>
+      <g stroke="#5a3410" stroke-width="3"><line x1="1160" y1="420" x2="1330" y2="540"/><line x1="1160" y1="470" x2="1330" y2="590" opacity="0.4"/></g>
+      <!-- окно -->
+      <rect x="1360" y="420" width="34" height="38" rx="3" fill="#bfe3f8" stroke="#6b431f" stroke-width="3"/>
+      <!-- куб внутри -->
+      <g id="still">
+        <circle cx="1230" cy="520" r="34" fill="#c9752e" stroke="#8a4a14" stroke-width="3"/>
+        <path d="M1230,486 q10,-24 0,-40" stroke="#8a4a14" stroke-width="6" fill="none"/>
+        <circle cx="1230" cy="438" r="8" fill="#e0904a" stroke="#8a4a14" stroke-width="3"/>
+        <rect x="1196" y="540" width="68" height="18" rx="4" fill="#a05a20" stroke="#7a3a10" stroke-width="2"/>
+      </g>
+      <!-- бочки -->
+      <g id="barrels">
+        <g transform="translate(1370,530)">
+          <ellipse cx="0" cy="8" rx="24" ry="8" fill="#6b431f"/>
+          <rect x="-22" y="-30" width="44" height="38" rx="10" fill="#a06a30" stroke="#6b431f" stroke-width="3"/>
+          <line x1="-22" y1="-18" x2="22" y2="-18" stroke="#5a3a18" stroke-width="3"/>
+          <line x1="-22" y1="-4" x2="22" y2="-4" stroke="#5a3a18" stroke-width="3"/>
+        </g>
+        <g transform="translate(1408,542)">
+          <rect x="-18" y="-24" width="36" height="32" rx="8" fill="#a06a30" stroke="#6b431f" stroke-width="3"/>
+        </g>
+      </g>
+      <!-- колесо у стены -->
+      <circle cx="1420" cy="480" r="26" fill="none" stroke="#6b431f" stroke-width="5"/>
+      <circle cx="1420" cy="480" r="6" fill="#6b431f"/>
+    </g>
+
+    <!-- ---- ГРЯДКИ (кликабельные) ---- -->
+    <g id="scene-beds">
+      <g class="bed clickable" data-idx="0" data-tip="Грядка с помидорами">
+        <rect x="120" y="660" width="300" height="60" rx="10" fill="#8a5a30" stroke="#6b431f" stroke-width="3"/>
+        <rect x="128" y="668" width="284" height="44" rx="8" fill="#5a7a30"/>
+        <circle cx="160" cy="680" r="9" fill="#e04a2a"/><circle cx="200" cy="700" r="9" fill="#e04a2a"/>
+        <circle cx="245" cy="682" r="9" fill="#e04a2a"/><circle cx="290" cy="702" r="9" fill="#e04a2a"/>
+        <circle cx="335" cy="680" r="9" fill="#e04a2a"/><circle cx="380" cy="700" r="9" fill="#e04a2a"/>
+      </g>
+      <g class="bed clickable" data-idx="1" data-tip="Грядка с зеленью">
+        <rect x="170" y="740" width="300" height="60" rx="10" fill="#8a5a30" stroke="#6b431f" stroke-width="3"/>
+        <rect x="178" y="748" width="284" height="44" rx="8" fill="#5a7a30"/>
+        <circle cx="215" cy="762" r="10" fill="#66b032"/><circle cx="260" cy="780" r="10" fill="#66b032"/>
+        <circle cx="308" cy="762" r="10" fill="#66b032"/><circle cx="355" cy="780" r="10" fill="#66b032"/>
+        <circle cx="400" cy="764" r="10" fill="#66b032"/>
+      </g>
+    </g>
+
+    <!-- ---- КОЛОДЕЦ (кликабельный) ---- -->
+    <g id="scene-well" class="clickable" data-tip="Колодец">
+      <rect x="1470" y="640" width="80" height="70" rx="6" fill="#9a9a92" stroke="#6a6a62" stroke-width="3"/>
+      <g stroke="#7a7a72" stroke-width="2"><line x1="1470" y1="658" x2="1550" y2="658"/><line x1="1470" y1="676" x2="1550" y2="676"/><line x1="1470" y1="694" x2="1550" y2="694"/></g>
+      <polygon points="1460,612 1560,612 1510,585" fill="url(#roof)" stroke="#6b3d14" stroke-width="3"/>
+      <rect x="1494" y="640" width="32" height="26" fill="#4a3018"/>
+    </g>
+
+    <!-- ---- КУРЫ (кликабельные) ---- -->
+    <g id="scene-chicken1" class="clickable bob" data-tip="Курица">
+      <ellipse cx="880" cy="640" rx="26" ry="20" fill="#f5f0e6" stroke="#c9bfa8" stroke-width="2"/>
+      <circle cx="902" cy="622" r="12" fill="#f5f0e6" stroke="#c9bfa8" stroke-width="2"/>
+      <polygon points="912,620 924,624 912,628" fill="#e08a2a"/>
+      <circle cx="905" cy="618" r="2" fill="#333"/>
+      <polygon points="898,608 902,600 906,608" fill="#e04a3a"/>
+      <path d="M872,640 q-10,14 -2,22" stroke="#e0a83a" stroke-width="3" fill="none"/>
+    </g>
+    <g id="scene-chicken2" class="clickable bob" data-tip="Петух" style="animation-delay:.6s">
+      <ellipse cx="960" cy="650" rx="24" ry="18" fill="#e8dcc8" stroke="#c0a888" stroke-width="2"/>
+      <circle cx="980" cy="632" r="11" fill="#e8dcc8" stroke="#c0a888" stroke-width="2"/>
+      <polygon points="989,630 1000,634 989,638" fill="#e08a2a"/>
+      <circle cx="983" cy="628" r="2" fill="#333"/>
+      <path d="M976,618 q4,-10 10,-8 q-4,4 -2,8" fill="#c63828"/>
+      <path d="M986,636 q14,-6 20,-2 q-8,8 -20,6" fill="#3a7a2a" opacity="0.9"/>
+    </g>
+    <!-- цыплята -->
+    <g fill="#ffe27a" stroke="#d0a030" stroke-width="2">
+      <circle cx="920" cy="672" r="8" class="bob"/><circle cx="945" cy="678" r="8" class="bob" style="animation-delay:.4s"/>
+    </g>
+
+    <!-- ---- ТЫКВА-МАСКОТ ---- -->
+    <g id="scene-pumpkin" class="clickable" data-tip="Тыква">
+      <image href="assets/images/Squash.png" x="610" y="755" width="190" height="145" preserveAspectRatio="xMidYMid meet"/>
+    </g>
+
+    <!-- тачка, лейка, подсолнухи, цветы -->
+    <g>
+      <rect x="580" y="760" width="90" height="30" rx="8" fill="#8a5a30" stroke="#6b431f" stroke-width="3"/>
+      <circle cx="600" cy="798" r="12" fill="#6b431f"/><circle cx="650" cy="798" r="12" fill="#6b431f"/>
+      <path d="M668,768 l26,20" stroke="#6b431f" stroke-width="5"/>
+      <circle cx="610" cy="756" r="10" fill="#e04a2a"/><circle cx="630" cy="752" r="10" fill="#f0c04a"/><circle cx="648" cy="758" r="10" fill="#e04a2a"/>
+      <rect x="420" y="770" width="20" height="40" rx="4" fill="#9ab0b8" stroke="#6a8088" stroke-width="2"/>
+      <path d="M410,770 q10,-16 24,-8" stroke="#6a8088" stroke-width="4" fill="none"/>
+    </g>
+    <g id="sunflowers">
+      <g transform="translate(150,640)"><rect x="-3" y="0" width="6" height="46" fill="#4a7a28"/><circle r="13" fill="#f0c04a"/><circle r="7" fill="#8a5a20"/></g>
+      <g transform="translate(190,650)"><rect x="-3" y="0" width="6" height="40" fill="#4a7a28"/><circle r="12" fill="#f0c04a"/><circle r="6" fill="#8a5a20"/></g>
+    </g>
+    <g fill="#e06a9a"><circle cx="1080" cy="820" r="6"/><circle cx="1100" cy="830" r="5"/><circle cx="1340" cy="800" r="6"/><circle cx="1362" cy="812" r="5"/><circle cx="160" cy="810" r="6"/><circle cx="140" cy="820" r="5"/></g>
+    <g fill="#8a6ad0"><circle cx="1120" cy="815" r="5"/><circle cx="90" cy="800" r="5"/></g>
+
+    <!-- забор -->
+    <g stroke="#b08a4a" stroke-width="6">
+      <line x1="60" y1="700" x2="60" y2="770"/><line x1="110" y1="702" x2="110" y2="772"/><line x1="160" y1="704" x2="160" y2="774"/>
+      <line x1="40" y1="720" x2="180" y2="714"/><line x1="40" y1="750" x2="180" y2="744"/>
+      <line x1="1420" y1="740" x2="1420" y2="810"/><line x1="1470" y1="742" x2="1470" y2="812"/><line x1="1520" y1="744" x2="1520" y2="814"/>
+    </g>
+  </svg>
 
     <nav class="navigation" aria-label="Разделы хозяйства">
       <button data-tab="home" class="active">🏚 Дом</button>
@@ -73,7 +272,30 @@
       <button data-tab="skills">🌳 Умения</button>
       <button data-tab="notebook">📖 Записки</button>
     </nav>
+    <aside class="prototype-side" aria-label="Быстрые разделы">
+      <button class="side-btn" type="button" data-tab="skills"><span class="big">🏆</span>Достижения</button>
+      <button class="side-btn" type="button" data-tab="notebook"><span class="big">📜</span>Задания и записки</button>
+      <button class="side-btn" type="button" data-tab="market"><span class="big">🎁</span>События и рынок</button>
+    </aside>
+    <aside class="prototype-task">
+      <h4>❗ Задача усадьбы</h4>
+      <div class="task-row"><span class="task-icon">🏡</span><div>Вернуть жизнь бабушкиному дому<small>Ремонт, урожай и развитие хозяйства</small></div></div>
+    </aside>
 
+
+    <div class="prototype-bottom">
+      <button class="panel-mini" type="button" id="bottomWarehouse"><span class="t">📦 Склад хозяйства</span><span class="s">Запасы и инвентарь</span></button>
+      <button class="panel-mini" type="button" data-tab="productionHub"><span class="t">🫗 Производство</span><span class="s">Открыть диспетчер</span></button>
+      <div class="pumpkin-mascot" id="pumpkinMascot" role="button" tabindex="0" aria-label="Поговорить с тыквой">
+        <div class="pumpkin-bubble" id="pumpkinSay">Тыква наблюдает за хозяйством. И явно что-то задумала.</div>
+        <img src="assets/images/Squash.png" alt="Тыква" />
+      </div>
+      <div class="prototype-shortcuts">
+        <button type="button" id="bottomMarket">🎒 Склад</button>
+        <button type="button" data-tab="notebook">📖 Записки</button>
+        <button type="button" data-tab="skills">🌳 Умения</button>
+      </div>
+    </div>
     <section class="needs panel">
       <h2>Состояние героя</h2>
       <div class="need">
@@ -237,15 +459,15 @@
     </details>
 
     <section class="panel event-console">
-      <h2>▣ Консоль событий · Последние записи</h2>
+      <h2>▣ Журнал событий</h2>
       <div id="notifications"></div>
     </section>
+
   </main>
 
 
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js" defer></script>
   <script type="module" src="js/game.js"></script>
 </body>
 </html>
