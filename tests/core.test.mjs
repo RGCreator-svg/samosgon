@@ -23,6 +23,7 @@ const { getEquipmentProfile, EQUIPMENT_MODULES } = await import("../js/equipment
 const { recordProduction } = await import("../js/productionhub.js");
 const { BERRY_CROPS, HERB_CROPS, GARDEN_CROPS, ensureBerryGarden, plantBerryBush, advanceBerryGardenDay, harvestBerryBush } = await import("../js/berries.js");
 const { HERBAL_FORMULAS, runHerbalFormula } = await import("../js/researchlab.js");
+const { ensureProductionPlant, getStillCapacity, startStillBatch, resolveStillChoice, STILL_MODELS } = await import("../js/productionplant.js");
 
 test("berry garden grows seasonal bushes, harvests repeat crops and respects warehouse capacity", () => {
   const state=createInitialState();
@@ -454,4 +455,28 @@ test("tincture blending creates distinct signature products with weighted flavor
  assert.equal(state.blendStandards.berry_tincture_blend.a,3);
  const meadow=blendBatch(state,"meadow_tincture_blend",recordProduction,{a:2,b:1});
  assert.ok(meadow);assert.equal(state.inventory.meadow_reserve_tincture,2);
+});
+
+
+test("multi-apparatus production plant runs independent staged batches", () => {
+  const state=createInitialState();
+  state.buildings.workshop=2;
+  state.inventory.braga=6;
+  state.inventory.fruit_braga=3;
+  const plant=ensureProductionPlant(state);
+  assert.equal(plant.units.length,1);
+  assert.equal(getStillCapacity(state),3);
+  const first=plant.units[0];
+  assert.equal(startStillBatch(state,first.id,"sugar"),true);
+  assert.equal(startStillBatch(state,first.id,"fruit"),false);
+  plant.units.push({id:2,name:"Аппарат №2",model:"stainless",maintenance:100,active:null});
+  assert.equal(startStillBatch(state,2,"fruit"),true);
+  assert.equal(state.inventory.braga,3);
+  assert.equal(state.inventory.fruit_braga,0);
+  const choices=["careful","balanced","careful"];
+  for(const choice of choices)resolveStillChoice(first.active,choice);
+  assert.equal(first.active.ready,true);
+  assert.ok(first.active.output>=1);
+  assert.equal(plant.units[1].active.ready,false);
+  assert.equal(STILL_MODELS.stainless.output,1);
 });
