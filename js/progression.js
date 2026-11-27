@@ -69,7 +69,9 @@ export function initMilestones(s,{renderGame,notify,earnExperience}){
   notify(`Достижение «${goal.title}»! Получено ${goal.reward.money} монет и ${goal.reward.xp} опыта.`);
   renderGame();render(s);
  });
-   document.querySelectorAll(".tab-content").forEach(x=>x.classList.toggle("hidden",x.id!=="milestones"));
+ nav.addEventListener("click",e=>{
+  if(!e.target.closest('[data-tab="milestones"]'))return;
+  document.querySelectorAll(".tab-content").forEach(x=>x.classList.toggle("hidden",x.id!=="milestones"));
   nav.querySelectorAll("[data-tab]").forEach(x=>x.classList.toggle("active",x.dataset.tab==="milestones"));
  });
  render(s);
