@@ -46,7 +46,7 @@ export function startMashBatch(state,recipeId,tempProfile=ensureMashHouse(state)
   const recipe=MASH_RECIPES.find(entry=>entry.id===recipeId);
   const house=ensureMashHouse(state);
   if(!recipe||house.batches.length>=getMashCapacity(state))return false;
-  const days=Math.max(1,recipe.days-(state.skills?.includes("patient_master")?1:0));
+  const days=Math.max(1,recipe.days-(state.skills?.includes("patient_master")?1:0)+(tempProfile==="gentle"?1:0));
   house.batches.push({
     id:house.nextId++,recipeId:recipe.id,name:recipe.name,
     remaining:days,totalDays:days,stage:"fermentation",ready:false,
@@ -119,7 +119,7 @@ export function renderMashHouse(state,root) {
   house.batches.forEach(batch=>{
     const row=el("div","mash-batch-row"+(batch.ready?" is-ready":""));
     const info=el("div","mash-batch-info");
-    info.append(el("b","",batch.name),el("span","",batch.ready?"Брожение завершено · предварительное качество "+batch.quality+"/100":"Брожение · осталось "+batch.remaining+" дн."));
+    info.append(el("b","",batch.name),el("span","",batch.ready?"Брожение завершено · качество "+batch.quality+"/100":"Режим: "+({stable:"стабильный",fast:"ускоренный",gentle:"бережный"}[batch.tempProfile]||"стабильный")+" · осталось "+batch.remaining+" дн. · отклонения "+(batch.temperatureDrift||0)));
     const meter=el("div","mash-progress");
     const fill=el("span","");
     fill.style.width=(batch.ready?100:Math.max(0,Math.min(100,100*(1-batch.remaining/Math.max(1,batch.totalDays)))))+"%";
@@ -187,7 +187,7 @@ export function advanceMashHouseDay(state,notify=()=>{}) {
       batch.temperatureDrift=(Number(batch.temperatureDrift)||0)+drift;
       batch.quality=Math.max(35,(Number(batch.quality)||60)-drift);
     } else if(batch.tempProfile==="gentle") batch.quality=Math.min(96,(Number(batch.quality)||60)+1);
-    batch.remaining=Math.max(0,(Number(batch.remaining)||0)-(batch.tempProfile==="fast"?1:1));
+    batch.remaining=Math.max(0,(Number(batch.remaining)||0)-(batch.tempProfile==="fast"?2:1));
     if(batch.remaining===0){
       batch.ready=true;
       const bonus= batch.tempProfile==="gentle"?2:0;
