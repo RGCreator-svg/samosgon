@@ -3107,3 +3107,66 @@ body { margin:0; font-family:"Segoe UI", "Comic Sans MS", sans-serif; background
   #game .navigation { top:94px; }
   #game .tab-content:not(.hidden) { top:218px; }
 }
+
+
+/* REV 6 — компактная компоновка: тыква над терминалом, без повторяющихся меню */
+#game .prototype-side,
+#game .prototype-shortcuts { display:none !important; }
+#game .prototype-bottom {
+  left:0; right:0; bottom:0; min-height:82px;
+  display:flex; align-items:center; justify-content:flex-start;
+  gap:12px; padding:9px 16px;
+  background:linear-gradient(0deg,#263b2bf2,#263b2b88 75%,transparent);
+}
+#game .prototype-bottom .panel-mini { min-width:155px; min-height:54px; }
+#game .prototype-bottom .panel-mini[data-tab="productionHub"] { margin-right:auto; }
+#game .prototype-task { top:174px; right:18px; width:205px; }
+#game .navigation {
+  top:116px; width:min(1040px,calc(100vw - 460px));
+  flex-wrap:nowrap; gap:6px;
+}
+#game .navigation button[data-tab] { min-width:0; padding:7px 10px; font-size:12px; }
+#game .event-console {
+  right:16px; bottom:94px; width:min(350px,30vw);
+  max-height:142px; display:block; z-index:20;
+}
+#game #notifications { max-height:98px; }
+#game .pumpkin-console-anchor {
+  position:absolute; z-index:21; right:78px; bottom:232px;
+  width:220px; height:138px; display:flex; align-items:flex-end; justify-content:center;
+  pointer-events:none;
+}
+#game .pumpkin-mascot {
+  width:190px; height:132px; margin:0; pointer-events:auto;
+}
+#game .pumpkin-mascot img { width:150px; height:125px; }
+#game .pumpkin-bubble { bottom:112px; max-width:245px; }
+@media(max-width:900px) {
+  #game .navigation { top:102px; width:calc(100vw - 24px); flex-wrap:wrap; }
+  #game .prototype-task { top:168px; right:8px; width:155px; }
+  #game .event-console { right:8px; bottom:88px; width:min(290px,42vw); max-height:126px; }
+  #game #notifications { max-height:82px; }
+  #game .pumpkin-console-anchor { right:24px; bottom:214px; width:180px; height:116px; }
+  #game .pumpkin-mascot { width:165px; height:110px; }
+  #game .pumpkin-mascot img { width:125px; height:105px; }
+  #game .pumpkin-bubble { bottom:95px; max-width:205px; }
+  #game .prototype-bottom .panel-mini { min-width:120px; }
+}
+@media(max-width:560px) {
+  #game .navigation { top:92px; left:8px; right:8px; width:auto; transform:none; justify-content:flex-start; }
+  #game .navigation button[data-tab] { flex:1 1 28%; min-height:34px; font-size:10px; padding:5px; }
+  #game .prototype-task { top:178px; right:7px; width:124px; padding:7px; font-size:10px; }
+  #game .prototype-task h4 { font-size:11px; }
+  #game .tab-content:not(.hidden) { top:230px; width:calc(100vw - 16px); max-height:calc(100vh - 330px); }
+  #game .event-console { display:block !important; right:8px; bottom:76px; width:calc(50vw - 12px); max-height:104px; }
+  #game .event-console h2 { padding:5px 7px; font-size:9px; }
+  #game #notifications { max-height:66px; padding:4px 6px; font-size:9px; }
+  #game .pumpkin-console-anchor { right:calc(50vw - 110px); bottom:178px; width:130px; height:95px; }
+  #game .pumpkin-mascot { width:125px; height:90px; }
+  #game .pumpkin-mascot img { width:100px; height:86px; }
+  #game .pumpkin-bubble { bottom:78px; max-width:150px; padding:5px 7px; font-size:9px; }
+  #game .prototype-bottom { min-height:68px; padding:5px 7px; gap:6px; }
+  #game .prototype-bottom .panel-mini { min-width:0; min-height:48px; flex:1; padding:5px 7px; }
+  #game .prototype-bottom .panel-mini .t { font-size:10px; }
+  #game .prototype-bottom .panel-mini .s { display:none; }
+}
