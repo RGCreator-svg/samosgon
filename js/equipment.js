@@ -173,12 +173,6 @@ function renderVisualAssembly(s){
   if(condenserNode){const kind=[...owned].find(id=>["dimroth_condenser","shell_condenser","direct_cooler"].includes(id))||"basic_condenser";condenserNode.classList.add(kind);condenserNode.dataset.moduleVisual=kind;}
   const receiverNode=root.querySelector(".still-receiver");
   if(receiverNode){const kind=[...owned].find(id=>["liquid_takeoff","vapor_takeoff","auto_takeoff"].includes(id))||"fraction_receiver";receiverNode.classList.add(kind);receiverNode.dataset.moduleVisual=kind;}
-  const columnNode=root.querySelector(".still-column");
-  if(columnNode){columnNode.classList.add(columnModule);if(has("glass_column"))columnNode.dataset.material="glass";else if(has("copper_column"))columnNode.dataset.material="copper";else if(has("stainless_column"))columnNode.dataset.material="steel";}
-  const condenserNode=root.querySelector(".still-condenser");
-  if(condenserNode){const kind=[...owned].find(id=>["dimroth_condenser","shell_condenser","direct_cooler"].includes(id))||"basic_condenser";condenserNode.classList.add(kind);condenserNode.dataset.moduleVisual=kind;}
-  const receiverNode=root.querySelector(".still-receiver");
-  if(receiverNode){const kind=[...owned].find(id=>["liquid_takeoff","vapor_takeoff","auto_takeoff"].includes(id))||"fraction_receiver";receiverNode.classList.add(kind);receiverNode.dataset.moduleVisual=kind;}
   if(previousModules){
     const added=[...owned].filter(id=>!previousModules.has(id));
     const removed=[...previousModules].filter(id=>!owned.has(id));
