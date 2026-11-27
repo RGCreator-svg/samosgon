@@ -375,6 +375,23 @@ export function initEconomy(state, { render, notify }) {
     const cartRoot = element("div", "material-cart"); cartRoot.id = "materialCart"; cartSection.append(cartRoot);
     const eventPanel = $("#notifications")?.closest(".event-console");
     if (eventPanel?.parentElement === game) game.insertBefore(cartSection, eventPanel); else game.append(cartSection);
+    cartSection.classList.add("cart-overlay-panel");
+    cartSection.setAttribute("aria-label", "Корзина покупок");
+    const devToggle = $("#devToggle");
+    if (devToggle && !$("#cartToggle")) {
+      const toggle = element("button", "cart-image-toggle");
+      toggle.id = "cartToggle"; toggle.type = "button";
+      toggle.setAttribute("aria-label", "Открыть корзину");
+      toggle.setAttribute("aria-expanded", "false");
+      const image = document.createElement("img");
+      image.src = "assets/images/ui/icon_cart.svg"; image.alt = "";
+      toggle.append(image);
+      devToggle.insertAdjacentElement("afterend", toggle);
+      toggle.addEventListener("click", () => {
+        const open = cartSection.classList.toggle("is-open");
+        toggle.setAttribute("aria-expanded", String(open));
+      });
+    }
   }
 
   if (!$("#economy")) {
@@ -412,7 +429,7 @@ export function initEconomy(state, { render, notify }) {
     notify(building.name + " улучшен до уровня " + current.buildings[building.id] + ".");
   });
 
-  $("#economy")?.addEventListener("click", event => {
+  game.addEventListener("click", event => {
     const button = event.target.closest("[data-economy-action]");
     if (!button) return;
     const [action, ...idParts] = button.dataset.economyAction.split(":");
@@ -506,6 +523,7 @@ export function initEconomy(state, { render, notify }) {
 
     render();
     renderEconomy(state);
+    renderMaterialCart(state);
   });
 
   renderEconomy(state);
