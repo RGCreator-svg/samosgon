@@ -21,6 +21,47 @@ const { resolveDistillationChoice, calculateDistillationResult } = await import(
 const { blendBatch, calculateBlendProfile } = await import("../js/blending.js");
 const { getEquipmentProfile, EQUIPMENT_MODULES } = await import("../js/equipment.js");
 const { recordProduction } = await import("../js/productionhub.js");
+const { BERRY_CROPS, ensureBerryGarden, plantBerryBush, advanceBerryGardenDay, harvestBerryBush } = await import("../js/berries.js");
+
+test("berry garden grows seasonal bushes, harvests repeat crops and respects warehouse capacity", () => {
+  const state=createInitialState();
+  state.viticulture={buildings:["berryGarden"],batches:[],nextId:1};
+  state.skills=["berry_growing","big_harvest"];
+  state.world={season:"summer",weather:"rain"};
+  const bush=plantBerryBush(state,"raspberry");
+  assert.ok(bush);
+  assert.equal(bush.remaining,3);
+  advanceBerryGardenDay(state);
+  advanceBerryGardenDay(state);
+  assert.equal(bush.ready,false);
+  advanceBerryGardenDay(state);
+  assert.equal(bush.ready,true);
+  assert.equal(bush.readyAmount,5);
+  const harvest=harvestBerryBush(state,bush.id);
+  assert.equal(harvest.harvested,5);
+  assert.equal(state.inventory.raspberry,5);
+  assert.equal(bush.ready,false);
+  assert.equal(bush.remaining,2);
+  state.world.season="winter";
+  advanceBerryGardenDay(state);
+  assert.equal(bush.remaining,2);
+  state.world.season="autumn";
+  const cranberry=plantBerryBush(state,"cranberry");
+  advanceBerryGardenDay(state);
+  advanceBerryGardenDay(state);
+  advanceBerryGardenDay(state);
+  advanceBerryGardenDay(state);
+  assert.equal(cranberry.ready,true);
+  assert.equal(harvestBerryBush(state,cranberry.id).harvested,4);
+  assert.equal(ensureBerryGarden(state).plots.length,2);
+  assert.equal(BERRY_CROPS.length,4);
+});
+
+test("berry garden limits planting to six plots", () => {
+  const state=createInitialState();
+  for(let i=0;i<6;i++)assert.ok(plantBerryBush(state,"blackcurrant"));
+  assert.equal(plantBerryBush(state,"raspberry"),null);
+});
 
 test("legacy saves migrate without losing inventory and receive legacy quality lots", () => {
   stored = JSON.stringify({
