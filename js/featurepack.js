@@ -78,7 +78,7 @@ function renderDistillation(s, root) {
   c.append(el("p","feature-meta",`Сырьевой профиль: ${({sugar:"Сахарная",fruit:"Фруктовая",grain:"Зерновая",honey:"Медовая"})[s.mashType]} · На складе: ${mashCount} ед. · Качество: ${s.distillation.quality||0}/100`));
   const mashPicker=el("div","mash-picker");
   [["sugar","🍬 Сахарная"],["fruit","🍎 Фруктовая"],["grain","🌾 Зерновая"],["honey","🍯 Медовая"]].forEach(([id,label])=>{const b=btn(label,"mashType",id,s.distillation.active || (id==="honey" && !s.skills.includes("honey_distillation")));if(s.mashType===id)b.classList.add("selected");mashPicker.append(b);});c.append(mashPicker);
-  c.append(el("p","module-meta",`Конфигурация: ${{pot:"Перегонный аппарат",hybrid:"Гибридная колонна",rectification:"Ректификационная колонна"}[profile.mode]} · Бонус модулей к качеству: +${profile.quality}`));
+  c.append(el("p","module-meta",`Конфигурация: ${{pot:"Перегонный аппарат",hybrid:"Гибридная колонна",rectification:"Ректификационная колонна"}[profile.mode]} · Линия: ${profile.lineage} · Синергия: ${profile.lineageModules}/${profile.lineageTotal} · бонус качества +${profile.lineageQuality}, выхода +${profile.lineageOutput}`));
   if (s.distillation.active) {
     const phases={
       stabilization:{title:"Подготовка аппарата",text:"Игровой этап: выбери, насколько внимательно система стабилизирует процесс.",choices:[["precise","Точный контроль"],["steady","Ровный темп"],["fast","Быстрый запуск"]]},
