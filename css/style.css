@@ -2130,3 +2130,96 @@ button:disabled {
   .warehouse-summary-hint { display: none; }
   .warehouse-category .warehouse-grid { grid-template-columns: 1fr; }
 }
+
+
+/* Дерево навыков: читаемые HTML-ветки без SVG-схемы */
+.skill-tree {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 330px), 1fr));
+  align-items: start;
+  gap: 13px;
+}
+.skill-branch-list {
+  padding: 14px;
+  background: linear-gradient(145deg, #292d23, #20231c);
+}
+.skill-branch-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #514b39;
+}
+.skill-branch-heading h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+.skill-branch-progress {
+  flex: 0 0 auto;
+  padding: 3px 8px;
+  border-radius: 20px;
+  background: #171914;
+  color: #d9c18b;
+  font-size: .78rem;
+  font-weight: 700;
+}
+.skill-branch-track {
+  display: grid;
+  gap: 8px;
+  padding-top: 10px;
+}
+.skill-step {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 9px;
+  padding: 9px;
+  border: 1px solid #4b4a39;
+  border-radius: 8px;
+  background: #252820;
+}
+.skill-step-marker {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 1px solid #80704b;
+  border-radius: 50%;
+  color: #d7bd83;
+  font-size: .8rem;
+  font-weight: 700;
+}
+.skill-step-info { min-width: 0; }
+.skill-step-info strong { color: #e2d4b5; font-size: .9rem; }
+.skill-step-info p {
+  margin: 2px 0;
+  color: #aaa18e;
+  font-size: .78rem;
+  line-height: 1.35;
+}
+.skill-step-info small { color: #a9a087; font-size: .72rem; }
+.skill-step-action {
+  margin: 0;
+  padding: 6px 9px;
+  font-size: .76rem;
+  white-space: nowrap;
+}
+.skill-step.unlocked {
+  border-color: #788d57;
+  background: #2b3526;
+}
+.skill-step.unlocked .skill-step-marker {
+  color: #e1f0c5;
+  border-color: #91a96b;
+  background: #465b35;
+}
+.skill-step.locked { opacity: .62; }
+@media (max-width: 480px) {
+  .skill-step {
+    grid-template-columns: 26px minmax(0, 1fr);
+  }
+  .skill-step-action {
+    grid-column: 2;
+    justify-self: start;
+  }
+}
