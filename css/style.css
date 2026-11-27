@@ -3200,3 +3200,49 @@ body { margin:0; font-family:"Segoe UI", "Comic Sans MS", sans-serif; background
 @media(max-width:700px) {
   #game .cart-image-toggle { position:relative; top:auto; right:auto; width:40px; height:40px; }
 }
+
+
+/* REV 7 — right rail mascot and event console; prevent panel collisions */
+#game #scene-pumpkin { display:none !important; }
+#game .pumpkin-console-anchor {
+  position:absolute; z-index:21; top:300px; right:18px; bottom:auto; left:auto;
+  width:190px; height:132px; display:flex; align-items:flex-end; justify-content:center;
+  pointer-events:none;
+}
+#game .pumpkin-mascot { width:180px; height:128px; margin:0; pointer-events:auto; }
+#game .pumpkin-mascot img { width:145px; height:120px; }
+#game .pumpkin-bubble { bottom:108px; max-width:210px; }
+#game .event-console {
+  top:450px; right:18px; bottom:auto; left:auto;
+  width:min(320px,25vw); max-height:150px; z-index:20;
+}
+#game #notifications { max-height:104px; }
+#game .tab-content:not(.hidden) {
+  z-index:30; width:min(700px,calc(100vw - 260px));
+  max-height:calc(100vh - 270px); overscroll-behavior:contain;
+}
+#game .shared-purchase-cart.cart-overlay-panel { z-index:46; }
+#game .cart-image-toggle { z-index:47; }
+#game .warehouse-panel { z-index:32; }
+@media(max-width:900px) {
+  #game .pumpkin-console-anchor { top:290px; right:8px; bottom:auto; width:155px; height:108px; }
+  #game .pumpkin-mascot { width:150px; height:105px; }
+  #game .pumpkin-mascot img { width:115px; height:98px; }
+  #game .pumpkin-bubble { bottom:88px; max-width:170px; }
+  #game .event-console { top:405px; right:8px; bottom:auto; width:min(260px,35vw); max-height:128px; }
+  #game #notifications { max-height:82px; }
+  #game .tab-content:not(.hidden) { width:calc(100vw - 190px); max-height:calc(100vh - 260px); }
+}
+@media(max-width:560px) {
+  #game .pumpkin-console-anchor { top:350px; right:5px; bottom:auto; width:112px; height:82px; }
+  #game .pumpkin-mascot { width:110px; height:80px; }
+  #game .pumpkin-mascot img { width:82px; height:76px; }
+  #game .pumpkin-bubble { bottom:70px; max-width:120px; padding:4px 6px; font-size:8px; }
+  #game .event-console { top:445px; right:5px; bottom:auto; width:calc(42vw - 8px); max-height:108px; }
+  #game .event-console h2 { padding:4px 6px; font-size:8px; }
+  #game #notifications { max-height:70px; padding:4px 5px; font-size:8px; }
+  #game .tab-content:not(.hidden) {
+    top:218px; left:8px; transform:none; width:calc(100vw - 16px);
+    max-height:calc(100vh - 350px); z-index:35;
+  }
+}
