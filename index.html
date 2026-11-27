@@ -40,7 +40,7 @@
   <div id="game-layout">
     <aside class="game-advisor game-advisor-left" aria-label="Советчик">
       <h2>Сомнительный эксперт</h2>
-      <img src="assets/images/madgardener.png" alt="Дядька Гришка — сомнительный эксперт">
+      <div class="art-placeholder advisor-art" role="img" aria-label="Иллюстрация персонажа пока отсутствует"><span>ПОРТРЕТ ПЕРСОНАЖА</span><small>Сгенерировать при доступности лимита</small></div>
       <p id="grishkaTip" class="game-advisor-tip" aria-live="polite">«Не суетись, внучок. Даже кривая дорожка куда-нибудь да приведёт. Главное — не в погреб».</p>
     </aside>
 
@@ -67,6 +67,8 @@
   </div>
 </div>
     </header>
+
+    <section id="game-world" class="game-world" aria-label="Игровая сцена"><div class="art-placeholder world-fallback"><span>ИГРОВАЯ СЦЕНА</span><small>Сгенерировать при доступности лимита</small></div></section>
 
     <nav class="navigation" aria-label="Разделы хозяйства">
       <button data-tab="home" class="active">🏚 Дом</button>
@@ -124,13 +126,7 @@
         <div class="homestead-path"></div>
         <div class="homestead-fence"></div>
         <div class="scene-caption"><span>ВАШЕ НАСЛЕДСТВО</span><strong>Дом, сад и новая история</strong><small id="sceneSeasonCaption">Усадьба просыпается</small></div>
-        <div class="homestead-hotspots" aria-label="Быстрый переход по усадьбе">
-          <button type="button" data-tab="home" class="hotspot hotspot-house"><span>🏡</span><b>Дом</b></button>
-          <button type="button" data-tab="farm" class="hotspot hotspot-farm"><span>🥕</span><b>Огород</b></button>
-          <button type="button" data-tab="orchard" class="hotspot hotspot-orchard"><span>🍎</span><b>Сад</b></button>
-          <button type="button" data-tab="barn" class="hotspot hotspot-barn"><span>⚙️</span><b>Сарай</b></button>
-        </div>
-      </div>
+</div>
       <div class="home-heading">
         <div><span class="section-kicker">ГЛАВНАЯ УСАДЬБА</span><h2>🏚 Бабушкин дом</h2></div>
         <span class="homestead-status"><i></i> Требует заботы</span>
@@ -230,18 +226,7 @@
       <p>Семейный архив, советы по хозяйству и вещи, которые бабушка явно не хотела показывать Петровичу.</p>
       <div id="grandmaNotes" class="grandma-notes"></div>
     </section>
-
-    <nav class="homestead-bottom-dock" aria-label="Быстрые разделы">
-      <button type="button" data-tab="productionHub"><span>📋</span><b>Диспетчер</b></button>
-      <button type="button" data-tab="productionPlant"><span>🏭</span><b>Цех</b></button>
-      <button type="button" data-tab="featurePack"><span>⚗️</span><b>Перегонка</b></button>
-      <button type="button" data-tab="viticulture"><span>🍷</span><b>Винодельня</b></button>
-      <button type="button" data-tab="cellar"><span>🪵</span><b>Погреб</b></button>
-      <button type="button" data-tab="researchLab"><span>🧪</span><b>Лаборатория</b></button>
-      <button type="button" data-tab="processCenter"><span>🧰</span><b>Техцентр</b></button>
-      <button type="button" data-tab="market"><span>🧺</span><b>Торговля</b></button>
-    </nav>
-    <section class="panel event-console">
+<section class="panel event-console">
       <h2>▣ Консоль событий · Последние записи</h2>
       <div id="notifications"></div>
     </section>
@@ -249,11 +234,12 @@
 
     <aside class="game-advisor game-advisor-right" aria-label="Мудрость с огорода">
       <h2>Мудрость с огорода</h2>
-      <img src="assets/images/Squash.png" alt="Огородный кабачок">
+      <div class="art-placeholder advisor-art" role="img" aria-label="Иллюстрация пока отсутствует"><span>ИЛЛЮСТРАЦИЯ УСАДЬБЫ</span><small>Сгенерировать при доступности лимита</small></div>
       <p>«Расти спокойно. Большие дела, как большие кабачки, не любят лишней суеты».</p>
     </aside>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.90.0/dist/phaser.min.js" defer></script>
   <script type="module" src="js/game.js"></script>
 </body>
 </html>
