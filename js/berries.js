@@ -54,7 +54,7 @@ export function harvestBerryBush(state,plotId){
   const garden=ensureBerryGarden(state);
   const plot=garden.plots.find(item=>Number(item.id)===Number(plotId));
   if(!plot?.ready)return {harvested:0,remaining:plot?.readyAmount||0};
-  const crop=BERRY_CROPS.find(item=>item.id===plot.berryId);
+  const crop=findCrop(plot.berryId);
   const season=state.world?.season||"spring";
   if(!crop?.seasons.includes(season))return {harvested:0,remaining:plot.readyAmount,wrongSeason:true};
   const requested=Math.max(0,Number(plot.readyAmount)||0);
