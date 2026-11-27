@@ -90,7 +90,7 @@ function showTab(tabId) {
     section.classList.toggle("hidden", section.id !== tabId);
   });
 
-  $("[data-tab]").forEach((button) => {
+  $$("[data-tab]").forEach((button) => {
     button.classList.toggle("active", button.dataset.tab === tabId);
   });
   window.dispatchEvent(new CustomEvent("samosgon:tab-change", { detail: tabId }));
