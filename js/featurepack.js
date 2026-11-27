@@ -38,6 +38,38 @@ function ensure(s) {
 function btn(label, attr, value, disabled=false) { const b=el("button","",label); b.setAttribute(`data-${attr}`,value); b.disabled=disabled; return b; }
 function card(parent,title,desc) { const c=el("article","feature-card"); c.append(el("h3","",title),el("p","",desc)); parent.append(c); return c; }
 
+export function resolveDistillationChoice(distillation,choice){
+  const phase=distillation.phase||"stabilization";
+  const impacts={
+    stabilization:{precise:[2,0],steady:[1,0],fast:[-2,1]},
+    heads:{precise:[3,-1],steady:[1,0],fast:[-2,1]},
+    heart:{precise:[3,0],steady:[1,1],fast:[-3,2]},
+    tails:{precise:[2,0],steady:[0,1],fast:[-3,2]}
+  };
+  const impact=impacts[phase]?.[choice];
+  if(!impact)return {valid:false,done:false,phase};
+  distillation.qualityPoints=(Number(distillation.qualityPoints)||0)+impact[0];
+  distillation.outputPoints=(Number(distillation.outputPoints)||0)+impact[1];
+  distillation.completedStages??=[];
+  if(!distillation.completedStages.includes(phase))distillation.completedStages.push(phase);
+  const order=["stabilization","heads","heart","tails"],index=order.indexOf(phase);
+  if(index===order.length-1)return {valid:true,done:true,phase:null};
+  distillation.phase=order[index+1];
+  return {valid:true,done:false,phase:distillation.phase};
+}
+
+export function calculateDistillationResult(state){
+  const profile=getEquipmentProfile(state,state.mashType);
+  const owned=new Set(state.equipmentModules||[]);
+  const coolingBonus=(owned.has("auto_cooling")?3:0)+(owned.has("safety_monitor")?2:0)+(owned.has("basic_condenser")?1:0);
+  const equipmentBonus=(Number(state.equipmentTier)||0)*4;
+  const baseQuality=Number(state.bragaQuality)||55;
+  const artisan=state.specialization==="artisan"?8:0;
+  const quality=Math.max(20,Math.min(100,Math.round(baseQuality+(Number(state.distillation.qualityPoints)||0)+artisan+equipmentBonus+profile.quality+coolingBonus+(Number(state.lab?.qualityBonus)||0)+(Number(state.story?.petrovichQualityBonus)||0))));
+  const output=Math.max(1,Math.round((2+(Number(state.distillation.outputPoints)||0)+profile.output)*(Number(state.processCenter?.outputMultiplier)||1)));
+  return {quality,output,stillMode:profile.mode,flavour:profile.flavour};
+}
+
 function renderDistillation(s, root) {
   const c=card(root,"⚗️ Перегонка и контроль качества","Переведи готовую брагу в игровую категорию «спирт-сырец». Выбор режима влияет только на условные игровые показатели качества и выхода.");
   const profile=getEquipmentProfile(s,s.mashType);
@@ -127,34 +159,16 @@ export function initFeaturePack(s,{render,notify,earnExperience}) {
     if(b.dataset.distillStart){const item={sugar:"braga",fruit:"fruit_braga",grain:"grain_braga",honey:"honey_braga"}[s.mashType]||"braga";if((s.inventory[item]||0)<3||s.distillation.result>0)return;const qualityLot=(s.qualityLots||[]).find(lot=>lot.item===item&&lot.quality!==null&&lot.quality!==undefined&&Number.isFinite(Number(lot.quality)));if(qualityLot)s.bragaQuality=Number(qualityLot.quality);removeInventory(s,item,3);s.distillation={active:true,phase:"stabilization",completedStages:[],quality:0,result:0,outputPoints:0,qualityPoints:0,mashType:s.mashType,resultItem:s.mashType==="honey"?"honey_spirit":"spirit"};notify("Перегонка запущена. Пройди четыре игровых этапа.");}
     if(b.dataset.distillCut){
       if(!s.distillation.active)return;
-      const phase=s.distillation.phase||"stabilization",choice=b.dataset.distillCut;
-      const impacts={
-        stabilization:{precise:[2,0],steady:[1,0],fast:[-2,1]},
-        heads:{precise:[3,-1],steady:[1,0],fast:[-2,1]},
-        heart:{precise:[3,0],steady:[1,1],fast:[-3,2]},
-        tails:{precise:[2,0],steady:[0,1],fast:[-3,2]}
-      };
-      const impact=impacts[phase]?.[choice];
-      if(!impact)return;
-      s.distillation.qualityPoints=(Number(s.distillation.qualityPoints)||0)+impact[0];
-      s.distillation.outputPoints=(Number(s.distillation.outputPoints)||0)+impact[1];
-      s.distillation.completedStages??=[];
-      s.distillation.completedStages.push(phase);
-      const order=["stabilization","heads","heart","tails"],index=order.indexOf(phase);
-      if(index<order.length-1){s.distillation.phase=order[index+1];notify("Игровой этап завершён. Следующий: "+({heads:"начальная фракция",heart:"основная фракция",tails:"завершение партии"}[s.distillation.phase])+".");}
+      const result=resolveDistillationChoice(s.distillation,b.dataset.distillCut);
+      if(!result.valid)return;
+      if(!result.done){notify("Игровой этап завершён. Следующий этап: "+({heads:"начальная фракция",heart:"основная фракция",tails:"завершение партии"}[result.phase])+".");}
       else{
-        const profile=getEquipmentProfile(s,s.mashType);
+        const outcome=calculateDistillationResult(s);
+        s.distillation={...s.distillation,active:false,phase:null,quality:outcome.quality,result:outcome.output,stillMode:outcome.stillMode,flavour:outcome.flavour};
         const owned=new Set(s.equipmentModules||[]);
-        const coolingBonus=(owned.has("auto_cooling")?3:0)+(owned.has("safety_monitor")?2:0)+(owned.has("basic_condenser")?1:0);
-        const equipmentBonus=(Number(s.equipmentTier)||0)*4;
-        const baseQuality=Number(s.bragaQuality)||55;
-        const artisan=s.specialization==="artisan"?8:0;
-        const finalQuality=Math.max(20,Math.min(100,Math.round(baseQuality+(Number(s.distillation.qualityPoints)||0)+artisan+equipmentBonus+profile.quality+coolingBonus+(Number(s.lab?.qualityBonus)||0)+(Number(s.story?.petrovichQualityBonus)||0))));
-        const output=Math.max(1,Math.round((2+(Number(s.distillation.outputPoints)||0)+profile.output)*(Number(s.processCenter?.outputMultiplier)||1)));
-        s.distillation={...s.distillation,active:false,phase:null,quality:finalQuality,result:output,stillMode:profile.mode,flavour:profile.flavour};
         s.maintenance=Math.max(0,(Number(s.maintenance)||100)-(owned.has("safety_monitor")?1:3));
         s.story??={};s.story.petrovichQualityBonus=0;
-        notify("Перегонка завершена: "+output+" ед., качество "+finalQuality+"/100. Износ установки: "+(100-s.maintenance)+"%.");
+        notify("Перегонка завершена: "+outcome.output+" ед., качество "+outcome.quality+"/100. Состояние установки: "+s.maintenance+"%.");
         earnExperience(14);
       }
     }
