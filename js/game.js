@@ -6,7 +6,7 @@ import { renderAll, renderAdvisor, reactGrishkaToEvent } from "./ui.js";
 import { initOrders, advanceOrdersDay } from "./orders.js";
 import { initDevTools } from "./dev.js";
 import { startNewDay } from "./events.js";
-import { initEconomy, renderEconomy, advanceDeliveries, addInventory, queuePurchase, registerCartHandler } from "./economy.js";
+import { initEconomy, renderEconomy, advanceDeliveries, addInventory, removeInventory, queuePurchase, registerCartHandler } from "./economy.js";
 import { initEquipment, renderEquipment } from "./equipment.js";
 import { initExpansion, renderExpansion, advanceExpansionDay } from "./expansion.js";
 import { initFeaturePack, renderFeaturePack, advanceFeaturePackDay, getMarketMultiplier } from "./featurepack.js";
@@ -176,7 +176,7 @@ $("#marketItems")?.addEventListener("click", (event) => {
   const quality = consumeQualityForSale(state,itemId,1);
   const price = Math.round(item.price * multiplier * quality.multiplier);
 
-  state.inventory[itemId] -= 1;
+  removeInventory(state, itemId, 1, { consumeQuality: false });
   state.money += price;
 
   earnExperience(state.skills.includes("regulars") ? 8 : 5);
