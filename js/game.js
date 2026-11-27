@@ -155,7 +155,14 @@ registerCartHandler("homesteadRepair",(current,item)=>{
   if(action==="basicBatch"&&!current.production.active&&!current.production.ready){current.energy=Math.max(0,current.energy-10);current.production.active=true;current.production.ready=false;current.production.daysLeft=current.skills.includes("patient_master")?1:2;}
   if(["house","barn","still","garden","orchard"].includes(action)) {
     discoverRepairStory(current,action,notify);
-    if(item.quantity>1 && Math.random()<0.22) discoverRepairStory(current,action,notify);
+    // Сад расчищается одной крупной операцией, поэтому за неё открываются
+    // несколько связанных страниц из садовой части бабушкиного архива.
+    if(action==="orchard") {
+      discoverRepairStory(current,action,notify);
+      discoverRepairStory(current,action,notify);
+    } else if(item.quantity>1 && Math.random()<0.22) {
+      discoverRepairStory(current,action,notify);
+    }
   }
 });
 
