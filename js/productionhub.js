@@ -138,6 +138,7 @@ function render(s) {
     const metrics = el("div", "passport-metrics");
     [["Аромат",p.aroma],["Чистота",p.purity],["Стабильность",p.stability]].forEach(([label,value]) => metrics.append(el("span","",label+": "+value)));
     if(p.flavorProfile)card.append(el("small","passport-flavor","Профиль: тело "+p.flavorProfile.body+" · аромат "+p.flavorProfile.aroma+" · "+(p.flavorProfile.notes||[]).join(", ")));
+    if(p.brandReputation!=null)card.append(el("small","passport-brand","Репутация марки: "+p.brandReputation+"/100 · бонус к цене +"+(p.brandBonus||0)+"%"));
     card.append(metrics,el("small","passport-sale","Влияние на цену: "+(p.saleModifier>=100?"+":"")+(p.saleModifier-100)+"%"));
     const factors=el("details","passport-factors");factors.append(el("summary","","Разбор оценки качества"));
     (p.factors||[]).forEach(f=>factors.append(el("p","",f.label+": "+(f.value>0?"+":"")+f.value+" · "+f.detail)));
