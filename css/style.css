@@ -3192,3 +3192,11 @@ body { margin:0; font-family:"Segoe UI", "Comic Sans MS", sans-serif; background
   #game .cart-image-toggle { top:8px; right:8px; width:40px; height:40px; }
   #game .shared-purchase-cart.cart-overlay-panel { top:55px; right:8px; }
 }
+
+#game .cart-image-toggle {
+  position:relative; top:auto; right:auto; flex:0 0 46px;
+  margin-left:6px; align-self:center;
+}
+@media(max-width:700px) {
+  #game .cart-image-toggle { position:relative; top:auto; right:auto; width:40px; height:40px; }
+}
