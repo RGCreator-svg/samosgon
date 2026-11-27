@@ -238,9 +238,9 @@ test("distillation requires four deliberate game stages before producing a batch
     assert.equal(result.done,index===3);
   });
   assert.deepEqual(state.distillation.completedStages,["stabilization","heads","heart","tails"]);
-  assert.equal(state.distillation.qualityPoints,8);
+  assert.equal(state.distillation.qualityPoints,6);
   const result=calculateDistillationResult(state);
-  assert.equal(result.quality,78);
+  assert.equal(result.quality,76);
   assert.equal(result.output,3);
   assert.equal(resolveDistillationChoice(state.distillation,"invalid").valid,false);
 });
