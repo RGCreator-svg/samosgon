@@ -2741,3 +2741,32 @@ body {
 .cellar-meter span{display:block;height:100%;background:linear-gradient(90deg,#8a6a3e,#e0bd78);transition:width .25s}
 .revision-label{display:inline-block;vertical-align:middle;margin-left:8px;padding:4px 8px;border:1px solid #b28a55;border-radius:7px;background:#35291e;color:#f2d39a;font-size:.42em;letter-spacing:.12em}
 @media(max-width:760px){.cellar-barrel-grid{grid-template-columns:1fr}}
+
+
+/* REV 4 — единая навигация и переход на Phaser 3 */
+.navigation {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+  padding: 14px;
+  margin: 14px 0 20px;
+  background: #20231c;
+  border: 1px solid #514b39;
+  border-radius: 12px;
+}
+.nav-group { min-width: 0; display: flex; flex-direction: column; gap: 5px; }
+.nav-group-title { padding: 0 8px; color: #b8a47a; font-size: .72rem; font-weight: 700; letter-spacing: .09em; text-transform: uppercase; }
+.nav-group button { width: 100%; margin: 0; text-align: left; background: #303328; border-color: #494735; }
+.nav-group button.active { background: #80683e; border-color: #d0b578; box-shadow: inset 3px 0 #e0bd69; }
+.game-world { width: 100%; min-height: 230px; overflow: hidden; margin: 12px 0 18px; border: 1px solid #62543a; border-radius: 14px; background: #171914; }
+.game-world canvas { display: block; width: 100% !important; height: auto !important; max-height: 280px; }
+.art-placeholder { min-height: 110px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 7px; padding: 18px; text-align: center; color: #d7bd83; background: repeating-linear-gradient(135deg,#282b22,#282b22 12px,#303328 12px,#303328 24px); border: 1px dashed #8a7042; border-radius: 10px; }
+.art-placeholder span { font-size: .8rem; font-weight: 800; letter-spacing: .12em; }
+.art-placeholder small { color: #b9b09d; font-size: .72rem; }
+.advisor-art { min-height: 145px; margin: 10px 0; }
+/* Старые CSS-сцены заменены общей сценой движка; сохраняем только игровые панели. */
+.intro-landscape, .homestead-scene, .location-scene { display: none !important; }
+@media (max-width: 700px) {
+  .navigation { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .game-world { min-height: 180px; }
+}
