@@ -42,6 +42,17 @@ try{
   await cartToggle.click();
   assert.ok(await page.locator("#sharedPurchaseCart").evaluate(el=>el.classList.contains("is-open")),"Cart launcher did not open the cart");
 
+  // Cart actions must work globally, including repairs outside the economy tab.
+  await page.locator("#repairHouse").click();
+  assert.match(await page.locator("#materialCart").innerText(),/Ремонт дома/,"House repair was not queued");
+  await page.locator("#materialCart [data-economy-action='pay']").click();
+  assert.match(await page.locator("#notifications").innerText(),/корзина оплачена/i,"Cart payment did not execute");
+  await page.locator("#repairGarden").click();
+  assert.match(await page.locator("#materialCart").innerText(),/Расчистка огорода/,"Garden clearing was not queued");
+  await page.locator("#materialCart [data-economy-action='pay']").click();
+  await page.locator("#harvestVegetables").click();
+  assert.match(await page.locator("#notifications").innerText(),/Урожай собран/i,"Vegetable harvest did not execute");
+
   // Scene hotspots use the existing game's tab controller.
   await page.locator("#scene-tree").click({force:true});
   assert.equal(await page.locator("#orchard").evaluate(el=>el.classList.contains("hidden")),false,"Orchard scene hotspot did not open the orchard tab");
@@ -61,7 +72,7 @@ try{
   const widths=await page.evaluate(()=>({body:document.body.scrollWidth,viewport:innerWidth}));
   assert.ok(widths.body<=widths.viewport+2,"Horizontal page overflow on mobile");
   assert.deepEqual(errors,[],"Browser console/page errors detected");
-  console.log("Browser smoke passed: Prototype screen, SVG scene, pumpkin image, scene hotspot, navigation, warehouse control, pumpkin interaction, mobile viewport; no browser errors.");
+  console.log("Browser smoke passed: Prototype screen, SVG scene, pumpkin/cart images, cart launcher/payment, house repair, garden clearing, vegetable harvest, scene hotspot, navigation, warehouse control, pumpkin interaction, mobile viewport; no browser errors.");
 }finally{
   await browser?.close();
   await new Promise(resolve=>server.close(resolve));
