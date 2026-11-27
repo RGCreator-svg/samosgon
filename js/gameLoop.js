@@ -18,7 +18,8 @@ export function advanceGameDay(state, systems) {
     ["Исследования", () => systems.advanceResearchLabDay(state, systems.notify, systems.earnExperience)],
     ["Производственные системы", () => systems.advanceFeaturePackDay(state, systems.notify)],
     ["Винодельня", () => systems.advanceViticultureDay(state, systems.notify)],
-    ["Производственный цех", () => systems.advanceProductionPlantDay?.(state, systems.notify)]
+    ["Производственный цех", () => systems.advanceProductionPlantDay?.(state, systems.notify)],
+    ["Погреб и выдержка", () => systems.ageBarrelsOneDay?.(state, systems.notify)]
   ];
 
   for (const [name, run] of phases) {
