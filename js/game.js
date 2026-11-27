@@ -111,7 +111,7 @@ if (state.gameStarted) {
 
 // Единый делегированный обработчик работает и для вкладок,
  // которые подключаются динамически отдельными игровыми модулями.
-$(".navigation")?.addEventListener("click", (event) => {
+$("#game")?.addEventListener("click", (event) => {
   const button = event.target.closest("[data-tab]");
   if (!button) return;
   showTab(button.dataset.tab);
