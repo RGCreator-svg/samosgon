@@ -1,5 +1,5 @@
-import { consumeQualityLots } from "./quality.js";
-import { queuePurchase, registerCartHandler, addInventory, getStorageCapacity } from "./economy.js";
+
+import { queuePurchase, registerCartHandler, addInventory, removeInventory, getStorageCapacity } from "./economy.js";
 import { getEquipmentProfile } from "./equipment.js";
 
 const RECIPES = [
@@ -275,8 +275,7 @@ export function initExpansion(state, { render, notify, earnExperience }) {
     if (event.target.closest("[data-complete-contract]")) {
       const contract = state.advancedContracts.offer;
       if (!contract || state.equipmentTier < contract.requiredTier || (state.inventory.braga || 0) < contract.quantity) return;
-      consumeQualityLots(state,"braga",contract.quantity);
-    state.inventory.braga -= contract.quantity;
+      removeInventory(state, "braga", contract.quantity);
       state.money += contract.reward;
       state.reputation = Math.min(100, (state.reputation || 0) + 5);
       state.advancedContracts.completed += 1;
