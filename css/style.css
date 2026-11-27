@@ -3381,3 +3381,6 @@ body { margin:0; font-family:"Segoe UI", "Comic Sans MS", sans-serif; background
     visibility:visible !important; pointer-events:auto !important;
   }
 }
+
+/* Keep bottom production/warehouse shortcuts above the expandable warehouse panel. */
+#game .prototype-bottom { z-index:38; }
