@@ -42,6 +42,17 @@ export function blendBatch(state, recipeId, recordProduction) {
   const recipe=BLEND_RECIPES.find(row=>row.id===recipeId);
   if(!recipe||!hasInventory(state,recipe.ingredients))return null;
   const {score,profile}=calculateBlendProfile(state,recipe);
+  // Отражаем расход в исходных паспортах до FIFO-списания складских лотов.
+  for(const [item,amount] of Object.entries(recipe.ingredients)){
+    let remaining=amount;
+    for(const lot of state.qualityLots||[]){
+      if(lot.item!==item||remaining<=0||!lot.passportId)continue;
+      const take=Math.min(remaining,Math.max(0,Number(lot.remaining)||0));
+      const passport=state.productionLog?.find(row=>row.passport?.id===lot.passportId)?.passport;
+      if(passport&&take){passport.remaining=Math.max(0,(Number(passport.remaining??passport.amount)||0)-take);passport.consumed=(Number(passport.consumed)||0)+take;}
+      remaining-=take;
+    }
+  }
   for(const [item,amount] of Object.entries(recipe.ingredients)){
     if(removeInventory(state,item,amount)!==amount)return null;
   }
