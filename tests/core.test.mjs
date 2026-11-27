@@ -15,6 +15,7 @@ globalThis.localStorage = {
 const { loadGame, saveGame, createInitialState } = await import("../js/engine.js");
 const { addInventory, removeInventory, setInventoryCount, hasInventory } = await import("../js/economy.js");
 const { advanceGameDay } = await import("../js/gameLoop.js");
+const { ensureGrandmaStory, runGrandmaQuestDev } = await import("../js/grandmaNotes.js");
 
 test("legacy saves migrate without losing inventory and receive legacy quality lots", () => {
   stored = JSON.stringify({
@@ -113,4 +114,33 @@ test("all feature modules can be imported as one dependency graph", async () => 
     await import(new URL("../js/" + file, import.meta.url));
   }
   assert.ok(files.length >= 15);
+});
+
+
+test("grandmother mystery advances through key, barn chest and orchard box", () => {
+  const state = createInitialState();
+  const story = ensureGrandmaStory(state);
+  const messages = [];
+  const notify = message => messages.push(message);
+
+  runGrandmaQuestDev(state, notify);
+  assert.equal(story.questStep, "floorboard");
+  runGrandmaQuestDev(state, notify);
+  assert.equal(story.keyFound, true);
+  assert.equal(story.questStep, "barnChest");
+
+  state.barn = 70;
+  runGrandmaQuestDev(state, notify);
+  assert.equal(story.chestOpened, true);
+  assert.equal(story.questStep, "orchardBox");
+  assert.ok(story.discovered.includes("quest_barn_chest"));
+
+  state.orchardRestored = true;
+  runGrandmaQuestDev(state, notify);
+  assert.equal(story.questStep, "completed");
+  assert.equal(story.familyRecipeUnlocked, true);
+  assert.equal(story.recipeFound, true);
+  assert.ok(story.discovered.includes("quest_orchard_box"));
+  assert.equal(state.money, createInitialState().money + 55);
+  assert.ok(messages.length >= 4);
 });
