@@ -142,7 +142,7 @@ initFeaturePack(state, { render, notify, earnExperience });
 initMilestones(state, { renderGame: render, notify, earnExperience });
 initWorld(state, { render, notify });
 initViticulture(state, { render, notify });
-initProductionHub(state);
+initProductionHub(state, { notify });
 initResearchLab(state, { render, notify, earnExperience });
 initProcessCenter(state, { render, notify, earnExperience });
 registerCartHandler("homesteadRepair",(current,item)=>{
