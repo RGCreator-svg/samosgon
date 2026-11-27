@@ -22,6 +22,7 @@ const { blendBatch, calculateBlendProfile } = await import("../js/blending.js");
 const { getEquipmentProfile, EQUIPMENT_MODULES } = await import("../js/equipment.js");
 const { recordProduction } = await import("../js/productionhub.js");
 const { BERRY_CROPS, HERB_CROPS, GARDEN_CROPS, ensureBerryGarden, plantBerryBush, advanceBerryGardenDay, harvestBerryBush } = await import("../js/berries.js");
+const { HERBAL_FORMULAS } = await import("../js/researchlab.js");
 
 test("berry garden grows seasonal bushes, harvests repeat crops and respects warehouse capacity", () => {
   const state=createInitialState();
@@ -399,4 +400,14 @@ assert.equal(HERB_CROPS.length,6);assert.equal(GARDEN_CROPS.length,BERRY_CROPS.l
 const mint=plantBerryBush(state,"mint");assert.ok(mint);for(let i=0;i<2;i++)advanceBerryGardenDay(state);assert.equal(mint.ready,true);assert.equal(harvestBerryBush(state,mint.id).harvested,3);assert.equal(mint.remaining,2);
 const juniper=plantBerryBush(state,"juniper");assert.ok(juniper);for(let i=0;i<5;i++)advanceBerryGardenDay(state);assert.equal(juniper.ready,true);assert.equal(harvestBerryBush(state,juniper.id).wrongSeason,true);state.world.season="autumn";assert.equal(harvestBerryBush(state,juniper.id).harvested,2);
 for(let i=0;i<4;i++)assert.ok(plantBerryBush(state,"thyme"));assert.equal(ensureBerryGarden(state).plots.length,6);assert.equal(plantBerryBush(state,"linden"),null);
+});
+
+test("laboratory herbal profiles define distinct ingredients, ratios and tincture products",()=>{
+ assert.equal(Object.keys(HERBAL_FORMULAS).length,3);
+ for(const [id,f] of Object.entries(HERBAL_FORMULAS)){
+  assert.ok(HERB_CROPS.some(x=>x.id===f.a));
+  assert.ok(HERB_CROPS.some(x=>x.id===f.b));
+  assert.ok(f.target>=2);
+  assert.ok(["mint_tincture","rosehip_tincture","juniper_tincture"].includes(f.product));
+ }
 });
