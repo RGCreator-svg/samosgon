@@ -272,11 +272,6 @@
       <button data-tab="skills">🌳 Умения</button>
       <button data-tab="notebook">📖 Записки</button>
     </nav>
-    <aside class="prototype-side" aria-label="Быстрые разделы">
-      <button class="side-btn" type="button" data-tab="skills"><span class="big">🏆</span>Достижения</button>
-      <button class="side-btn" type="button" data-tab="notebook"><span class="big">📜</span>Задания и записки</button>
-      <button class="side-btn" type="button" data-tab="market"><span class="big">🎁</span>События и рынок</button>
-    </aside>
     <aside class="prototype-task">
       <h4>❗ Задача усадьбы</h4>
       <div class="task-row"><span class="task-icon">🏡</span><div>Вернуть жизнь бабушкиному дому<small>Ремонт, урожай и развитие хозяйства</small></div></div>
@@ -286,15 +281,6 @@
     <div class="prototype-bottom">
       <button class="panel-mini" type="button" id="bottomWarehouse"><span class="t">📦 Склад хозяйства</span><span class="s">Запасы и инвентарь</span></button>
       <button class="panel-mini" type="button" data-tab="productionHub"><span class="t">🫗 Производство</span><span class="s">Открыть диспетчер</span></button>
-      <div class="pumpkin-mascot" id="pumpkinMascot" role="button" tabindex="0" aria-label="Поговорить с тыквой">
-        <div class="pumpkin-bubble" id="pumpkinSay">Тыква наблюдает за хозяйством. И явно что-то задумала.</div>
-        <img src="assets/images/Squash.png" alt="Тыква" />
-      </div>
-      <div class="prototype-shortcuts">
-        <button type="button" id="bottomMarket">🎒 Склад</button>
-        <button type="button" data-tab="notebook">📖 Записки</button>
-        <button type="button" data-tab="skills">🌳 Умения</button>
-      </div>
     </div>
     <section class="needs panel">
       <h2>Состояние героя</h2>
@@ -458,6 +444,12 @@
       </div>
     </details>
 
+    <div class="pumpkin-console-anchor">
+      <div class="pumpkin-mascot" id="pumpkinMascot" role="button" tabindex="0" aria-label="Поговорить с тыквой">
+        <div class="pumpkin-bubble" id="pumpkinSay">Тыква наблюдает за хозяйством. И явно что-то задумала.</div>
+        <img src="assets/images/Squash.png" alt="Тыква" />
+      </div>
+    </div>
     <section class="panel event-console">
       <h2>▣ Журнал событий</h2>
       <div id="notifications"></div>
