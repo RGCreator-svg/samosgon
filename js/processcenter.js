@@ -1,6 +1,5 @@
 import { getEquipmentProfile } from "./equipment.js";
-import { queuePurchase, registerCartHandler } from "./economy.js";
-import { removeInventory } from "./economy.js";
+import { queuePurchase, registerCartHandler, removeInventory } from "./economy.js";
 
 const $ = selector => document.querySelector(selector);
 const el = (tag, cls, text) => {
