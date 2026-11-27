@@ -1,5 +1,4 @@
-import { removeInventory } from "./economy.js";
-import { queuePurchase, registerCartHandler, addInventory } from "./economy.js";
+import { removeInventory, queuePurchase, registerCartHandler, addInventory } from "./economy.js";
 import { getEquipmentProfile } from "./equipment.js";
 import { getWorldYieldMultiplier } from "./world.js";
 import { recordProduction } from "./productionhub.js";
