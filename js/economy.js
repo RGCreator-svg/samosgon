@@ -48,7 +48,8 @@ export const BUILDINGS = [
 export const PARTS = [
   { id: "timber", name: "Пиломатериалы", emoji: "🪵", price: 18, delivery: 1, description: "Для ремонта и расширения построек." },
   { id: "metal", name: "Металлические заготовки", emoji: "🔩", price: 35, delivery: 2, description: "Универсальный строительный материал." },
-  { id: "fasteners", name: "Крепёж", emoji: "🧷", price: 12, delivery: 1, description: "Мелочь, без которой всё разваливается." },
+  { id: "fasteners", name: "Крепёж и гвозди", emoji: "🧷", price: 12, delivery: 1, description: "Гвозди, скобы и крепёж для ремонта." },
+  { id: "paint", name: "Краска", emoji: "🪣", price: 16, delivery: 1, description: "Для защиты и отделки дома и построек." },
   { id: "tools", name: "Набор инструментов", emoji: "🧰", price: 90, delivery: 2, description: "Для игровой мастерской и ремонта." },
   { id: "pump", name: "Насосный модуль", emoji: "⚙️", price: 160, delivery: 3, description: "Комплектующий модуль для будущих производственных улучшений." },
   { id: "controller", name: "Контроллер автоматики", emoji: "🎛️", price: 240, delivery: 3, description: "Основа будущей автоматизации хозяйства." }
@@ -191,7 +192,7 @@ function renderMaterialCart(state) {
     root.append(element("p", "economy-empty", "Корзина пока пуста. Добавляйте товары и улучшения из разных вкладок."));
     return;
   }
-  totals.purchases.forEach(item => {
+  totals.purchases.filter(item => item.kind !== "homesteadRepair").forEach(item => {
     const row = element("div", "material-cart-row");
     row.append(element("div", "material-cart-info", item.name + " × " + item.quantity + " · " + (item.cost * item.quantity) + " монет"));
     const controls = element("div", "material-cart-controls");
@@ -371,7 +372,7 @@ export function initEconomy(state, { render, notify }) {
   if (!$("#sharedPurchaseCart")) {
     const cartSection = element("section", "panel shared-purchase-cart");
     cartSection.id = "sharedPurchaseCart";
-    cartSection.append(element("h2", "", "🛒 Единая корзина закупок"), element("p", "economy-detail", "Здесь объединяются товары, сырьё, комплектующие, строительство, услуги и технологические улучшения из всех вкладок. Одинаковые позиции суммируются, а недостающие детали автоматически добавляются к заказу."));
+    cartSection.append(element("h2", "", "🛒 Единая корзина закупок"), element("p", "economy-detail", "Здесь собраны только материалы и комплектующие для заказов, ремонта и улучшений. Стоимость работы списывается отдельно при оформлении ремонта."));
     const cartRoot = element("div", "material-cart"); cartRoot.id = "materialCart"; cartSection.append(cartRoot);
     const eventPanel = $("#notifications")?.closest(".event-console");
     if (eventPanel?.parentElement === game) game.insertBefore(cartSection, eventPanel); else game.append(cartSection);
