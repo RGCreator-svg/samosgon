@@ -27,8 +27,15 @@ try{
   page.on("console",message=>{if(message.type()==="error")errors.push(message.text());});
   await page.goto("http://127.0.0.1:4173/",{waitUntil:"networkidle",timeout:45000});
   assert.match(await page.title(),/Самогон/);
+  assert.ok(await page.locator("#intro").isVisible(),"Title screen must remain visible until player continues");
+  assert.match(await page.locator("#intro").innerText(),/После череды неудач/,"Opening story text is missing");
   await page.locator("#startGame").click();
   await page.locator("#homestead-scene").waitFor({state:"visible"});
+  assert.ok(await page.locator(".game-footer-dock").isVisible(),"Bottom HUD dock is missing");
+  const dock=await page.locator(".game-footer-dock").boundingBox();
+  assert.ok(dock.y+dock.height>=950,"Pumpkin and event log are not anchored to the bottom of the viewport");
+  assert.ok(await page.locator(".event-console").isVisible(),"Event log is hidden from the bottom dock");
+  assert.ok(await page.locator(".xp-panel").boundingBox().then(box=>box.height<45),"XP display is not compact");
   assert.ok(await page.locator("#homestead-scene").count()===1,"Prototype SVG scene is missing");
   assert.equal(await page.locator(".pumpkin-mascot").count(),1,"There must be exactly one interactive pumpkin mascot");
   assert.equal(await page.locator("#scene-pumpkin").isVisible(),false,"Decorative duplicate pumpkin should be hidden");
