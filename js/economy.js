@@ -86,6 +86,20 @@ export function removeInventory(state, itemId, amount = 1, options = {}) {
   return removed;
 }
 
+export function setInventoryCount(state, itemId, amount) {
+  if (!itemId) return 0;
+  state.inventory ??= {};
+  state.qualityLots ??= [];
+  const target = Math.max(0, Math.floor(Number(amount) || 0));
+  const current = getInventoryCount(state, itemId);
+  if (target < current) removeInventory(state, itemId, current - target);
+  if (target > current) {
+    state.inventory[itemId] = target;
+    state.qualityLots.push({ item: itemId, remaining: target - current, quality: null, passportId: null, legacy: true });
+  }
+  return target;
+}
+
 export function hasInventory(state, requirements = {}) {
   return Object.entries(requirements).every(([id, amount]) => getInventoryCount(state, id) >= Math.max(0, Number(amount) || 0));
 }
