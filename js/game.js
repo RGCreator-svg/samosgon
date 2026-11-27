@@ -1,4 +1,5 @@
 import { consumeQualityForSale } from "./quality.js";
+import { advanceGameDay } from "./gameLoop.js";
 
 import { loadGame, saveGame, addXP } from "./engine.js";
 import { ITEMS, SKILL_BRANCHES } from "./data.js";
@@ -318,49 +319,19 @@ $("#sleepButton")?.addEventListener("click", (event) => {
   if (sleepButton) sleepButton.disabled = true;
 
   try {
-    state.day = Math.max(1, Number(state.day) || 1) + 1;
-    state.skills = Array.isArray(state.skills) ? state.skills : [];
-    state.production ??= { active: false, ready: false, daysLeft: 0 };
-    state.production.active = Boolean(state.production.active);
-    state.production.daysLeft = Number(state.production.daysLeft) || 0;
-
-    advanceOrdersDay(state, notify);
-    advanceDeliveries(state, notify);
-    advanceExpansionDay(state, notify);
-    advanceWorldDay(state, notify);
-    advanceResearchLabDay(state, notify, earnExperience);
-    advanceFeaturePackDay(state, notify);
-    advanceViticultureDay(state, notify);
-
-    const hungerLoss = state.skills.includes("country_life") ? 5 : 10;
-    const warmthLoss = (state.skills.includes("country_life") ? 2 : 5) + getWorldColdPenalty(state);
-    const energyGain = state.skills.includes("good_sleep") ? 100 : 70;
-
-    state.hunger = Math.max(0, (Number(state.hunger) || 0) - hungerLoss);
-    state.warmth = Math.max(0, (Number(state.warmth) || 0) - warmthLoss);
-    state.energy = Math.min(100, (Number(state.energy) || 0) + energyGain);
-
-    if (state.production.active) {
-      state.production.daysLeft -= 1;
-      if (state.production.daysLeft <= 0) {
-        state.production.active = false;
-        state.production.ready = true;
-        notify("Брага готова! В сарае пахнет успехом и дрожжами.");
-      }
-    }
-
-    if (state.hunger === 0) {
-      state.energy = Math.max(0, state.energy - 10);
-      notify("Вы голодны. Желудок уже рассматривает вариант увольнения.");
-    }
-
-    if (state.warmth === 0) {
-      state.energy = Math.max(0, state.energy - 10);
-      notify("Вы замёрзли. Надо бы заняться домом, а не только бизнесом.");
-    }
-
-    earnExperience(5);
-    startNewDay(state, notify);
+    advanceGameDay(state, {
+      notify,
+      earnExperience,
+      advanceOrdersDay,
+      advanceDeliveries,
+      advanceExpansionDay,
+      advanceWorldDay,
+      advanceResearchLabDay,
+      advanceFeaturePackDay,
+      advanceViticultureDay,
+      getWorldColdPenalty,
+      startNewDay
+    });
     render();
   } catch (error) {
     console.error("Не удалось завершить игровой день:", error);
