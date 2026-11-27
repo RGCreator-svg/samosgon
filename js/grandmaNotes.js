@@ -141,6 +141,16 @@ function maybeStartPetrovichEncounter(story) {
   }
 }
 
+export function runPetrovichEncounterDev(state, notify = () => {}) {
+  const story = ensureGrandmaStory(state);
+  const ids = Object.keys(PETROVICH_ENCOUNTERS);
+  const index = Number(story.petrovichDevIndex || 0) % ids.length;
+  story.pendingPetrovich = ids[index];
+  story.petrovichDevIndex = index + 1;
+  notify("DEV: вызвана встреча с Петровичем — " + PETROVICH_ENCOUNTERS[story.pendingPetrovich].title);
+  return true;
+}
+
 export function resolvePetrovichEncounter(state, choiceId, notify = () => {}) {
   const story = ensureGrandmaStory(state);
   const encounter = PETROVICH_ENCOUNTERS[story.pendingPetrovich];
