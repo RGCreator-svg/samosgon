@@ -1,6 +1,6 @@
 import { queuePurchase, registerCartHandler, addInventory } from "./economy.js";
 import { recordProduction } from "./productionhub.js";
-import { BERRY_CROPS, ensureBerryGarden, plantBerryBush, harvestBerryBush, advanceBerryGardenDay } from "./berries.js";
+import { BERRY_CROPS, HERB_CROPS, GARDEN_CROPS, ensureBerryGarden, plantBerryBush, harvestBerryBush, advanceBerryGardenDay } from "./berries.js";
 
 const $ = selector => document.querySelector(selector);
 const el = (tag, cls, text) => { const node = document.createElement(tag); if (cls) node.className = cls; if (text !== undefined) node.textContent = text; return node; };
@@ -71,19 +71,20 @@ function render(s) {
     b.append(line);
   });
 
-  const berryCard=card(root,"🍓 Ягодник и сезонный урожай","Выращивайте ягоды для настоек. Кусты плодоносят в свой сезон, после сбора отрастают снова. Посадка саженцев и постройки оплачиваются через общую корзину.");
+  const berryCard=card(root,"🍓 Ягодник и сезонный урожай","Выращивайте ягоды, травы и пряности на общем участке. Каждая культура имеет свой сезон, срок роста и повторный сбор. Посадка саженцев оплачивается через общую корзину.");
   const berryStatus=el("p","feature-meta","Занято грядок: "+s.viticulture.berryGarden.plots.length+"/6 · Сезон: "+({spring:"весна",summer:"лето",autumn:"осень",winter:"зима"}[s.world?.season||"spring"]));
   berryCard.append(berryStatus);
   const berryGrid=el("div","berry-garden-grid");
-  BERRY_CROPS.forEach(crop=>{
+  GARDEN_CROPS.forEach(crop=>{
     const item=el("article","berry-crop-card");
+    if(crop.herb)item.dataset.cropKind="herb";
     item.append(el("h4","",crop.emoji+" "+crop.name),el("p","",crop.description),el("small","", "Сбор: "+crop.seasons.map(x=>({summer:"лето",autumn:"осень"}[x]||x)).join(" / ")+" · рост "+crop.growDays+" дн."));
     const pending=(s.purchaseCart||[]).filter(x=>x.kind==="berryPlant"&&x.payload?.berryId===crop.id).reduce((sum,x)=>sum+(Number(x.quantity)||1),0);
     const plant=el("button","","Посадить куст · "+crop.seedCost+" монет");
     plant.dataset.berryPlant=crop.id;
-    plant.disabled=!s.skills.includes("berry_growing")||!s.viticulture.buildings.includes("berryGarden")||s.viticulture.berryGarden.plots.length+(s.purchaseCart||[]).filter(x=>x.kind==="berryPlant").reduce((sum,x)=>sum+(Number(x.quantity)||1),0)>=6;
+    plant.disabled=!s.skills.includes(crop.herb?"herb_gardening":"berry_growing")||!s.viticulture.buildings.includes("berryGarden")||s.viticulture.berryGarden.plots.length+(s.purchaseCart||[]).filter(x=>x.kind==="berryPlant").reduce((sum,x)=>sum+(Number(x.quantity)||1),0)>=6;
     item.append(plant);
-    if(!s.skills.includes("berry_growing"))item.append(el("small","tech-locked","Нужен навык «Ягодное дело»."));
+    if(!s.skills.includes(crop.herb?"herb_gardening":"berry_growing"))item.append(el("small","tech-locked",crop.herb?"Нужен навык «Травник».":"Нужен навык «Ягодное дело»."));
     else if(!s.viticulture.buildings.includes("berryGarden"))item.append(el("small","tech-locked","Сначала постройте ягодник."));
     berryGrid.append(item);
   });
@@ -91,7 +92,7 @@ function render(s) {
   const plots=el("div","berry-plots");
   if(!s.viticulture.berryGarden.plots.length)plots.append(el("p","economy-empty","Пока нет кустов. Постройте ягодник и посадите первые саженцы."));
   s.viticulture.berryGarden.plots.forEach(plot=>{
-    const crop=BERRY_CROPS.find(x=>x.id===plot.berryId);
+    const crop=GARDEN_CROPS.find(x=>x.id===plot.berryId);
     const row=el("div","berry-plot-row");
     row.append(el("b","",crop?.emoji+" "+(crop?.name||plot.berryId)),el("span","",plot.ready?"Урожай созрел: "+plot.readyAmount+" шт.":"До урожая: "+plot.remaining+" дн."));
     const harvest=el("button","","Собрать ягоды");
@@ -141,7 +142,11 @@ function render(s) {
     {id:"blackcurrantTincture",name:"Смородиновая настойка",desc:"Насыщенный профиль чёрной смородины.",consume:{blackcurrant:3,spirit:2,sugar:1,bottles:2,labels:2},days:3,stage:"infusion",output:"blackcurrant_tincture",amount:2,skill:"infusion_basics",quality:74,flavorProfile:{body:72,aroma:88,notes:["чёрная смородина","ягодный","пряный"]}},
     {id:"raspberryTincture",name:"Малиновая настойка",desc:"Мягкий ароматный профиль малины.",consume:{raspberry:3,spirit:2,sugar:1,bottles:2,labels:2},days:3,stage:"infusion",output:"raspberry_tincture",amount:2,skill:"infusion_basics",quality:76,flavorProfile:{body:66,aroma:92,notes:["малина","цветочный","летний"]}},
     {id:"blueberryTincture",name:"Черничная настойка",desc:"Глубокий лесной ягодный профиль.",consume:{blueberry:3,spirit:2,sugar:1,bottles:2,labels:2},days:4,stage:"infusion",output:"blueberry_tincture",amount:2,skill:"infusion_basics",quality:78,flavorProfile:{body:82,aroma:80,notes:["черника","лесные ягоды","мягкий"]}},
-    {id:"forestTincture",name:"Лесная настойка",desc:"Авторский купаж смородины, малины и черники.",consume:{blackcurrant:2,raspberry:2,blueberry:1,cranberry:1,spirit:3,sugar:2,bottles:3,labels:3},days:4,stage:"infusion",output:"forest_tincture",amount:3,skill:"berry_blending",quality:86,flavorProfile:{body:90,aroma:94,notes:["лесные ягоды","смородина","малина","клюква"]}}
+    {id:"forestTincture",name:"Лесная настойка",desc:"Авторский купаж смородины, малины и черники.",consume:{blackcurrant:2,raspberry:2,blueberry:1,cranberry:1,spirit:3,sugar:2,bottles:3,labels:3},days:4,stage:"infusion",output:"forest_tincture",amount:3,skill:"berry_blending",quality:86,flavorProfile:{body:90,aroma:94,notes:["лесные ягоды","смородина","малина","клюква"]}},
+    {id:"mintTincture",name:"Мятная настойка",desc:"Свежий травяной профиль.",consume:{mint:3,spirit:2,sugar:1,bottles:2,labels:2},days:3,stage:"infusion",output:"mint_tincture",amount:2,skill:"herbal_infusions",quality:80,flavorProfile:{body:62,aroma:96,notes:["мята","свежая зелень","прохладный"]}},
+    {id:"meadowTincture",name:"Луговая настойка",desc:"Купаж зверобоя, чабреца и липового цвета.",consume:{st_johns_wort:2,thyme:2,linden:1,spirit:3,sugar:1,bottles:3,labels:3},days:5,stage:"infusion",output:"meadow_tincture",amount:3,skill:"herbal_infusions",quality:87,flavorProfile:{body:84,aroma:94,notes:["луговые травы","липовый цвет","чабрец"]}},
+    {id:"juniperTincture",name:"Можжевеловая настойка",desc:"Пряная хвойная партия.",consume:{juniper:3,thyme:1,spirit:3,sugar:1,bottles:3,labels:3},days:5,stage:"infusion",output:"juniper_tincture",amount:3,skill:"spice_craft",quality:89,flavorProfile:{body:91,aroma:90,notes:["можжевельник","хвоя","пряности"]}},
+    {id:"rosehipTincture",name:"Шиповниковая настойка",desc:"Осенний фруктово-травяной профиль.",consume:{rosehip:3,mint:1,spirit:2,sugar:1,bottles:2,labels:2},days:4,stage:"infusion",output:"rosehip_tincture",amount:2,skill:"herbal_infusions",quality:83,flavorProfile:{body:82,aroma:86,notes:["шиповник","мята","фруктовый"]}}
   ];
   tinctureRecipes.forEach(recipe=>{
     const line=el("div","farm-upgrade");
@@ -158,7 +163,7 @@ function render(s) {
   if(!s.viticulture.batches.length)batches.append(el("p","economy-empty","Пока нет активных партий."));
   s.viticulture.batches.forEach(job=>{const row=el("div","aging-row",job.name+" · "+(job.ready?"готово к сбору":(job.stage==="aging"?"выдержка":job.stage==="infusion"?"настаивание":"брожение")+" · осталось "+job.remaining+" дн."));if(job.ready){const collect=el("button","","Забрать продукцию");collect.dataset.vitiCollect=String(job.id);row.append(collect);}batches.append(row);});
   const stock=card(root,"📦 Запасы винодельни","Виноград и мёд с собственных хозяйств попадают сюда же, что и купленные партии.");
-  const stockNames={sugar:"Сахар",grain:"Зерно",grapes:"Виноград",apple:"Яблоки",pear:"Груши",honey:"Мёд",blackcurrant:"Чёрная смородина",raspberry:"Малина",blueberry:"Черника",cranberry:"Клюква",yeast:"Дрожжи",yeast_nutrient:"Питательная добавка",water:"Вода",bottles:"Бутылки",corks:"Пробки",wine:"Вино",mead:"Медовуха",apple_cider:"Яблочный сидр",pear_wine:"Грушевое вино",fruit_wine:"Фруктовое вино",blackcurrant_tincture:"Смородиновая настойка",raspberry_tincture:"Малиновая настойка",blueberry_tincture:"Черничная настойка",forest_tincture:"Лесная настойка",honey_braga:"Медовая брага",honey_spirit:"Медовый дистиллят"};Object.entries(stockNames).forEach(([id,name])=>stock.append(el("p","economy-detail",name+": "+(s.inventory[id]||0))));
+  const stockNames={sugar:"Сахар",grain:"Зерно",grapes:"Виноград",apple:"Яблоки",pear:"Груши",honey:"Мёд",blackcurrant:"Чёрная смородина",raspberry:"Малина",blueberry:"Черника",cranberry:"Клюква",mint:"Мята",st_johns_wort:"Зверобой",thyme:"Чабрец",linden:"Липовый цвет",rosehip:"Шиповник",juniper:"Можжевельник",yeast:"Дрожжи",yeast_nutrient:"Питательная добавка",water:"Вода",bottles:"Бутылки",corks:"Пробки",wine:"Вино",mead:"Медовуха",apple_cider:"Яблочный сидр",pear_wine:"Грушевое вино",fruit_wine:"Фруктовое вино",blackcurrant_tincture:"Смородиновая настойка",raspberry_tincture:"Малиновая настойка",blueberry_tincture:"Черничная настойка",forest_tincture:"Лесная настойка",mint_tincture:"Мятная настойка",meadow_tincture:"Луговая настойка",juniper_tincture:"Можжевеловая настойка",rosehip_tincture:"Шиповниковая настойка",honey_braga:"Медовая брага",honey_spirit:"Медовый дистиллят"};Object.entries(stockNames).forEach(([id,name])=>stock.append(el("p","economy-detail",name+": "+(s.inventory[id]||0))));
 }
 
 export function initViticulture(s,{render:renderGame,notify}) {
@@ -205,7 +210,7 @@ export function initViticulture(s,{render:renderGame,notify}) {
     }
     const plant=event.target.closest("[data-berry-plant]");
     if(plant){
-      const crop=BERRY_CROPS.find(x=>x.id===plant.dataset.berryPlant);
+      const crop=GARDEN_CROPS.find(x=>x.id===plant.dataset.berryPlant);
       const pending=(s.purchaseCart||[]).filter(x=>x.kind==="berryPlant").reduce((sum,x)=>sum+(Number(x.quantity)||1),0);
       if(!crop||!s.skills.includes("berry_growing")||!s.viticulture.buildings.includes("berryGarden")||s.viticulture.berryGarden.plots.length+pending>=6)return;
       queuePurchase(s,{key:"berry-plant:"+crop.id,kind:"berryPlant",name:"Саженец: "+crop.name,cost:crop.seedCost,payload:{berryId:crop.id},quantity:1,stackable:true});
@@ -236,7 +241,11 @@ export function initViticulture(s,{render:renderGame,notify}) {
         blackcurrantTincture:{id:"blackcurrantTincture",name:"Смородиновая настойка",consume:{blackcurrant:3,spirit:2,sugar:1,bottles:2,labels:2},days:3,stage:"infusion",output:"blackcurrant_tincture",amount:2,skill:"infusion_basics",quality:74,flavorProfile:{body:72,aroma:88,notes:["чёрная смородина","ягодный","пряный"]}},
         raspberryTincture:{id:"raspberryTincture",name:"Малиновая настойка",consume:{raspberry:3,spirit:2,sugar:1,bottles:2,labels:2},days:3,stage:"infusion",output:"raspberry_tincture",amount:2,skill:"infusion_basics",quality:76,flavorProfile:{body:66,aroma:92,notes:["малина","цветочный","летний"]}},
         blueberryTincture:{id:"blueberryTincture",name:"Черничная настойка",consume:{blueberry:3,spirit:2,sugar:1,bottles:2,labels:2},days:4,stage:"infusion",output:"blueberry_tincture",amount:2,skill:"infusion_basics",quality:78,flavorProfile:{body:82,aroma:80,notes:["черника","лесные ягоды","мягкий"]}},
-        forestTincture:{id:"forestTincture",name:"Лесная настойка",consume:{blackcurrant:2,raspberry:2,blueberry:1,cranberry:1,spirit:3,sugar:2,bottles:3,labels:3},days:4,stage:"infusion",output:"forest_tincture",amount:3,skill:"berry_blending",quality:86,flavorProfile:{body:90,aroma:94,notes:["лесные ягоды","смородина","малина","клюква"]}}
+        forestTincture:{id:"forestTincture",name:"Лесная настойка",consume:{blackcurrant:2,raspberry:2,blueberry:1,cranberry:1,spirit:3,sugar:2,bottles:3,labels:3},days:4,stage:"infusion",output:"forest_tincture",amount:3,skill:"berry_blending",quality:86,flavorProfile:{body:90,aroma:94,notes:["лесные ягоды","смородина","малина","клюква"]}},
+        mintTincture:{id:"mintTincture",name:"Мятная настойка",consume:{mint:3,spirit:2,sugar:1,bottles:2,labels:2},days:3,stage:"infusion",output:"mint_tincture",amount:2,skill:"herbal_infusions",quality:80,flavorProfile:{body:62,aroma:96,notes:["мята","свежая зелень","прохладный"]}},
+        meadowTincture:{id:"meadowTincture",name:"Луговая настойка",consume:{st_johns_wort:2,thyme:2,linden:1,spirit:3,sugar:1,bottles:3,labels:3},days:5,stage:"infusion",output:"meadow_tincture",amount:3,skill:"herbal_infusions",quality:87,flavorProfile:{body:84,aroma:94,notes:["луговые травы","липовый цвет","чабрец"]}},
+        juniperTincture:{id:"juniperTincture",name:"Можжевеловая настойка",consume:{juniper:3,thyme:1,spirit:3,sugar:1,bottles:3,labels:3},days:5,stage:"infusion",output:"juniper_tincture",amount:3,skill:"spice_craft",quality:89,flavorProfile:{body:91,aroma:90,notes:["можжевельник","хвоя","пряности"]}},
+        rosehipTincture:{id:"rosehipTincture",name:"Шиповниковая настойка",consume:{rosehip:3,mint:1,spirit:2,sugar:1,bottles:2,labels:2},days:4,stage:"infusion",output:"rosehip_tincture",amount:2,skill:"herbal_infusions",quality:83,flavorProfile:{body:82,aroma:86,notes:["шиповник","мята","фруктовый"]}}
       };
       const recipe=recipes[batch.dataset.vitiBatch];
       if(!recipe||recipe.needs?.some(id=>!s.viticulture.buildings.includes(id))||!s.skills.includes(recipe.skill)||(recipe.stage==="infusion"&&!s.viticulture.buildings.includes("berryGarden")))return;
