@@ -120,7 +120,7 @@ function renderWaterDevelopment() {
   const materials=document.createElement("p");materials.className="water-requirement";
   materials.textContent="Материалы: "+Object.entries(stage.parts).map(([id,n])=>materialNames[id]+" × "+n+" (на складе: "+(Number(state.parts?.[id])||0)+")").join(", ");
   const cost=document.createElement("p");cost.className="water-requirement";cost.textContent="Работа: "+stage.cost+" монет";
-  details.append(skill,materials,cost);
+  const effect=document.createElement("p");effect.className="water-requirement";effect.textContent="Эффект после строительства: "+((level+1)*4)+"% к урожайности огорода и "+((level+1)*2)+"% к урожайности сада.";details.append(skill,materials,cost,effect);
   button.textContent=stage.button;button.disabled=!!(stage.skill&&!state.skills.includes(stage.skill));
   button.dataset.waterUpgrade=String(level+1);
 }
