@@ -24,8 +24,8 @@ export function advanceGameDay(state, systems) {
     try {
       run();
     } catch (error) {
-      error.message = "Фаза «" + name + "»: " + error.message;
-      throw error;
+      const reason = error instanceof Error ? error.message : String(error);
+      throw new Error("Фаза «" + name + "»: " + reason, { cause: error });
     }
   }
 
