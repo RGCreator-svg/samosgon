@@ -10,7 +10,9 @@ function makePassport(entry, s, type = "production") {
     honey_spirit:{body:70,aroma:78,notes:["медовый","цветочный"]},
     aged_honey_spirit:{body:82,aroma:84,notes:["медовый","древесный"]}
   };
-  const flavorProfile = entry.flavorProfile || flavorDefaults[entry.item] || flavorDefaults.spirit;
+  const mashFlavor={fruit:{body:9,aroma:14,notes:["фруктовый","садовый"]},grain:{body:14,aroma:5,notes:["зерновой","хлебный"]},honey:{body:8,aroma:16,notes:["медовый","цветочный"]}}[entry.mashType];
+  const baseFlavor=flavorDefaults[entry.item]||flavorDefaults.spirit;
+  const flavorProfile = entry.flavorProfile || (mashFlavor?{body:Math.min(100,baseFlavor.body+mashFlavor.body),aroma:Math.min(100,baseFlavor.aroma+mashFlavor.aroma),notes:[...new Set([...baseFlavor.notes,...mashFlavor.notes])].slice(0,4)}:baseFlavor);
   const assessment=assessBatchQuality(s,entry);
   const standard=entry.recipeId?s.lab?.standards?.[entry.recipeId]:null;
   return {
@@ -21,7 +23,7 @@ function makePassport(entry, s, type = "production") {
     process:String(entry.process||"Производство"),quality:assessment.score,grade:assessment.grade.label,
     baseQuality:assessment.base,saleModifier:Math.round((1+(assessment.score-60)*.005)*100),aroma:assessment.aroma,purity:assessment.purity,stability:assessment.stability,
     factors:assessment.factors,standardDelta:assessment.standardDelta,flavorProfile,
-    recipeId:entry.recipeId||null,recipeName:entry.recipeName||null,ratio:entry.ratio||null,flavorProfile:entry.flavorProfile||null,mashType:entry.mashType||null,
+    recipeId:entry.recipeId||null,recipeName:entry.recipeName||null,ratio:entry.ratio||null,mashType:entry.mashType||null,
     standardId:standard?.trialId||null,standardMatch:assessment.standardMatch
   };
 }
