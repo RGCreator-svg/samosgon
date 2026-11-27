@@ -2513,3 +2513,5 @@ button:disabled {
 .still-unit[data-lineage="grain"] .still-boiler{background-image:linear-gradient(110deg,#5a594d,#a19b7b 28%,#4b4c42 60%,#252923)}
 .still-unit[data-lineage="honey"] .still-receiver{filter:drop-shadow(0 0 9px #d99b31aa)}
 .still-unit[data-lineage="neutral"] .still-boiler{background-image:linear-gradient(110deg,#39474a,#a7b5b2 28%,#566a6b 60%,#263336)}
+
+.passport-lineage{display:block;margin-top:5px;color:#d9bd82;font-weight:600}
