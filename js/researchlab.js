@@ -102,6 +102,7 @@ function render(s){
  const analysis=el("section","lab-analysis-panel");analysis.append(el("h3","","Последний протокол анализа"));
  if(s.lab.lastAnalysis){const a=s.lab.lastAnalysis;analysis.append(el("p","lab-analysis-caption",a.name+" · День "+a.day+" · "+a.note));const meters=el("div","lab-meters");[["Аромат",a.aroma],["Чистота",a.purity],["Стабильность",a.stability]].forEach(([name,value])=>{const m=el("div","lab-meter");m.append(el("div","lab-meter-head",name),el("div","lab-meter-track"));const fill=el("i","lab-meter-fill");fill.style.width=value+"%";m.querySelector(".lab-meter-track").append(fill);m.append(el("b","",value+"/100"));meters.append(m);});analysis.append(meters);}else analysis.append(el("p","lab-analysis-caption","Протоколов пока нет. Выберите образец и проведите первый анализ."));
  root.append(analysis);
+ renderHerbalRecipes(s,root);
  root.append(el("h3","","Экспериментальная лаборатория"));
  const expGrid=el("div","lab-experiments");
  EXPERIMENTS.forEach(exp=>{const card=el("article","lab-card");card.append(el("h4","",exp.name),el("p","",exp.desc),el("small","lab-cost","Реактивы: "+Object.entries(exp.items).map(([id,n])=>id+" × "+n).join(", ")+" · "+exp.money+" монет · +"+exp.points+" балла"));const b=el("button","","Провести опыт");b.dataset.labExperiment=exp.id;b.disabled=!hasItems(s,exp.items)||s.money<exp.money;card.append(b);expGrid.append(card);});
