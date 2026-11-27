@@ -33,7 +33,7 @@ function hasItems(s,items){return Object.entries(items).every(([id,n])=>(Number(
 
 const FORMULAS={orchard:{name:"Садовый купаж",a:"apple",b:"pear",target:2,product:"orchard_blush",productName:"Румянец старого сада",emoji:"🍎",desc:"Авторский яблочно-грушевый купаж."},vineyard:{name:"Виноградный купаж",a:"grapes",b:"honey",target:3,product:"golden_vintage",productName:"Золотой винтаж",emoji:"🍇",desc:"Виноградный сорт с медовым оттенком."},pear:{name:"Грушевый купаж",a:"pear",b:"honey",target:2,product:"pear_honey_reserve",productName:"Грушевый медовый резерв",emoji:"🍐",desc:"Редкий грушево-медовый сорт."}};
 const RAW_NAMES={apple:"яблоки",pear:"груши",grapes:"виноград",honey:"мёд"};
-const HERBAL_FORMULAS={
+export const HERBAL_FORMULAS={
  herb_mint:{name:"Мятно-чабрецовый профиль",a:"mint",b:"thyme",target:2,product:"mint_tincture",productName:"Мятно-чабрецовая настойка",emoji:"🌿",desc:"Свежий травяной профиль с пряным акцентом.",notes:["мята","чабрец","свежая зелень"]},
  herb_rosehip:{name:"Осенний цветочный профиль",a:"rosehip",b:"linden",target:2,product:"rosehip_tincture",productName:"Шиповниково-липовая настойка",emoji:"🌹",desc:"Мягкий ягодный профиль с цветочной нотой.",notes:["шиповник","липовый цвет","осенние ягоды"]},
  herb_juniper:{name:"Хвойно-пряный профиль",a:"juniper",b:"thyme",target:3,product:"juniper_tincture",productName:"Можжевелово-пряная настойка",emoji:"🫒",desc:"Выразительный хвойный профиль с пряным послевкусием.",notes:["можжевельник","чабрец","хвойные ноты"]}
@@ -54,7 +54,7 @@ function renderHerbalRecipes(s,root){
  const found=s.lab.discoveredHerbalRecipes.filter(id=>HERBAL_FORMULAS[id]);if(!found.length)discovered.append(el("p","","Сначала проведите лабораторные опыты и добейтесь качества 80/100."));
  found.forEach(id=>{const x=HERBAL_FORMULAS[id],standard=s.lab.standards[id],card=el("article","lab-discovered-card");card.append(el("b","",x.emoji+" "+x.productName),el("p","",x.desc),el("small","", "Профиль: "+x.notes.join(" · ")+(standard?" · стандарт "+standard.a+":"+standard.b:"")));const b=el("button","","Выпустить фирменную партию");b.dataset.herbalProduce=id;const ratio=standard||{a:x.target,b:1};const consume=herbalIngredients(x,ratio.a,ratio.b);Object.assign(consume,{spirit:2,sugar:1,bottles:2,labels:2});b.disabled=!hasItems(s,consume)||s.money<12;card.append(b);discovered.append(card);});section.append(discovered);root.append(section);
 }
-function runHerbalFormula(s,type,a,b,notify,earnExperience,produce=false){
+export function runHerbalFormula(s,type,a,b,notify=()=>{},earnExperience=()=>{},produce=false){
  const f=HERBAL_FORMULAS[type];if(!f||!Number.isInteger(a)||!Number.isInteger(b)||a<1||b<1||a>4||b>4)return false;
  const herbs=herbalIngredients(f,a,b);
  if(produce){Object.assign(herbs,{spirit:2,sugar:1,bottles:2,labels:2});}
