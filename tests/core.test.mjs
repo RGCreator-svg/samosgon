@@ -420,6 +420,7 @@ test("herbal laboratory discovers a profile, records a passport and reproduces i
  assert.ok(state.lab.discoveredHerbalRecipes.includes("herb_mint"));
  const trial=state.lab.trialLog[0];assert.equal(trial.recipe,"herb_mint");assert.ok(trial.passportId);
  state.lab.standards.herb_mint={a:2,b:1,quality:trial.quality,trialId:trial.id,passportId:trial.passportId};
+ state.inventory.mint=2;state.inventory.thyme=1;
  assert.equal(runHerbalFormula(state,"herb_mint",2,1,notify,earn,true),true);
  assert.equal(state.inventory.mint_tincture,2);
  const passport=state.productionLog.find(x=>x.name==="Мятно-чабрецовая настойка");
