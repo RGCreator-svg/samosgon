@@ -146,7 +146,9 @@ export function initProductionHub(s) {
     section.innerHTML="<h2>🏭 Производственный центр</h2>";
     game.append(section);
   }
-      document.querySelectorAll(".tab-content").forEach(section => section.classList.toggle("hidden", section.id !== "productionHub"));
+  nav.addEventListener("click", event => {
+    if (!event.target.closest('[data-tab="productionHub"]')) return;
+    document.querySelectorAll(".tab-content").forEach(section => section.classList.toggle("hidden", section.id !== "productionHub"));
     nav.querySelectorAll("[data-tab]").forEach(button => button.classList.toggle("active", button.dataset.tab === "productionHub"));
   });
   render(s);
