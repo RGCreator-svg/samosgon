@@ -163,3 +163,24 @@ test("Petrovich encounters offer choices and apply their consequences", () => {
   assert.equal(resolvePetrovichEncounter(state, "keep", notify), true);
   assert.ok(messages.length >= 3);
 });
+
+
+test("Petrovich remembers choices and can improve a distillation batch", () => {
+  const state = createInitialState();
+  const notify = () => {};
+  runPetrovichEncounterDev(state, notify);
+  assert.equal(state.story.pendingPetrovich, "clue");
+  assert.equal(resolvePetrovichEncounter(state, "thank", notify), true);
+  assert.equal(state.story.petrovichRelation, 8);
+
+  runPetrovichEncounterDev(state, notify);
+  assert.equal(state.story.pendingPetrovich, "wrong");
+  resolvePetrovichEncounter(state, "keep", notify);
+  assert.equal(state.story.petrovichRelation, 5);
+
+  for (let i = 0; i < 3; i++) runPetrovichEncounterDev(state, notify);
+  assert.equal(state.story.pendingPetrovich, "distill_help");
+  resolvePetrovichEncounter(state, "accept", notify);
+  assert.equal(state.story.petrovichQualityBonus, 5);
+  assert.equal(state.parts.fasteners, 1);
+});
