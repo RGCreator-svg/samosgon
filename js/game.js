@@ -236,19 +236,35 @@ $("#harvestVegetables")?.addEventListener("click", () => {
   render();
 });
 
-// Расчистка огорода через единую корзину.
+// Работа оплачивается сразу, а в общую корзину попадают только нужные материалы.
+function queueHomesteadRepair(action, name, cost, parts) {
+  const key = "repair:" + action + ":" + (action === "orchard" ? "restore" : state[action]);
+  state.purchaseCart ??= [];
+  if (state.purchaseCart.some(item => item.key === key)) {
+    notify("Этот ремонт уже ожидает материалы в корзине.");
+    return;
+  }
+  if ((Number(state.money) || 0) < cost) {
+    notify(`Для работы нужно ${cost} монет. Сейчас денег не хватает.`);
+    return;
+  }
+  state.money -= cost;
+  queuePurchase(state, { key, kind:"homesteadRepair", name, cost:0, parts, payload:{ action } });
+  notify(`${name}: работа оплачена (${cost} монет). В корзину добавлены только необходимые материалы.`);
+  render();
+}
+
+// Расчистка огорода: инструменты, доски и крепёж.
 $("#repairGarden")?.addEventListener("click", () => {
   const cost=state.skills.includes("handyman")?15:20;
-  queuePurchase(state,{key:"repair:garden:"+state.garden,kind:"homesteadRepair",name:"Расчистка огорода",cost,payload:{action:"garden"}});
-  notify("Расчистка огорода добавлена в общую корзину.");render();
+  queueHomesteadRepair("garden", "Расчистка огорода", cost, { timber:1, fasteners:1, tools:1 });
 });
 
-// Восстановление сада через единую корзину.
+// Восстановление сада: инструменты, доски и крепёж.
 $("#restoreOrchard")?.addEventListener("click", () => {
   if(state.orchardRestored)return;
   const cost=state.skills.includes("handyman")?30:40;
-  queuePurchase(state,{key:"repair:orchard",kind:"homesteadRepair",name:"Восстановление сада",cost,payload:{action:"orchard"}});
-  notify("Восстановление сада добавлено в общую корзину.");render();
+  queueHomesteadRepair("orchard", "Восстановление сада", cost, { timber:2, fasteners:1, tools:2 });
 });
 
 // Сбор фруктов
@@ -276,28 +292,25 @@ $("#harvestFruit")?.addEventListener("click", () => {
   render();
 });
 
-// Ремонт дома через единую корзину.
+// Ремонт дома: доски, гвозди и краска.
 $("#repairHouse")?.addEventListener("click", () => {
   if(state.house>=100)return;
   const cost=state.skills.includes("handyman")?20:30;
-  queuePurchase(state,{key:"repair:house:"+state.house,kind:"homesteadRepair",name:"Ремонт дома",cost,payload:{action:"house"}});
-  notify("Ремонт дома добавлен в общую корзину.");render();
+  queueHomesteadRepair("house", "Ремонт дома", cost, { timber:2, fasteners:2, paint:1 });
 });
 
-// Ремонт сарая через единую корзину.
+// Ремонт сарая: доски, гвозди и краска.
 $("#repairBarn")?.addEventListener("click", () => {
   if(state.barn>=100)return;
   const cost=state.skills.includes("handyman")?20:30;
-  queuePurchase(state,{key:"repair:barn:"+state.barn,kind:"homesteadRepair",name:"Ремонт сарая",cost,payload:{action:"barn"}});
-  notify("Ремонт сарая добавлен в общую корзину.");render();
+  queueHomesteadRepair("barn", "Ремонт сарая", cost, { timber:3, fasteners:2, paint:1 });
 });
 
-// Ремонт аппарата через единую корзину.
+// Ремонт аппарата: металлические заготовки, крепёж и инструменты.
 $("#repairStill")?.addEventListener("click", () => {
   if(state.still>=100)return;
   const cost=state.skills.includes("handyman")?35:50;
-  queuePurchase(state,{key:"repair:still:"+state.still,kind:"homesteadRepair",name:"Ремонт аппарата",cost,payload:{action:"still"}});
-  notify("Ремонт аппарата добавлен в общую корзину.");render();
+  queueHomesteadRepair("still", "Ремонт аппарата", cost, { metal:2, fasteners:2, tools:1 });
 });
 
 // Запуск базовой партии браги через общую корзину.
