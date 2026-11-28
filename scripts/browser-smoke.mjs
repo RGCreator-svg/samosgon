@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import assert from "node:assert/strict";
 
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),"..");
-const mime={".html":"text/html; charset=utf-8",".js":"text/javascript; charset=utf-8",".css":"text/css; charset=utf-8",".png":"image/png",".svg":"image/svg+xml",".json":"application/json; charset=utf-8"};
+const mime={".html":"text/html; charset=utf-8",".js":"text/javascript; charset=utf-8",".css":"text/css; charset=utf-8",".png":"image/png",".webp":"image/webp",".svg":"image/svg+xml",".json":"application/json; charset=utf-8"};
 const server=createServer(async(req,res)=>{
   try{
     const pathname=decodeURIComponent(new URL(req.url,"http://localhost").pathname);
@@ -42,6 +42,14 @@ try{
   await page.locator("#eventConsole > summary").click();
   assert.ok(await page.locator(".xp-panel").boundingBox().then(box=>box.height<45),"XP display is not compact");
   assert.ok(await page.locator("#homestead-scene").count()===1,"Prototype SVG scene is missing");
+  const homesteadImage=await page.evaluate(async()=>{
+    const image=new Image(); image.src="assets/images/homestead.webp";
+    await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=reject;});
+    return {width:image.naturalWidth,height:image.naturalHeight};
+  });
+  assert.ok(homesteadImage.width>=250&&homesteadImage.height>=160,"Generated homestead artwork failed to load");
+  const heroBackground=await page.locator("#home .homestead-scene").evaluate(el=>getComputedStyle(el).backgroundImage);
+  assert.match(heroBackground,/homestead\\.webp/,"Generated homestead artwork is not used by the home scene");
   assert.equal(await page.locator(".pumpkin-mascot").count(),1,"There must be exactly one interactive pumpkin mascot");
   assert.equal(await page.locator("#scene-pumpkin").isVisible(),false,"Decorative duplicate pumpkin should be hidden");
   const pumpkin=page.locator(".pumpkin-mascot img");
