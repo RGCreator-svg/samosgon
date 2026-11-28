@@ -704,3 +704,24 @@ body { min-height:100vh; }
 
 /* REV 10.17 — remove the large decorative homestead backdrop; keep individual object sprites. */
 #homestead-scene { display:none !important; }
+
+
+/* REV 10.18 — individual farm sprites, not a stretched scene backdrop. */
+#game .farm-plots {
+  display:flex; align-items:flex-end; justify-content:center; flex-wrap:wrap;
+  gap:clamp(8px,2vw,24px); position:relative; min-height:150px; margin:12px 0 18px;
+  background:transparent !important;
+}
+#game .farm-plot {
+  position:relative; display:block; flex:0 1 190px; width:clamp(130px,18vw,190px);
+  min-height:0; padding:0; margin:0; border:0 !important; outline:0 !important;
+  background:transparent !important; box-shadow:none !important; cursor:pointer; line-height:0;
+  transition:transform .16s ease,filter .16s ease;
+}
+#game .farm-plot:hover,#game .farm-plot:focus-visible { transform:translateY(-4px); filter:brightness(1.08); }
+#game .farm-plot img { display:block; pointer-events:none; user-select:none; }
+#game .farm-plot-ground { width:100%; height:auto; }
+#game .farm-plot-crop { position:absolute; width:70%; height:76%; object-fit:contain; left:15%; bottom:8%; }
+#game .farm-plot-action { position:absolute; width:34px; height:34px; object-fit:contain; right:4%; top:0; }
+#game .farm-yard-animal { width:clamp(48px,7vw,76px); height:auto; object-fit:contain; align-self:flex-end; margin:0 0 5px -8px; pointer-events:none; }
+@media (max-width:560px) { #game .farm-plots { gap:2px; } #game .farm-plot { flex-basis:44%; width:44%; } #game .farm-yard-animal { width:48px; } }
