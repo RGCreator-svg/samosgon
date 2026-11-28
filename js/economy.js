@@ -522,6 +522,13 @@ export function initEconomy(state, { render, notify }) {
     const [action, ...idParts] = button.dataset.economyAction.split(":");
     const id = idParts.join(":");
 
+    if (action === "guardDogMaterials") {
+      const added = queueMaterials(state, { timber: 2, fasteners: 1 });
+      const names = Object.entries(added).map(([partId, qty]) => (PARTS.find(part => part.id === partId)?.name || partId) + " ×" + qty);
+      if (names.length) notify("Недостающие материалы для будки добавлены в общую корзину: " + names.join(", ") + ". Оплатите корзину, дождитесь доставки и заберите детали на склад.");
+      else notify("Материалы для будки уже есть на складе или добавлены в корзину. Проверьте общую корзину.");
+    }
+
     if (action === "cartOrder") {
       const part = PARTS.find(item => item.id === id);
       if (!part) return;
