@@ -89,6 +89,13 @@ const FARM_CROPS = {
   radish: { name: "Редис", emoji: "🔴", item: "radish", image: "assets/images/farm/crops/radish.png" }
 };
 state.farmCropTypes ??= {};
+// Старые сохранения получат изображения для трёх стартовых культур.
+const STARTER_CROPS = ["potato","carrot","cabbage"];
+state.farmPlots.forEach((stage,index)=>{
+  if(stage!=="empty"&&!state.farmCropTypes[index]){
+    state.farmCropTypes[index]=STARTER_CROPS[index%STARTER_CROPS.length];
+  }
+});
 function farmCooldownRemaining(index) {
   return Math.max(0,(Number(state.farmPlotCooldowns?.[index])||0)-Date.now());
 }
