@@ -552,10 +552,36 @@ function renderAllRepairButtons(){
 }
 function renderHousePartProgress(){
   const parts=state.houseParts||{};
+  const names={roof:"крыши",walls:"стен",windows:"окон",floor:"пола",heating:"отопления"};
   for(const id of ["roof","walls","windows","floor","heating"]){
     const value=Math.max(0,Math.min(100,Number(parts[id])||0));
     const label=$("#housePartValue-"+id);if(label)label.textContent=value+"%";
-    const card=$(`[data-house-part-card="${id}"]`);if(card)card.dataset.stage=value>=100?"complete":value>0?"repairing":"damaged";
+    const card=$(`[data-house-part-card="${id}"]`);
+    if(!card)continue;
+    card.dataset.stage=value>=100?"complete":value>0?"repairing":"damaged";
+    const button=card.querySelector("[data-house-part]");
+    if(!button)continue;
+    const config=HOMESTEAD_REPAIRS["house_"+id];
+    const missing=getRepairMissing(config.parts);
+    const queued=Object.entries(missing).some(([partId])=>pendingPartBreakdown(partId).inCart>0);
+    const arrived=Object.entries(missing).some(([partId])=>pendingPartBreakdown(partId).arrived>0);
+    const inTransit=Object.entries(missing).some(([partId])=>pendingPartBreakdown(partId).inTransit>0);
+    const allAvailable=Object.keys(missing).length===0;
+    button.disabled=value>=100||(!allAvailable&&(queued||arrived||inTransit));
+    button.textContent=value>=100?"✓ Готово":allAvailable
+      ? "🔨 Выполнить ремонт · "+repairCost(config)+" монет"
+      : arrived?"📦 Заберите детали в «Снабжении»"
+      : queued?"🛒 Оплатите заказ в корзине"
+      : inTransit?"⏳ Ожидайте доставку"
+      :"🧰 Заказать недостающие детали";
+    let hint=card.querySelector(".house-part-status");
+    if(!hint){hint=document.createElement("small");hint.className="house-part-status";button.insertAdjacentElement("afterend",hint);}
+    hint.textContent=value>=100?"Этап завершён":allAvailable
+      ?"Материалы на складе — нажмите кнопку, чтобы закончить работу."
+      :arrived?"Снабжение → Доставка → «Забрать всё». Затем вернитесь сюда и нажмите «Выполнить ремонт»."
+      :queued?"Откройте корзину закупок и оплатите заказ."
+      :inTransit?"Материалы уже оплачены. Они появятся в доставках после указанного срока."
+      :"Нажмите кнопку, чтобы добавить недостающее в корзину.";
   }
 }
 
