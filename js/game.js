@@ -1,5 +1,5 @@
 import { consumeQualityForSale } from "./quality.js";
-import { initImportedFarmAnimations } from "./farmAnimations.js";
+import { initImportedFarmAnimations } from "./farmAnimations.js?v=2";
 import { advanceGameDay } from "./gameLoop.js";
 import { discoverRepairStory, renderGrandmaNotes, runGrandmaQuestDev, runPetrovichEncounterDev } from "./grandmaNotes.js";
 
