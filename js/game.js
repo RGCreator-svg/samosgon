@@ -1,4 +1,5 @@
 import { consumeQualityForSale } from "./quality.js";
+import { initImportedFarmAnimations } from "./farmAnimations.js";
 import { advanceGameDay } from "./gameLoop.js";
 import { discoverRepairStory, renderGrandmaNotes, runGrandmaQuestDev, runPetrovichEncounterDev } from "./grandmaNotes.js";
 
@@ -640,6 +641,7 @@ $("#skillTree")?.addEventListener("click", (event) => {
 });
 
 // Первичная отрисовка и автосохранение
+initImportedFarmAnimations();
 render();
 
 setInterval(save, 15000);
