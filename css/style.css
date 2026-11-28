@@ -3517,3 +3517,30 @@ body { margin:0; font-family:"Segoe UI", "Comic Sans MS", sans-serif; background
   #game .prototype-task { top:175px; right:5px; width:118px; }
   #game .prototype-bottom .panel-mini { min-width:0; }
 }
+
+/* REV 10.4 — цель усадьбы становится частью домашнего экрана, а не плавающим баннером. */
+#game .prototype-task.home-objective {
+  position:relative;
+  inset:auto;
+  z-index:1;
+  width:100%;
+  max-width:620px;
+  margin:12px 0 16px;
+  padding:10px 13px;
+  border:1px solid #9a794e;
+  border-left:4px solid #84965b;
+  border-radius:11px;
+  background:linear-gradient(110deg,#fdf3d7,#f3e4bd);
+  box-shadow:0 2px 6px #0002;
+}
+#game .prototype-task.home-objective h4 { margin:0 0 4px; font-size:12px; }
+#game .prototype-task.home-objective .task-row { font-size:12px; }
+#game .prototype-task.home-objective .task-icon { font-size:22px; }
+#game .prototype-task.home-objective small { color:#6b5b43; }
+@media(max-width:900px) {
+  #game .prototype-task.home-objective { top:auto; right:auto; width:100%; }
+}
+@media(max-width:560px) {
+  #game .prototype-task.home-objective { top:auto; right:auto; width:100%; padding:9px 10px; }
+  #game .prototype-task.home-objective .task-row { font-size:11px; }
+}
