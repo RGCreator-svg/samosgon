@@ -13,7 +13,7 @@ globalThis.localStorage = {
 };
 
 const { loadGame, saveGame, createInitialState } = await import("../js/engine.js");
-const { addInventory, removeInventory, setInventoryCount, hasInventory } = await import("../js/economy.js");
+const { addInventory, removeInventory, setInventoryCount, hasInventory, registerCartHandler, settlePendingPurchaseBatches } = await import("../js/economy.js");
 const { advanceGameDay } = await import("../js/gameLoop.js");
 const { ensureGrandmaStory, runGrandmaQuestDev, runPetrovichEncounterDev, resolvePetrovichEncounter } = await import("../js/grandmaNotes.js");
 const { ensureMashHouse, getMashCapacity, startMashBatch, advanceMashHouseDay, MASH_RECIPES } = await import("../js/mashhouse.js");
@@ -502,4 +502,26 @@ test("cellar barrels age separate batches, apply wood profiles and preserve qual
   assert.ok(aged.flavorProfile.notes.includes(BARREL_WOODS.oak.note));
   ageBarrelsOneDay(state,()=>{});
   assert.equal(cellar.barrels[1].active.ready,true);
+});
+
+
+test("material-backed cart purchases wait until ordered parts are delivered and collected", () => {
+  const state=createInitialState();
+  let completed=0;
+  registerCartHandler("testDeliveryGatedPurchase",()=>{completed+=1;});
+  state.pendingPurchaseBatches=[{
+    purchases:[{kind:"testDeliveryGatedPurchase"}],
+    parts:{timber:2,fasteners:1},
+    reservedParts:{timber:1}
+  }];
+  settlePendingPurchaseBatches(state,()=>{});
+  assert.equal(completed,0,"purchase must not complete before the missing materials arrive");
+  assert.equal(state.pendingPurchaseBatches.length,1);
+  state.parts.timber=1;
+  state.parts.fasteners=1;
+  settlePendingPurchaseBatches(state,()=>{});
+  assert.equal(completed,1,"purchase completes only after all missing materials are collected");
+  assert.equal(state.parts.timber,0);
+  assert.equal(state.parts.fasteners,0);
+  assert.equal(state.pendingPurchaseBatches.length,0);
 });
