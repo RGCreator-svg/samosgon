@@ -71,12 +71,10 @@ try{
 
   async function repairThroughDelivery(tabId, buttonSelector, partIds, progressSelector, laborCost, completeLabel) {
     await page.locator(`.navigation [data-tab="${tabId}"]`).click();
-    const tabDebug=await page.locator(buttonSelector).evaluate(el=>({buttonClass:el.className,buttonDisplay:getComputedStyle(el).display,buttonVisibility:getComputedStyle(el).visibility,buttonRect:el.getBoundingClientRect().toJSON(),parentClass:el.closest(".tab-content")?.className,parentDisplay:getComputedStyle(el.closest(".tab-content")).display}));
-    console.log("REPAIR TAB",tabId,JSON.stringify(tabDebug));
     const progress=page.locator(progressSelector);
     const beforeProgress=await progress.innerText();
     const beforeMoney=Number((await page.locator("#money").innerText()).replace(/[^0-9-]/g,""));
-    await page.locator(buttonSelector).click({force:true});
+    await page.locator(buttonSelector).click();
     assert.match(await page.locator("#materialCart").innerText(),/Пиломатериалы|Металлические заготовки|Крепёж|Инструмент/i,"Repair materials were not added to the cart");
     assert.equal(Number((await page.locator("#money").innerText()).replace(/[^0-9-]/g,"")),beforeMoney,"Labor must not be charged when materials are merely ordered");
     assert.equal(await progress.innerText(),beforeProgress,"Repair must not happen when the order is added");
