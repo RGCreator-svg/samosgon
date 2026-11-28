@@ -1114,3 +1114,8 @@ body { min-height:100vh; }
 .house-part-card [data-house-part]{white-space:normal;min-height:44px}
 .delivery-row .delivery-ready-hint{flex-basis:100%;margin:.35rem 0;color:var(--muted,#667085);line-height:1.45}
 .delivery-row .collect-all-button{white-space:normal;min-height:44px}
+
+
+/* Clear purchase instructions for supplies and guard dog. */
+#game .economy-order-hint{margin:.45rem 0 .7rem;color:var(--muted,#667085);font-size:.84rem;line-height:1.45}
+#game .guard-dog-requirements{margin:.55rem 0;color:var(--muted,#667085);font-size:.88rem;line-height:1.5}
