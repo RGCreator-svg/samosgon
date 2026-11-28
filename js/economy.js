@@ -316,13 +316,10 @@ export function renderEconomy(state) {
     const card = element("article", "economy-card");
     card.append(element("h3", "", `${part.emoji} ${part.name}`), element("p", "", part.description));
     lines.forEach(line => card.append(element("p", "economy-detail", line)));
-    const cartButton = element("button", "", "Добавить 1 шт. в общую корзину");
+    card.append(element("p", "economy-order-hint", `Чтобы купить: добавьте количество в корзину и оплатите её. После оплаты поставщик отправит материал; срок доставки — ${part.delivery} игровых дня.`));
+    const cartButton = element("button", "", "🛒 Заказать 1 шт. · " + part.price + " монет");
     cartButton.dataset.economyAction = `cartOrder:${part.id}`;
     card.append(cartButton);
-    const orderButton = element("button", "", "Добавить доставку в общую корзину");
-    orderButton.dataset.economyAction = `order:${part.id}`;
-    orderButton.disabled = false;
-    card.append(orderButton);
     if (arrived > 0) {
       const collectButton = element("button", "collect-all-button", `Забрать всё доставленное (${arrived})`);
       collectButton.dataset.economyAction = `collectAll:${part.id}`;
