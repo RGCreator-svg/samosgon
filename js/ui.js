@@ -662,6 +662,11 @@ export function renderWorld(state) {
   const houseStage = house < 40 ? "ruined" : house < 70 ? "repairing" : house < 100 ? "restored" : "complete";
   if (homeScene) {
     homeScene.dataset.houseStage = houseStage;
+    const houseParts=state.houseParts||{};
+    for(const part of ["roof","walls","windows","floor","heating"]){
+      const value=Math.max(0,Math.min(100,Number(houseParts[part])||0));
+      homeScene.dataset[part+"Stage"]=value>=100?"complete":value>0?"repairing":"damaged";
+    }
     homeScene.setAttribute("aria-label", ({
       ruined:"Сильно обветшавший деревенский дом, ремонт ещё не начат",
       repairing:"Деревенский дом постепенно ремонтируется",
