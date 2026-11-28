@@ -75,10 +75,18 @@ function notify(message) {
 }
 
 const FARM_ACTION_DELAY_MS = 10000;
+const MAX_FARM_PLOTS = 12;
+const FARM_PLOT_EXPANSION_COST = 100;
 const FARM_CROPS = {
-  potato: { name: "Картофель", emoji: "🥔", item: "potato" },
-  carrot: { name: "Морковь", emoji: "🥕", item: "carrot" },
-  cabbage: { name: "Капуста", emoji: "🥬", item: "cabbage" }
+  potato: { name: "Картофель", emoji: "🥔", item: "potato", image: "assets/images/farm/crops/potato.png" },
+  carrot: { name: "Морковь", emoji: "🥕", item: "carrot", image: "assets/images/farm/crops/carrot.png" },
+  cabbage: { name: "Капуста", emoji: "🥬", item: "cabbage", image: "assets/images/farm/crops/cabbage.png" },
+  tomato: { name: "Помидоры", emoji: "🍅", item: "tomato", image: "assets/images/farm/crops/tomato.png" },
+  cucumber: { name: "Огурцы", emoji: "🥒", item: "cucumber", image: "assets/images/farm/crops/cucumber.png" },
+  beet: { name: "Свёкла", emoji: "🫜", item: "beet", image: "assets/images/farm/crops/beet.png" },
+  pepper: { name: "Перец", emoji: "🫑", item: "pepper", image: "assets/images/farm/crops/pepper.png" },
+  pumpkin: { name: "Тыква", emoji: "🎃", item: "pumpkin", image: "assets/images/farm/crops/pumpkin.png" },
+  radish: { name: "Редис", emoji: "🔴", item: "radish", image: "assets/images/farm/crops/radish.png" }
 };
 state.farmCropTypes ??= {};
 function farmCooldownRemaining(index) {
@@ -86,20 +94,36 @@ function farmCooldownRemaining(index) {
 }
 function renderFarmPlots() {
   const plots=Array.isArray(state.farmPlots)?state.farmPlots:[];
+  const container=$("#farmPlots");
+  if(!container)return;
+  const animal=container.querySelector(".farm-yard-animal");
+  let buttons=[...container.querySelectorAll(".farm-plot")];
+  while(buttons.length<plots.length){
+    const button=document.createElement("button");
+    button.type="button";button.className="farm-plot";
+    button.innerHTML='<img class="farm-plot-ground" alt="" draggable="false"><img class="farm-plot-crop" alt="" draggable="false" hidden><img class="farm-plot-action" alt="" draggable="false" hidden>';
+    container.insertBefore(button,animal||null);buttons.push(button);
+  }
+  while(buttons.length>plots.length){buttons.pop().remove();}
   const stages={empty:{label:"Выбрать семена",icon:""},needs_water:{label:"Полить грядку",icon:"need_water"},needs_weed:{label:"Прополоть грядку",icon:"need_weed"},needs_fertilize:{label:"Удобрить грядку",icon:"need_fertilize"},ready:{label:"Собрать урожай",icon:"need_take"}};
-  document.querySelectorAll(".farm-plot").forEach((plot,index)=>{
+  buttons.forEach((plot,index)=>{
     const stage=stages[plots[index]]?plots[index]:"empty",info=stages[stage],remaining=farmCooldownRemaining(index);
     const cropInfo=FARM_CROPS[state.farmCropTypes[index]]||null;
-    plot.dataset.stage=stage;plot.dataset.cooldown=remaining>0?"true":"false";
-    plot.setAttribute("aria-label","Грядка "+(index+1)+": "+(cropInfo?cropInfo.name+". ":"")+info.label+(remaining>0?". Ожидание "+Math.ceil(remaining/1000)+" сек.":""));plot.title=(cropInfo?cropInfo.name+" · ":"")+info.label;
-    const crop=plot.querySelector(".farm-plot-crop"),action=plot.querySelector(".farm-plot-action");
-    if(crop){crop.hidden=stage==="empty";crop.textContent=cropInfo?.emoji||"";crop.setAttribute("aria-label",cropInfo?.name||"Растение");}
+    plot.dataset.plotIndex=String(index);plot.dataset.stage=stage;plot.dataset.cooldown=remaining>0?"true":"false";
+    plot.setAttribute("aria-label","Грядка "+(index+1)+": "+(cropInfo?cropInfo.name+". ":"")+info.label+(remaining>0?". Ожидание "+Math.ceil(remaining/1000)+" сек.":""));
+    plot.title=(cropInfo?cropInfo.name+" · ":"")+info.label;
+    const ground=plot.querySelector(".farm-plot-ground"),crop=plot.querySelector(".farm-plot-crop"),action=plot.querySelector(".farm-plot-action");
+    if(ground)ground.src="assets/images/farm/"+(index%2?"land_2":"land_1")+".png";
+    if(crop){crop.hidden=stage==="empty"||!cropInfo;crop.src=cropInfo?.image||"";crop.alt=cropInfo?.name||"Растение";}
     if(action){action.hidden=!info.icon;if(info.icon)action.src="assets/images/farm/"+info.icon+".png";}
     let timer=plot.querySelector(".farm-plot-timer");
     if(!timer){timer=document.createElement("span");timer.className="farm-plot-timer";timer.setAttribute("aria-live","off");plot.append(timer);}
     timer.hidden=remaining<=0;timer.textContent=remaining>0?Math.ceil(remaining/1000)+" с":"";
     plot.disabled=remaining>0;
   });
+  const count=$("#farmPlotCount"),expand=$("#expandFarm");
+  if(count)count.textContent="Грядки: "+plots.length+" / "+MAX_FARM_PLOTS;
+  if(expand){expand.textContent=plots.length>=MAX_FARM_PLOTS?"✓ Огород расширен до максимума":"➕ Пристроить грядку · "+FARM_PLOT_EXPANSION_COST+" монет";expand.disabled=plots.length>=MAX_FARM_PLOTS||state.money<FARM_PLOT_EXPANSION_COST;}
 }
 setInterval(()=>{
   document.querySelectorAll(".farm-plot").forEach((plot,index)=>{
@@ -327,7 +351,10 @@ function harvestVegetables(plotIndex=null) {
   render();return harvested>0;
 }
 $("#harvestVegetables")?.addEventListener("click",()=>harvestVegetables());
-document.querySelectorAll(".farm-plot").forEach((plot,index)=>plot.addEventListener("click",()=>{
+$("#farmPlots")?.addEventListener("click",event=>{
+  const plot=event.target.closest(".farm-plot");
+  if(!plot)return;
+  const index=Number(plot.dataset.plotIndex);
   const stages=["empty","needs_water","needs_weed","needs_fertilize","ready"];
   const current=stages.includes(state.farmPlots[index])?state.farmPlots[index]:"empty";
   if(farmCooldownRemaining(index)>0)return;
@@ -338,16 +365,22 @@ document.querySelectorAll(".farm-plot").forEach((plot,index)=>plot.addEventListe
     if(picker){picker.dataset.plotIndex=String(index);picker.hidden=false;}
     return;
   }
-  else{
-    state.energy-=1;
-    const next={needs_water:"needs_weed",needs_weed:"needs_fertilize",needs_fertilize:"ready"}[current];
-    state.farmPlots[index]=next;
-    state.farmPlotCooldowns[index]=Date.now()+FARM_ACTION_DELAY_MS;
-    const messages={needs_weed:"Грядка полита. Теперь пора убрать сорняки.",needs_fertilize:"Сорняки убраны. Осталось подкормить растения.",ready:"Растения удобрены — урожай созрел!"};
-    notify("Грядка "+(index+1)+": "+messages[next]+" Следующее действие через 10 секунд.");
-  }
+  state.energy-=1;
+  const next={needs_water:"needs_weed",needs_weed:"needs_fertilize",needs_fertilize:"ready"}[current];
+  state.farmPlots[index]=next;
+  state.farmPlotCooldowns[index]=Date.now()+FARM_ACTION_DELAY_MS;
+  const messages={needs_weed:"Грядка полита. Теперь пора убрать сорняки.",needs_fertilize:"Сорняки убраны. Осталось подкормить растения.",ready:"Растения удобрены — урожай созрел!"};
+  notify("Грядка "+(index+1)+": "+messages[next]+" Следующее действие через 10 секунд.");
   plot.classList.remove("is-changing");void plot.offsetWidth;plot.classList.add("is-changing");render();
-}));
+});
+$("#expandFarm")?.addEventListener("click",()=>{
+  if(state.farmPlots.length>=MAX_FARM_PLOTS){notify("Огород уже расширен до максимума.");return;}
+  if(state.money<FARM_PLOT_EXPANSION_COST){notify("Не хватает монет на новую грядку.");return;}
+  state.money-=FARM_PLOT_EXPANSION_COST;
+  state.farmPlots.push("empty");
+  notify("Новая грядка пристыкована к огороду. Теперь участок больше!");
+  render();
+});
 $("#farmSeedPicker")?.addEventListener("click",event=>{
   const cancel=event.target.closest("[data-seed-cancel]");
   const choice=event.target.closest("[data-seed]");
