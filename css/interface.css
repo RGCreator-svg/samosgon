@@ -870,3 +870,21 @@ body { min-height:100vh; }
   #game .farm-garden-toolbar {align-items:flex-start}
   #game .farm-garden-toolbar button {font-size:11px}
 }
+
+/* REV 10.29 — tightly packed beds: remove cell gutters and artificial sprite width limits. */
+#game #farm .farm-plots {
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  column-gap:0;
+  row-gap:0;
+}
+#game #farm .farm-plots .farm-plot {
+  width:100%;
+  max-width:none;
+  justify-self:stretch;
+}
+@media(max-width:600px) {
+  #game #farm .farm-plots {
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:0;
+  }
+}
