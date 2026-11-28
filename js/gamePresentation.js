@@ -1,5 +1,5 @@
 const GROUPS = [
-  { title: "Усадьба", icon: "🏡", tabs: ["home", "farm", "orchard", "barn"] },
+  { title: "Усадьба", icon: "🏡", tabs: ["home", "farm", "orchard", "barn", "construction"] },
   { title: "Торговля", icon: "🧺", tabs: ["market", "economy"] },
   { title: "Производство", icon: "⚗️", tabs: ["productionHub", "productionPlant", "featurePack", "viticulture", "cellar"] },
   { title: "Развитие", icon: "🌱", tabs: ["skills", "researchLab", "processCenter"] },
@@ -7,7 +7,7 @@ const GROUPS = [
 ];
 const LABELS = {
   home:"Дом",farm:"Огород",orchard:"Сад",barn:"Сарай",
-  market:"Рынок",economy:"Финансы",skills:"Умения",notebook:"Записки",
+  market:"Рынок",economy:"Снабжение",construction:"Стройка",skills:"Умения",notebook:"Записки",
   productionHub:"Диспетчер",productionPlant:"Цех",featurePack:"Винокурня",
   viticulture:"Винодельня",cellar:"Погреб",researchLab:"Лаборатория",
   processCenter:"Техцентр",milestones:"Достижения",orders:"Задания",goals:"Цели"
