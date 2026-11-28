@@ -71,6 +71,21 @@ try{
   assert.ok(await cartToggle.locator("img").evaluate(img=>img.complete&&img.naturalWidth>0),"Cart illustration failed to load");
   await cartToggle.click();
   assert.ok(await page.locator("#sharedPurchaseCart").evaluate(el=>el.classList.contains("is-open")),"Cart launcher did not open the cart");
+  assert.ok(await page.locator(".cart-overlay-scrim").evaluate(el=>el.classList.contains("is-visible")),"Cart backdrop did not appear");
+  assert.ok(await page.locator("#sharedPurchaseCart .cart-panel-close").isVisible(),"Cart close control is missing");
+  await page.locator("#sharedPurchaseCart .cart-panel-close").click();
+  assert.ok(!(await page.locator("#sharedPurchaseCart").evaluate(el=>el.classList.contains("is-open"))),"Close button did not close the cart");
+  await cartToggle.click();
+  await page.locator(".cart-overlay-scrim").click({position:{x:10,y:10}});
+  assert.ok(!(await page.locator("#sharedPurchaseCart").evaluate(el=>el.classList.contains("is-open"))),"Backdrop did not dismiss the cart");
+  await cartToggle.click();
+  await page.keyboard.press("Escape");
+  assert.ok(!(await page.locator("#sharedPurchaseCart").evaluate(el=>el.classList.contains("is-open"))),"Escape did not dismiss the cart");
+  await cartToggle.click();
+  await page.locator("#bottomWarehouse").click();
+  assert.ok(!(await page.locator("#sharedPurchaseCart").evaluate(el=>el.classList.contains("is-open"))),"Opening the warehouse should close the cart");
+  assert.equal(await page.locator(".warehouse-panel").evaluate(el=>el.open),true,"Warehouse shortcut did not open the warehouse");
+  await page.locator("#bottomWarehouse").click();
 
   // Repair lifecycle: order missing materials, wait for their delivery, collect, then pay labor and repair.
   await page.locator("#devToggle").click();
