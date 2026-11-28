@@ -40,7 +40,7 @@ state.orders.completed ??= 0;
 state.orders.failed ??= 0;
 
 const $ = (selector) => document.querySelector(selector);
-const $ = (selector) => document.querySelectorAll(selector);
+const $all = (selector) => document.querySelectorAll(selector);
 
 const HOMESTEAD_REPAIRS = {
   house: { name:"Ремонт дома", button:"#repairHouse", baseCost:30, discountedCost:20, parts:{ timber:1, fasteners:1, paint:1 }, progress:20, xp:5 },
@@ -98,11 +98,11 @@ function showGame() {
 }
 
 function showTab(tabId) {
-  $$(".tab-content").forEach((section) => {
+  $all(".tab-content").forEach((section) => {
     section.classList.toggle("hidden", section.id !== tabId);
   });
 
-  $$("[data-tab]").forEach((button) => {
+  $all("[data-tab]").forEach((button) => {
     button.classList.toggle("active", button.dataset.tab === tabId);
   });
   window.dispatchEvent(new CustomEvent("samosgon:tab-change", { detail: tabId }));
