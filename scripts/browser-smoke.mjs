@@ -31,6 +31,7 @@ try{
   assert.match(await page.locator("#intro").innerText(),/После череды неудач/,"Opening story text is missing");
   await page.locator("#startGame").click();
   await page.locator("#homestead-scene").waitFor({state:"visible"});
+  assert.deepEqual(errors,[],"Browser errors occurred during initial game render: "+errors.join(" | "));
   assert.ok(await page.locator(".game-footer-dock").isVisible(),"Bottom HUD dock is missing");
   const dock=await page.locator(".game-footer-dock").boundingBox();
   assert.ok(dock.y+dock.height>=950,"Pumpkin and event log are not anchored to the bottom of the viewport");
