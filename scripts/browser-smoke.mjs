@@ -137,7 +137,11 @@ try{
   await page.locator("#scene-beds").click({force:true});
   assert.equal(await page.locator("#farm").evaluate(el=>el.classList.contains("hidden")),false,"Garden scene hotspot did not open the farm tab");
   assert.ok(await page.locator("#farm .farm-scene").isVisible(),"Generated garden artwork is hidden");
-  assert.match(await page.locator("#farm .farm-scene").evaluate(el=>getComputedStyle(el).backgroundImage),/homestead\.webp/,"Generated garden artwork is not connected");
+  assert.equal(await page.locator("#farm .farm-scene").evaluate(el=>getComputedStyle(el).backgroundImage),"none","Garden scene must not use a stretched raster background");
+  const farmSprites=await page.locator(".farm-plot img, .farm-yard-animal").evaluateAll(images=>images.every(img=>img.complete&&img.naturalWidth>0));
+  assert.ok(farmSprites,"Imported farm PNG sprites failed to load");
+  await page.locator(".farm-plot").first().click();
+  assert.match(await page.locator("#notifications").textContent(),/Урожай собран|Сначала приведите огород в порядок|Нет сил/,"Clicking a farm illustration did not trigger the harvest action");
   await clickNavTab("market");
   assert.equal(await page.locator("#market").evaluate(el=>el.classList.contains("hidden")),false,"Top navigation did not open market");
   await page.locator("#bottomWarehouse").click();
