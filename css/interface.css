@@ -725,3 +725,15 @@ body { min-height:100vh; }
 #game .farm-plot-action { position:absolute; width:34px; height:34px; object-fit:contain; right:4%; top:0; }
 #game .farm-yard-animal { width:clamp(48px,7vw,76px); height:auto; object-fit:contain; align-self:flex-end; margin:0 0 5px -8px; pointer-events:none; }
 @media (max-width:560px) { #game .farm-plots { gap:2px; } #game .farm-plot { flex-basis:44%; width:44%; } #game .farm-yard-animal { width:48px; } }
+
+
+/* REV 10.19 — keep warehouse/day shortcuts clickable above the cart scrim. */
+#game .prototype-bottom {
+  position:relative !important;
+  z-index:60 !important;
+}
+#game .prototype-bottom #bottomWarehouse,
+#game .prototype-bottom #advanceDayShortcut {
+  position:relative !important;
+  z-index:61 !important;
+}
