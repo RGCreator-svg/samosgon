@@ -35,7 +35,11 @@ try{
   assert.ok(await page.locator(".game-footer-dock").isVisible(),"Bottom HUD dock is missing");
   const dock=await page.locator(".game-footer-dock").boundingBox();
   assert.ok(dock.y+dock.height>=950,"Pumpkin and event log are not anchored to the bottom of the viewport");
-  assert.ok(await page.locator(".event-console").isVisible(),"Event log is hidden from the bottom dock");
+  assert.ok(await page.locator(".event-console").isVisible(),"Event log launcher is missing from the bottom dock");
+  assert.equal(await page.locator("#eventConsole").evaluate(el=>el.open),false,"Event log should start collapsed to reduce HUD clutter");
+  await page.locator("#eventConsole > summary").click();
+  assert.equal(await page.locator("#eventConsole").evaluate(el=>el.open),true,"Event log summary did not expand the event history");
+  await page.locator("#eventConsole > summary").click();
   assert.ok(await page.locator(".xp-panel").boundingBox().then(box=>box.height<45),"XP display is not compact");
   assert.ok(await page.locator("#homestead-scene").count()===1,"Prototype SVG scene is missing");
   assert.equal(await page.locator(".pumpkin-mascot").count(),1,"There must be exactly one interactive pumpkin mascot");
