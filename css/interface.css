@@ -1018,3 +1018,21 @@ body { min-height:100vh; }
     transform:translateX(50%)!important;
   }
 }
+
+/* REV 10.34 — remove horizontal overlap between beds; retain half-bed row staggering. */
+#game #farm #farmPlots.farm-plots > .farm-plot {
+  width:100%!important;
+  margin-left:0!important;
+  margin-right:0!important;
+}
+#game #farm #farmPlots.farm-plots > .farm-plot:nth-child(n+4):nth-child(-n+6),
+#game #farm #farmPlots.farm-plots > .farm-plot:nth-child(n+10):nth-child(-n+12) {
+  transform:translateX(50%)!important;
+}
+@media(max-width:600px) {
+  #game #farm #farmPlots.farm-plots > .farm-plot { width:100%!important; margin-left:0!important; margin-right:0!important; }
+  #game #farm #farmPlots.farm-plots > .farm-plot:nth-child(3),
+  #game #farm #farmPlots.farm-plots > .farm-plot:nth-child(4),
+  #game #farm #farmPlots.farm-plots > .farm-plot:nth-child(7),
+  #game #farm #farmPlots.farm-plots > .farm-plot:nth-child(8) { transform:translateX(50%)!important; }
+}
