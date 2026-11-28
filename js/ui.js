@@ -651,6 +651,34 @@ export function renderWorld(state) {
   // Сцены отражают состояние хозяйства и обновляются вместе с обычным рендером.
   const homeScene = $(".homestead-scene");
   applySeasonToScene(homeScene);
+  const house = Math.max(0, Math.min(100, Number(state.house) || 0));
+  const houseStage = house < 40 ? "ruined" : house < 70 ? "repairing" : house < 100 ? "restored" : "complete";
+  if (homeScene) {
+    homeScene.dataset.houseStage = houseStage;
+    homeScene.setAttribute("aria-label", ({
+      ruined:"Сильно обветшавший деревенский дом, ремонт ещё не начат",
+      repairing:"Деревенский дом постепенно ремонтируется",
+      restored:"Отремонтированный деревенский дом, остались последние улучшения",
+      complete:"Полностью восстановленный деревенский дом"
+    })[houseStage]);
+    const caption = homeScene.querySelector(".scene-caption strong");
+    if (caption) caption.textContent = ({
+      ruined:"Дом ждёт ремонта",
+      repairing:"Дом постепенно оживает",
+      restored:"Почти родной дом",
+      complete:"Дом полностью восстановлен"
+    })[houseStage];
+    const status = $(".homestead-status");
+    if (status) {
+      status.dataset.stage = houseStage;
+      status.lastChild.textContent = ({
+        ruined:" Требует капитального ремонта",
+        repairing:" Идёт восстановление",
+        restored:" Почти готов",
+        complete:" Полностью восстановлен"
+      })[houseStage];
+    }
+  }
   const productionActive = Boolean(state.production?.active || state.mashHouse?.batches?.length || state.distillation?.active || state.viticulture?.batches?.some(batch => batch.status === "fermenting" || batch.status === "aging" || batch.daysLeft > 0));
   const productionReady = Boolean(state.production?.ready || state.mashHouse?.batches?.some(batch => Number(batch.daysLeft) <= 0));
   if (homeScene) { homeScene.dataset.production = productionReady ? "ready" : productionActive ? "active" : "idle"; }
@@ -691,9 +719,13 @@ export function renderWorld(state) {
 
   setText(
     "#homeDescription",
-    state.house >= 70
-      ? "Дом почти уютный. Осталось выгнать сквозняк и пару мышей."
-      : "Крыша местами есть. В дождь можно выбирать, где именно стоять."
+    state.house >= 100
+      ? "Дом полностью восстановлен: крыша не течёт, стены утеплены, окна целы. Теперь здесь действительно можно жить."
+      : state.house >= 70
+        ? "Дом уже выглядит уютно. Остались последние штрихи: отделка, мелкий ремонт и защита от сквозняков."
+        : state.house >= 40
+          ? "Дом постепенно оживает: стены укреплены, но крыша и окна всё ещё требуют внимания."
+          : "Дом сильно обветшал: повреждена крыша, стены потемнели от времени, часть окон разбита. Пора начинать ремонт."
   );
 
   setText(
