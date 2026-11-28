@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Самогон · REV 10.5 — Новая жизнь</title>
-  <link rel="stylesheet" href="css/style.css?v=10.5">
+  <title>Самогон · REV 10.6 — Новая жизнь</title>
+  <link rel="stylesheet" href="css/style.css?v=10.6">
 </head>
 <body>
   <section id="intro" class="intro">
@@ -471,10 +471,10 @@
         <img src="assets/images/Squash.png" alt="Тыква" />
       </div>
     </div>
-    <section class="panel event-console">
-      <h2>▣ Журнал событий</h2>
+    <details class="panel event-console" id="eventConsole">
+      <summary><span>▣ Журнал событий</span><span class="event-count" id="eventCount" aria-label="Количество событий">0</span></summary>
       <div id="notifications"></div>
-    </section>
+    </details>
     </div>
 
   </main>
@@ -482,6 +482,6 @@
 
   </div>
 
-  <script type="module" src="js/game.js?v=10.5"></script>
+  <script type="module" src="js/game.js?v=10.6"></script>
 </body>
 </html>
