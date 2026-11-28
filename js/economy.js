@@ -394,7 +394,7 @@ export function initEconomy(state, { render, notify }) {
   if (!$("#sharedPurchaseCart")) {
     const cartSection = element("section", "panel shared-purchase-cart");
     cartSection.id = "sharedPurchaseCart";
-    cartSection.append(element("h2", "", "🛒 Единая корзина закупок"), element("p", "economy-detail", "Здесь собраны только материалы и комплектующие для заказов, ремонта и улучшений. Стоимость работы списывается отдельно при оформлении ремонта."));
+    cartSection.append(element("h2", "", "🛒 Единая корзина закупок"), element("p", "economy-detail", "Здесь собраны только материалы и комплектующие для заказов, ремонта и улучшений. Работа оплачивается отдельно после получения материалов, в момент выполнения ремонта."));
     const cartRoot = element("div", "material-cart"); cartRoot.id = "materialCart"; cartSection.append(cartRoot);
     const eventPanel = $("#notifications")?.closest(".event-console");
     if (eventPanel?.parentElement === game) game.insertBefore(cartSection, eventPanel); else game.append(cartSection);
