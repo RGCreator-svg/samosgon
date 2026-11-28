@@ -748,3 +748,5 @@ body { min-height:100vh; }
 @keyframes farm-animal-idle { 0%,100% { transform:translateY(0) rotate(-1deg); } 35% { transform:translateY(-5px) rotate(1deg); } 70% { transform:translateY(-1px) rotate(0); } }
 @keyframes farm-animal-hop { 0%,100% { transform:translateY(0) rotate(0); } 45% { transform:translateY(-13px) rotate(-7deg); } }
 @media(prefers-reduced-motion:reduce) { #game .farm-plot-crop,#game .farm-plot-action,#game .farm-yard-animal { animation:none !important; } }
+
+#game .farm-plot img[hidden] { display:none !important; }
