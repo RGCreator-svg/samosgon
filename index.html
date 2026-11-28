@@ -369,24 +369,19 @@
         <button type="button" data-seed="potato">🥔 Картофель</button>
         <button type="button" data-seed="carrot">🥕 Морковь</button>
         <button type="button" data-seed="cabbage">🥬 Капусту</button>
+        <button type="button" data-seed="tomato">🍅 Помидоры</button>
+        <button type="button" data-seed="cucumber">🥒 Огурцы</button>
+        <button type="button" data-seed="beet">🫜 Свёклу</button>
+        <button type="button" data-seed="pepper">🫑 Перец</button>
+        <button type="button" data-seed="pumpkin">🎃 Тыкву</button>
+        <button type="button" data-seed="radish">🔴 Редис</button>
         <button type="button" class="seed-picker-cancel" data-seed-cancel>Отмена</button>
       </div>
-      <div class="farm-plots" aria-label="Интерактивные грядки">
-        <button class="farm-plot" type="button" data-plot-index="0" aria-label="Грядка 1: полить" title="Полить грядку">
-          <img class="farm-plot-ground" src="assets/images/farm/land_1.png" alt="" draggable="false">
-          <span class="farm-plot-crop" aria-label="Растение"></span>
-          <img class="farm-plot-action" src="assets/images/farm/need_take.png" alt="" draggable="false">
-        </button>
-        <button class="farm-plot" type="button" data-plot-index="1" aria-label="Грядка 2: прополоть" title="Прополоть грядку">
-          <img class="farm-plot-ground" src="assets/images/farm/land_2.png" alt="" draggable="false">
-          <span class="farm-plot-crop" aria-label="Растение"></span>
-          <img class="farm-plot-action" src="assets/images/farm/need_take.png" alt="" draggable="false">
-        </button>
-        <button class="farm-plot" type="button" data-plot-index="2" aria-label="Грядка 3: удобрить" title="Удобрить грядку">
-          <img class="farm-plot-ground" src="assets/images/farm/land_1.png" alt="" draggable="false">
-          <span class="farm-plot-crop" aria-label="Растение"></span>
-          <img class="farm-plot-action" src="assets/images/farm/need_take.png" alt="" draggable="false">
-        </button>
+      <div class="farm-garden-toolbar">
+        <span id="farmPlotCount">Грядки: 3 / 12</span>
+        <button id="expandFarm" type="button">➕ Пристроить грядку · 100 монет</button>
+      </div>
+      <div class="farm-plots" id="farmPlots" aria-label="Интерактивные грядки">
         <img class="farm-yard-animal animal-3" data-animation-clip="pig_full_front" src="assets/images/farm/farm_animal3.png" alt="Свинья" draggable="false">
       </div>
       <div class="location-heading"><div><span class="section-kicker">ЗЕМЛЯ И ТРУД</span><h2>🥕 Огород</h2></div><span class="location-tag">🌱 Сезонные посадки</span></div>
