@@ -579,7 +579,7 @@ function queueHomesteadRepair(action) {
   if(action==="garden"){state.garden=Math.min(100,state.garden+config.progress);}
   if(action==="orchard"){state.orchardRestored=true;state.trees=state.skills.includes("orchard_lore")?5:3;earnExperience(config.xp);}
   if(["house","barn","still","garden","orchard"].includes(action)||action.startsWith("house_")){
-    discoverRepairStory(state,action,notify);
+    discoverRepairStory(state,action.startsWith("house_")?"house":action,notify);
   }
   notify(`${config.name} выполнен. Работа: ${cost} монет; материалы списаны со склада.`);
   render();
