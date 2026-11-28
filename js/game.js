@@ -202,12 +202,17 @@ initProcessCenter(state, { render, notify, earnExperience });
 initProductionPlant(state, { render, notify, earnExperience });
 initCellar(state, { render, notify });
 initGamePresentation();
-registerCartHandler("basicBatch",(current,item)=>{
+const startBasicBatchFromCart=(current)=>{
   if(current.production.active||current.production.ready)return;
   current.energy=Math.max(0,current.energy-10);
   current.production.active=true;
   current.production.ready=false;
   current.production.daysLeft=current.skills.includes("patient_master")?1:2;
+};
+registerCartHandler("basicBatch",startBasicBatchFromCart);
+// Поддержка старых сохранений, где запуск браги ещё назывался homesteadRepair.
+registerCartHandler("homesteadRepair",(current,item)=>{
+  if(item.payload?.action==="basicBatch")startBasicBatchFromCart(current);
 });
 
 
