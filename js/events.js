@@ -74,7 +74,7 @@ const EVENTS = [
     title: "Мышиный рейд",
     text: "Мыши устроили ночной банкет. Пропала часть запасов картошки.",
     chance: 0.08,
-    apply(state) { removeInventory(state, "potato", 1); }
+    apply(state) { if(state.guardDog) return "Барс услышал шорох и прогнал мышей. Запасы целы!"; removeInventory(state, "potato", 1); return ""; }
   },
   {
     title: "Петрович и уровень",
@@ -103,6 +103,6 @@ export function startNewDay(state, notify) {
   if (Math.random() > 0.68) return;
 
   const event = EVENTS[Math.floor(Math.random() * EVENTS.length)];
-  event.apply(state);
-  notify(`Событие: ${event.title}. ${event.text}`);
+  const outcome=event.apply(state);
+  notify(`Событие: ${event.title}. ${outcome || event.text}`);
 }
