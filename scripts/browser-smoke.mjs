@@ -61,39 +61,45 @@ try{
   await cartToggle.click();
   assert.ok(await page.locator("#sharedPurchaseCart").evaluate(el=>el.classList.contains("is-open")),"Cart launcher did not open the cart");
 
-  // Repair labor is charged directly; only required materials appear in the cart.
+  // Repair lifecycle: order missing materials, wait for their delivery, collect, then pay labor and repair.
   await page.locator("#devToggle").click();
   await page.locator('#devForm [name="money"]').fill("1000");
   await page.locator("#devForm .dev-apply").click();
-  await page.locator("#repairHouse").click();
-  assert.match(await page.locator("#materialCart").innerText(),/Пиломатериалы|Краска|Крепёж/i,"House repair materials were not queued");
-  assert.doesNotMatch(await page.locator("#materialCart").innerText(),/Ремонт дома|30 монет/,"Repair service fee leaked into the material cart");
-  assert.equal(await page.locator("#money").innerText(),"970","House repair labor fee was not charged immediately");
-  await page.locator("#materialCart [data-economy-action='pay']").click();
-  assert.match(await page.locator("#notifications").innerText(),/корзина оплачена/i,"Cart payment did not execute");
 
-  await page.locator('.navigation [data-tab="farm"]').click();
-  await page.locator("#repairGarden").click();
-  assert.match(await page.locator("#materialCart").innerText(),/Пиломатериалы|Крепёж/i,"Garden clearing materials were not queued");
-  assert.doesNotMatch(await page.locator("#materialCart").innerText(),/Расчистка огорода/,"Garden service leaked into the material cart");
-  await cartToggle.click();
-  await page.locator("#materialCart [data-economy-action='pay']").click();
-  await page.locator("#harvestVegetables").click();
+  async function repairThroughDelivery(tabId, buttonSelector, partIds, progressSelector, laborCost, completeLabel) {
+    await page.locator(`.navigation [data-tab="${tabId}"]`).click();
+    const progress=page.locator(progressSelector);
+    const beforeProgress=await progress.innerText();
+    const beforeMoney=Number((await page.locator("#money").innerText()).replace(/[^0-9-]/g,""));
+    await page.locator(buttonSelector).click();
+    assert.match(await page.locator("#materialCart").innerText(),/Пиломатериалы|Металлические заготовки|Крепёж|Инструмент/i,"Repair materials were not added to the cart");
+    assert.equal(Number((await page.locator("#money").innerText()).replace(/[^0-9-]/g,"")),beforeMoney,"Labor must not be charged when materials are merely ordered");
+    assert.equal(await progress.innerText(),beforeProgress,"Repair must not happen when the order is added");
+    if(!await page.locator("#sharedPurchaseCart").evaluate(el=>el.classList.contains("is-open"))) await cartToggle.click();
+    await page.locator("#materialCart [data-economy-action='pay']").click();
+    assert.equal(await progress.innerText(),beforeProgress,"Paying for materials must not perform the repair");
+    assert.match(await page.locator("#notifications").innerText(),/доставк/i,"Cart payment did not start a delivery");
+    const deliveryDays={timber:1,fasteners:1,paint:1,metal:2,tools:2};
+    const maxDeliveryDays=partIds.reduce((max,id)=>Math.max(max,deliveryDays[id]||1),0);
+    for(let day=0;day<maxDeliveryDays;day++) await page.locator("#sleepButton").click();
+    await page.locator('.navigation [data-tab="economy"]').click();
+    for(const id of partIds){
+      const collect=page.locator(`#partsDeliveries [data-economy-action="collectAll:${id}"]`);
+      if(await collect.count()) await collect.click();
+    }
+    await page.locator(`.navigation [data-tab="${tabId}"]`).click();
+    const moneyBeforeWork=Number((await page.locator("#money").innerText()).replace(/[^0-9-]/g,""));
+    await page.locator(buttonSelector).click();
+    assert.notEqual(await progress.innerText(),beforeProgress,"Repair must take effect only after materials are on the warehouse");
+    assert.equal(Number((await page.locator("#money").innerText()).replace(/[^0-9-]/g,"")),moneyBeforeWork-laborCost,"Labor must be charged at the moment of repair");
+    if(completeLabel) assert.match(await page.locator(buttonSelector).innerText(),new RegExp(completeLabel));
+  }
 
-  await page.locator('.navigation [data-tab="orchard"]').click();
-  await page.locator("#restoreOrchard").click();
-  assert.match(await page.locator("#materialCart").innerText(),/Пиломатериалы|Инструмент|Крепёж/i,"Orchard restoration materials were not queued");
-  assert.doesNotMatch(await page.locator("#materialCart").innerText(),/Восстановление сада/,"Orchard service leaked into the material cart");
-  await cartToggle.click();
-  await page.locator("#materialCart [data-economy-action='pay']").click();
-  await page.locator("#harvestFruit").click();
+  await repairThroughDelivery("home","#repairHouse",["timber","fasteners","paint"],"#houseValue",30);
+  await repairThroughDelivery("farm","#repairGarden",["timber","fasteners"],"#gardenValue",20);
+  await repairThroughDelivery("orchard","#restoreOrchard",["timber","fasteners","tools"],"#orchardValue",40,"Готово");
+  await repairThroughDelivery("barn","#repairStill",["metal","fasteners","tools"],"#stillValue",50);
 
-  await page.locator('.navigation [data-tab="barn"]').click();
-  await page.locator("#repairStill").click();
-  assert.match(await page.locator("#materialCart").innerText(),/Металлические заготовки|Инструмент|Крепёж/i,"Still repair materials were not queued");
-  assert.doesNotMatch(await page.locator("#materialCart").innerText(),/Ремонт аппарата/,"Still service leaked into the material cart");
-  await cartToggle.click();
-  await page.locator("#materialCart [data-economy-action='pay']").click();
 
   // Scene hotspots use the existing game's tab controller.
   await page.locator("#scene-tree").click({force:true});
