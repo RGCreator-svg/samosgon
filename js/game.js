@@ -28,6 +28,7 @@ let state = loadGame();
 // Старые сохранения получают поэтапное состояние деталей дома без потери общего прогресса.
 state.houseParts ??= { roof: Number(state.house)||0, walls: Number(state.house)||0, windows: Number(state.house)||0, floor: Number(state.house)||0, heating: Number(state.house)||0 };
 state.farmPlots ??= ["needs_water","needs_weed","needs_fertilize"];
+state.guardDog ??= false;
 state.farmPlotCooldowns ??= {};
 
 // Миграция сохранений: старые партии не теряют прогресс.
@@ -137,7 +138,7 @@ function renderFarmPlots() {
   buttons.forEach((plot,index)=>{
     const stage=stages[plots[index]]?plots[index]:"empty",info=stages[stage],remaining=farmCooldownRemaining(index);
     const cropInfo=FARM_CROPS[state.farmCropTypes[index]]||null;
-    plot.dataset.plotIndex=String(index);plot.dataset.stage=stage;plot.dataset.cooldown=remaining>0?"true":"false";
+    plot.dataset.plotIndex=String(index);plot.dataset.stage=stage;plot.dataset.cooldown=remaining>0?"true":"false";plot.dataset.cropType=state.farmCropTypes[index]||"none";
     plot.setAttribute("aria-label","Грядка "+(index+1)+": "+(cropInfo?cropInfo.name+". ":"")+info.label+(remaining>0?". Ожидание "+Math.ceil(remaining/1000)+" сек.":""));
     plot.title=(cropInfo?cropInfo.name+" · ":"")+info.label;
     const ground=plot.querySelector(".farm-plot-ground"),crop=plot.querySelector(".farm-plot-crop"),action=plot.querySelector(".farm-plot-action");
@@ -161,8 +162,15 @@ setInterval(()=>{
   });
 },250);
 
+function renderGuardDog(){
+  const post=$("#guardDogPost"),button=$("#guardDogAction"),status=$("#guardDogStatus");
+  if(post)post.dataset.active=state.guardDog?"true":"false";
+  if(button){button.disabled=Boolean(state.guardDog);button.textContent=state.guardDog?"✓ Собака охраняет дом":"Построить будку · 120 монет";}
+  if(status)status.textContent=state.guardDog?"Барс на посту! Ночью он сторожит двор и отгоняет мышей от запасов.":"Участок пока без охраны. Собака будет отгонять мышей от запасов.";
+}
 function render() {
   state.waterSystem ??= { level: 0 };
+  renderGuardDog();
   renderAll(state);
   renderFarmPlots();
   renderHouseRepairDetails();
@@ -272,6 +280,16 @@ if (startButton && state.gameStarted) startButton.textContent = "Продолж�
 
 // Единый делегированный обработчик работает и для вкладок,
  // которые подключаются динамически отдельными игровыми модулями.
+$("#guardDogAction")?.addEventListener("click",()=>{
+  if(state.guardDog){notify("Барс уже на посту. Он внимательно следит за двором.");return;}
+  const cost=120,materials={timber:2,fasteners:1};
+  if(state.money<cost){notify("Для будки нужно "+cost+" монет.");return;}
+  const missing=Object.entries(materials).filter(([id,n])=>(Number(state.parts?.[id])||0)<n);
+  if(missing.length){notify("Для будки не хватает: "+missing.map(([id,n])=>(PARTS.find(p=>p.id===id)?.name||id)+" × "+(n-(Number(state.parts?.[id])||0))).join(", ")+".");return;}
+  state.money-=cost;Object.entries(materials).forEach(([id,n])=>{state.parts[id]-=n;});
+  state.guardDog=true;earnExperience(12);notify("Будка готова! Барс занял пост и теперь охраняет усадьбу.");render();
+});
+
 $("#game")?.addEventListener("click", (event) => {
   const button = event.target.closest("[data-tab]");
   if (!button) return;
