@@ -67,6 +67,8 @@ function notify(message) {
   while (container.children.length > 8) {
     container.lastChild.remove();
   }
+  const eventCount = document.querySelector("#eventCount");
+  if (eventCount) eventCount.textContent = String(container.children.length);
 }
 
 function render() {
