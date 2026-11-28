@@ -176,6 +176,12 @@ try{
   assert.equal(await page.locator("#barn .location-animals .farm-yard-animal").count(),2,"Sheep and the second pig should be moved to the barn screen");
   const barnDock=await page.locator(".game-footer-dock").boundingBox();
   assert.ok(barnDock.y+barnDock.height>=950,"Bottom dock moved away from the bottom on barn");
+  for(const tabId of ["skills","goals","notebook"]){
+    await clickNavTab(tabId);
+    assert.equal(await page.locator("#"+tabId).evaluate(el=>el.classList.contains("hidden")),false,tabId+" screen did not open");
+    const screenDock=await page.locator(".game-footer-dock").boundingBox();
+    assert.ok(screenDock.y+screenDock.height>=950,"Bottom dock moved away from the bottom on "+tabId);
+  }
   await clickNavTab("market");
   assert.equal(await page.locator("#market").evaluate(el=>el.classList.contains("hidden")),false,"Top navigation did not open market");
   await page.locator("#bottomWarehouse").click();
