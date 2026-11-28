@@ -71,7 +71,7 @@
     </nav> 
     <aside class="prototype-side" aria-label="Игровые цели">
       <button class="side-btn" type="button" data-tab="milestones"><span class="big">🏆</span>Достижения</button>
-      <button class="side-btn" type="button" data-tab="orders"><span class="big">📜</span>Задания</button>
+      <button class="side-btn" type="button" data-tab="quests"><span class="big">📜</span>Задания</button>
       <button class="side-btn" type="button" data-tab="goals"><span class="big">🎯</span>Цели</button>
     </aside>
     <aside class="prototype-task" aria-label="Текущая задача">
@@ -266,11 +266,14 @@
       <div id="skillTree" class="skill-tree"></div>
     </section>
 
-<section id="goals" class="tab-content panel hidden">
+<section id="quests" class="tab-content panel hidden">
+      <h2>📜 Задания</h2>
+      <p>Пошаговая история восстановления усадьбы. Выполненные этапы отмечаются автоматически по вашим действиям.</p>
+      <div id="storyQuestList" class="story-quest-list" aria-live="polite"></div>
+    </section>
+    <section id="goals" class="tab-content panel hidden">
       <h2>🎯 Цели хозяйства</h2>
       <p>План развития усадьбы: восстановить дом и сарай, расчистить огород и сад, наладить воду, затем расширять производство.</p>
-      <h3 class="story-quest-title">📜 Текущая цепочка заданий</h3>
-      <div id="storyQuestList" class="story-quest-list" aria-live="polite"></div>
       <ul class="homestead-goal-list">
         <li>🏚️ Восстановить бабушкин дом и мастерскую</li>
         <li>🌱 Поднять огород и вернуть к жизни фруктовый сад</li>
