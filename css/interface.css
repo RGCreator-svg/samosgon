@@ -760,3 +760,16 @@ body { min-height:100vh; }
 #game .farm-yard-animal.animal-6 { animation-delay:-1.75s; }
 #game .farm-yard-animal.animal-7 { animation-delay:-2.1s; }
 @media(max-width:560px) { #game .farm-yard-animal { width:34px; margin-left:-3px; } }
+
+
+/* REV 10.25 — remove the old illustrated garden scene; keep standalone plot and animal sprites. */
+#game #farm .farm-scene { display:none !important; }
+#game #farm #harvestVegetables { display:none !important; }
+#game .farm-plot-timer {
+  position:absolute; z-index:4; left:50%; top:8%; transform:translateX(-50%);
+  color:#fff4ce; font:700 14px/1.2 system-ui,sans-serif;
+  text-shadow:0 1px 3px #24180d,0 0 5px #24180d;
+  pointer-events:none; white-space:nowrap;
+}
+#game .farm-plot[data-cooldown="true"] { cursor:wait; filter:saturate(.72); }
+#game .farm-plot:disabled { opacity:1; }
