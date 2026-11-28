@@ -20,6 +20,16 @@
   @keyframes rise { 0%{transform:translateY(0); opacity:.5} 100%{transform:translateY(-28px); opacity:0} }
   .bird { animation: fly 14s linear infinite; }
   @keyframes fly { 0%{transform:translate(-60px,20px)} 50%{transform:translate(50vw,-10px)} 100%{transform:translate(110vw,30px)} }
+  .garden-bed { cursor:pointer; transition:filter .2s; }
+  .garden-bed:hover { filter:brightness(1.12) drop-shadow(0 0 5px #fff7); }
+  .crop-plant { transform-box:fill-box; transform-origin:50% 100%; animation:cropSway 3s ease-in-out infinite; }
+  @keyframes cropSway { 0%,100%{transform:rotate(-2deg) scale(1)} 50%{transform:rotate(2deg) scale(1.035)} }
+  .crop-pop { animation:cropPop .55s cubic-bezier(.2,1.5,.4,1) both; transform-box:fill-box; transform-origin:center bottom; }
+  @keyframes cropPop { from{opacity:0;transform:scale(.15) translateY(18px)} to{opacity:1;transform:scale(1) translateY(0)} }
+  .garden-actions { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0 14px; }
+  .garden-catalog { display:grid; grid-template-columns:repeat(auto-fit,minmax(135px,1fr)); gap:8px; }
+  .garden-crop { background:#fff1cf; border:1px solid #d9b57c; border-radius:10px; padding:9px; color:#5c3a1e; }
+  .garden-crop b { display:block; } .garden-crop small { color:#8a6a3e; }
 
   /* ===== ВЕРХНЯЯ ПАНЕЛЬ ===== */
   .top { position:absolute; top:0; left:0; right:0; display:flex; align-items:flex-start; gap:12px; padding:10px 14px; z-index:10; pointer-events:none; }
@@ -243,22 +253,7 @@
     </g>
 
     <!-- ---- ГРЯДКИ (кликабельные) ---- -->
-    <g id="beds">
-      <g class="bed clickable" data-idx="0" data-tip="Грядка с помидорами">
-        <rect x="120" y="660" width="300" height="60" rx="10" fill="#8a5a30" stroke="#6b431f" stroke-width="3"/>
-        <rect x="128" y="668" width="284" height="44" rx="8" fill="#5a7a30"/>
-        <circle cx="160" cy="680" r="9" fill="#e04a2a"/><circle cx="200" cy="700" r="9" fill="#e04a2a"/>
-        <circle cx="245" cy="682" r="9" fill="#e04a2a"/><circle cx="290" cy="702" r="9" fill="#e04a2a"/>
-        <circle cx="335" cy="680" r="9" fill="#e04a2a"/><circle cx="380" cy="700" r="9" fill="#e04a2a"/>
-      </g>
-      <g class="bed clickable" data-idx="1" data-tip="Грядка с зеленью">
-        <rect x="170" y="740" width="300" height="60" rx="10" fill="#8a5a30" stroke="#6b431f" stroke-width="3"/>
-        <rect x="178" y="748" width="284" height="44" rx="8" fill="#5a7a30"/>
-        <circle cx="215" cy="762" r="10" fill="#66b032"/><circle cx="260" cy="780" r="10" fill="#66b032"/>
-        <circle cx="308" cy="762" r="10" fill="#66b032"/><circle cx="355" cy="780" r="10" fill="#66b032"/>
-        <circle cx="400" cy="764" r="10" fill="#66b032"/>
-      </g>
-    </g>
+    <g id="beds"></g>
 
     <!-- ---- КОЛОДЕЦ (кликабельный) ---- -->
     <g id="well" class="clickable" data-tip="Колодец">
@@ -415,6 +410,8 @@ const S = {
   coins: 12450, energy: 78, gems: 25,
   level: 7, xp: 340, xpNeed: 1000,
   apples: 12, tomatoes: 8, greens: 15,
+  carrots: 0, cucumbers: 0, cabbage: 0, potatoes: 0, beets: 0, peppers: 0, pumpkins: 0, radishes: 0,
+  gardenPlots: [{crop:'tomatoes',plantedAt:Date.now()-900000,readyAt:Date.now()-1000},{crop:'greens',plantedAt:Date.now()-900000,readyAt:Date.now()-1000}],
   mash: 0, raw: 0, brandy: 0,
   storage: 35, storageMax: 1000,
   taskHave: 0, taskMax: 50,
@@ -427,16 +424,55 @@ const RECIPES = {
   raw:    { name:'Дистилляция',    ic:'🔥', time:35, need:{mash:2},  gives:'raw',  out:'Спирт-сырец', energy:4 },
   brandy: { name:'Выдержка бренди',ic:'🥃', time:50, need:{raw:1},   gives:'brandy', out:'Бренди', energy:3 }
 };
-const PRICES = { apples:15, tomatoes:12, greens:8, mash:40, raw:120, brandy:450 };
-const STORAGE_ITEM = { apples:1, tomatoes:1, greens:1, mash:2, raw:3, brandy:4 };
+const PRICES = { apples:15, tomatoes:12, greens:8, carrots:10, cucumbers:13, cabbage:11, potatoes:9, beets:10, peppers:16, pumpkins:18, radishes:8, mash:40, raw:120, brandy:450 };
+const STORAGE_ITEM = { apples:1, tomatoes:1, greens:1, carrots:1, cucumbers:1, cabbage:1, potatoes:1, beets:1, peppers:1, pumpkins:1, radishes:1, mash:2, raw:3, brandy:4 };
+const CROPS = {
+  tomatoes:{name:'Помидоры',emoji:'🍅',color:'#e04a2a',days:24,price:12},
+  greens:{name:'Зелень',emoji:'🥬',color:'#66b032',days:18,price:8},
+  carrots:{name:'Морковь',emoji:'🥕',color:'#f28b28',days:22,price:10},
+  cucumbers:{name:'Огурцы',emoji:'🥒',color:'#4c9b42',days:23,price:13},
+  cabbage:{name:'Капуста',emoji:'🥬',color:'#8fbd55',days:30,price:11},
+  potatoes:{name:'Картофель',emoji:'🥔',color:'#c6a16b',days:28,price:9},
+  beets:{name:'Свёкла',emoji:'🫜',color:'#a63b62',days:25,price:10},
+  peppers:{name:'Перец',emoji:'🫑',color:'#58a947',days:27,price:16},
+  pumpkins:{name:'Тыква',emoji:'🎃',color:'#e68b24',days:36,price:18},
+  radishes:{name:'Редис',emoji:'🔴',color:'#d94c55',days:15,price:8}
+};
+const PLOT_COST = 350;
+const MAX_PLOTS = 11;
+function plotProgress(plot){ return Math.max(0,Math.min(1,(Date.now()-plot.plantedAt)/(plot.readyAt-plot.plantedAt))); }
+function plotStage(plot){ const p=plotProgress(plot); return p>=1?3:p>=.66?2:p>=.28?1:0; }
+function renderGardenScene(){
+  const root=$('#beds'); if(!root)return;
+  root.replaceChildren();
+  S.gardenPlots.forEach((plot,index)=>{
+    const crop=CROPS[plot.crop]||CROPS.tomatoes;
+    const x=index===0?120:index===1?170:440+((index-2)%3)*330;
+    const y=index===0?660:index===1?740:660+Math.floor((index-2)/3)*76;
+    const ns='http://www.w3.org/2000/svg', g=document.createElementNS(ns,'g');
+    g.setAttribute('class','garden-bed clickable'); g.dataset.idx=String(index); g.dataset.tip='Грядка: '+crop.name;
+    const rect=(x,y,w,h,rx,fill,stroke,sw)=>{const n=document.createElementNS(ns,'rect');[['x',x],['y',y],['width',w],['height',h],['rx',rx],['fill',fill],['stroke',stroke],['stroke-width',sw]].forEach(([k,v])=>n.setAttribute(k,v));g.append(n);};
+    rect(x,y,300,60,10,'#8a5a30','#6b431f',3); rect(x+8,y+8,284,44,8,'#5a7a30','#3d6125',1);
+    const stage=plotStage(plot), plant=document.createElementNS(ns,'g'); plant.setAttribute('class','crop-plant crop-pop');
+    for(let i=0;i<5;i++){
+      const px=x+35+i*55, py=y+38-(i%2)*8;
+      const stem=document.createElementNS(ns,'path'); stem.setAttribute('d','M'+px+' '+py+' q-2 -'+(12+stage*5)+' 0 -'+(20+stage*10)); stem.setAttribute('stroke','#326b2c'); stem.setAttribute('stroke-width','3'); stem.setAttribute('fill','none'); plant.append(stem);
+      if(stage>0){const leaf=document.createElementNS(ns,'ellipse');leaf.setAttribute('cx',px-7);leaf.setAttribute('cy',py-12-stage*4);leaf.setAttribute('rx',5+stage*2);leaf.setAttribute('ry',3+stage);leaf.setAttribute('fill','#72b84c');plant.append(leaf);}
+      if(stage>=2){const fruit=document.createElementNS(ns,'circle');fruit.setAttribute('cx',px+2);fruit.setAttribute('cy',py-4);fruit.setAttribute('r',stage===3?7:4);fruit.setAttribute('fill',crop.color);fruit.setAttribute('stroke','#fff5');fruit.setAttribute('stroke-width','1');plant.append(fruit);}
+    }
+    g.append(plant);
+    if(stage===3){const ready=document.createElementNS(ns,'text');ready.setAttribute('x',x+268);ready.setAttribute('y',y+20);ready.setAttribute('font-size','17');ready.textContent='✨';g.append(ready);}
+    root.append(g);
+  });
+}
 
-function storageUsed(){ return S.apples + S.tomatoes + S.greens + S.mash*2 + S.raw*3 + S.brandy*4; }
+function storageUsed(){ return S.apples + Object.keys(CROPS).reduce((n,k)=>n+(S[k]||0),0) + S.mash*2 + S.raw*3 + S.brandy*4; }
 
 // ================== УТИЛИТЫ ==================
 const $ = s => document.querySelector(s);
 const fmt = n => n.toLocaleString('ru-RU');
 function save(){ try{ localStorage.setItem('farmSave', JSON.stringify(S)); }catch(e){} }
-function load(){ try{ const d=localStorage.getItem('farmSave'); if(d) Object.assign(S, JSON.parse(d)); }catch(e){} }
+function load(){ try{ const d=localStorage.getItem('farmSave'); if(d) Object.assign(S, JSON.parse(d)); }catch(e){} S.gardenPlots??=[{crop:'tomatoes',plantedAt:Date.now()-900000,readyAt:Date.now()-1000},{crop:'greens',plantedAt:Date.now()-900000,readyAt:Date.now()-1000}]; S.gardenPlots=S.gardenPlots.filter(p=>p&&p.crop).slice(0,MAX_PLOTS); }
 
 function toast(msg){
   const t = $('#toast'); t.textContent = msg; t.classList.add('show');
@@ -494,7 +530,7 @@ function finishProd(){
   S.prod = null;
   render();
 }
-setInterval(render, 1000);
+setInterval(()=>{updateGardenGrowth();render();if($('#modalOverlay').classList.contains('show')&&$('#modalBody').innerHTML.includes('Мои грядки'))showTabModal('garden');}, 1000);
 
 // ================== КЛИКИ ПО СЦЕНЕ ==================
 function clickable(el, handler){
@@ -511,18 +547,9 @@ clickable($('#tree'), e => {
   floatText(p.x, p.y, '+' + n + ' 🍎', '#ffd75e');
   render(); checkTask();
 });
-// Грядки
-document.querySelectorAll('.bed').forEach(b => {
-  clickable(b, e => {
-    if(!spendEnergy(1)) return;
-    const isTomato = b.dataset.idx === '0';
-    const n = 2;
-    if(isTomato) S.tomatoes += n; else S.greens += n;
-    addXp(6);
-    const p = scenePoint(e);
-    floatText(p.x, p.y, '+' + n + (isTomato ? ' 🍅' : ' 🥬'), '#aaffaa');
-    render();
-  });
+// Делегирование кликов по динамическим грядкам.
+$('#beds').addEventListener('click', e => {
+  const bed=e.target.closest('.garden-bed'); if(bed) window.harvestPlot(Number(bed.dataset.idx));
 });
 // Колодец
 clickable($('#well'), e => {
@@ -567,10 +594,13 @@ function showTabModal(name){
     h += '<div class="card"><div class="ci">🍰</div><div class="grow"><b>Пирог с яблоками</b><div class="sub">5 🍎 → монеты и опыт</div></div><button class="btn g" onclick="bakePie()" '+(S.apples<5?'disabled':'')+'>Испечь</button></div>';
   }
   if(name === 'garden' || name === 'orchard'){
-    h += '<p style="color:#8a6a3e;font-size:13px;margin-bottom:10px">Кликай по грядкам и яблоне прямо на экране, чтобы собирать урожай. Колодец даёт +3 энергии.</p>';
-    h += '<div class="card"><div class="ci">🍅</div><div class="grow"><b>Помидоры: '+S.tomatoes+'</b></div><button class="btn o" onclick="sellItem(\'tomatoes\')">Продать</button></div>';
-    h += '<div class="card"><div class="ci">🥬</div><div class="grow"><b>Зелень: '+S.greens+'</b></div><button class="btn o" onclick="sellItem(\'greens\')">Продать</button></div>';
+    h += '<p style="color:#8a6a3e;font-size:13px;margin-bottom:10px">Выбирай культуру, сажай её на свободные грядки и собирай урожай после созревания. Растения плавно проходят стадии роста.</p>';
+    h += '<div class="garden-actions"><button class="btn g" onclick="expandGarden()" '+(S.gardenPlots.length>=MAX_PLOTS||S.coins<PLOT_COST?'disabled':'')+'>➕ Новая грядка · '+fmt(PLOT_COST)+' 🪙</button><span style="color:#8a6a3e;font-size:12px;align-self:center">Занято '+S.gardenPlots.length+'/'+MAX_PLOTS+'</span></div>';
+    h += '<div class="garden-catalog">'+Object.entries(CROPS).map(([id,c])=>'<div class="garden-crop"><b>'+c.emoji+' '+c.name+'</b><small>Рост: '+c.days+' сек. · '+c.price+' 🪙/шт.</small><button class="btn b" style="width:100%;margin-top:6px" onclick="selectCrop(\''+id+'\')">Посадить</button></div>').join('')+'</div>';
+    h += '<h3 style="color:#6b431f;margin:14px 0 8px">Мои грядки</h3>';
+    h += S.gardenPlots.map((p,i)=>{const crop=CROPS[p.crop],ready=Date.now()>=p.readyAt,remaining=Math.max(0,Math.ceil((p.readyAt-Date.now())/1000));return '<div class="card garden-bed-row"><div class="ci">'+crop.emoji+'</div><div class="grow"><b>Грядка '+(i+1)+' · '+crop.name+'</b><div class="sub">'+(ready?'Урожай созрел! Можно собирать':'Рост: '+Math.round(plotProgress(p)*100)+'% · осталось '+remaining+' сек.')+'</div></div><button class="btn '+(ready?'g':'o')+'" onclick="harvestPlot('+i+')" '+(ready?'':'disabled')+'>'+(ready?'Собрать':'Растёт')+'</button></div>';}).join('');
     h += '<div class="card"><div class="ci">🍎</div><div class="grow"><b>Яблоки: '+S.apples+'</b><div class="sub">Нужны для браги</div></div><button class="btn o" onclick="sellItem(\'apples\')">Продать</button></div>';
+    for(const [id,crop] of Object.entries(CROPS)) h += '<div class="card"><div class="ci">'+crop.emoji+'</div><div class="grow"><b>'+crop.name+': '+(S[id]||0)+'</b></div><button class="btn o" onclick="sellItem(\''+id+'\')" '+((S[id]||0)?'':'disabled')+'>Продать</button></div>';
   }
   if(name === 'shed'){
     h += '<div class="card"><div class="ci">🪣</div><div class="grow"><b>Ремонтный набор</b><div class="sub">Апгрейд склада: +500 к лимиту</div></div><button class="btn b" onclick="upgradeStorage()" '+(S.coins<2000?'disabled':'')+'>2 000 🪙</button></div>';
@@ -639,6 +669,34 @@ window.sellItem = k => {
   S[k]--; addCoins(PRICES[k]); addXp(10);
   toast('💰 +' + PRICES[k] + ' 🪙 за ' + NAMES[k]); closeModal(); render();
 };
+window.selectCrop = id => {
+  if(!CROPS[id])return;
+  if(S.gardenPlots.length>=MAX_PLOTS)return toast('🌱 Сначала расширь огород!');
+  if(!spendEnergy(1))return;
+  const now=Date.now(); S.gardenPlots.push({crop:id,plantedAt:now,readyAt:now+CROPS[id].days*1000});
+  renderGardenScene(); toast('🌱 Посажено: '+CROPS[id].name); showTabModal('garden'); render();
+};
+window.expandGarden = () => {
+  if(S.gardenPlots.length>=MAX_PLOTS)return toast('Участок уже максимально расширен.');
+  if(S.coins<PLOT_COST)return toast('Не хватает монет на новую грядку.');
+  S.coins-=PLOT_COST; const now=Date.now();
+  S.gardenPlots.push({crop:'greens',plantedAt:now,readyAt:now+CROPS.greens.days*1000});
+  renderGardenScene(); toast('🪵 Новая грядка пристыкована к огороду!'); showTabModal('garden'); render();
+};
+window.harvestPlot = index => {
+  const plot=S.gardenPlots[index]; if(!plot||Date.now()<plot.readyAt)return toast('🌿 Урожай ещё растёт!');
+  if(!spendEnergy(1))return;
+  const crop=CROPS[plot.crop],amount=3; S[plot.crop]=(S[plot.crop]||0)+amount; addXp(8);
+  const x=index===0?120:index===1?170:440+((index-2)%3)*330, y=index===0?660:index===1?740:660+Math.floor((index-2)/3)*76;
+  const rect=$('#scene').getBoundingClientRect(); floatText((x+150)*rect.width/1600,(y+20)*rect.height/900,'+'+amount+' '+crop.emoji,'#aaffaa');
+  const now=Date.now(); plot.plantedAt=now; plot.readyAt=now+crop.days*1000;
+  renderGardenScene(); render(); showTabModal('garden'); toast('🧺 Собрано: '+crop.name+' ×'+amount);
+};
+function updateGardenGrowth(){
+  let changed=false;
+  S.gardenPlots.forEach(p=>{const stage=plotStage(p);if(p._stage!==stage){p._stage=stage;changed=true;}});
+  if(changed)renderGardenScene();
+}
 function checkTask(){
   if(S.taskHave >= S.taskMax){
     addCoins(1500); addXp(150); S.taskHave = S.taskMax;
@@ -715,6 +773,7 @@ setInterval(() => { S.day++; render(); }, 60000);
 
 // ================== СТАРТ ==================
 load();
+renderGardenScene();
 render();
 </script>
 </body>
