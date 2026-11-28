@@ -888,3 +888,42 @@ body { min-height:100vh; }
     gap:0;
   }
 }
+
+/* REV 10.30 — interlocking isometric bed layout: stagger rows and overlap diamond corners. */
+#game #farm .farm-plots {
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  column-gap:0!important;
+  row-gap:0!important;
+  width:min(900px,100%);
+  padding:0 8%;
+  box-sizing:border-box;
+}
+#game #farm .farm-plots .farm-plot {
+  width:100%;
+  max-width:none;
+  margin:0 0 -68px;
+  justify-self:stretch;
+}
+#game #farm .farm-plots .farm-plot:nth-child(6n+4),
+#game #farm .farm-plots .farm-plot:nth-child(6n+5),
+#game #farm .farm-plots .farm-plot:nth-child(6n+6) {
+  transform:translate(50%,-68px);
+  margin-bottom:-68px;
+}
+#game #farm .farm-plots .farm-plot:hover,
+#game #farm .farm-plots .farm-plot:focus-visible { z-index:2; }
+#game #farm .farm-plots .farm-yard-animal {
+  grid-column:1/-1;
+  transform:none;
+  margin:0 5% 0 0;
+}
+@media(max-width:600px) {
+  #game #farm .farm-plots { grid-template-columns:repeat(2,minmax(0,1fr)); padding:0 5%; }
+  #game #farm .farm-plots .farm-plot { margin-bottom:-42px; }
+  #game #farm .farm-plots .farm-plot:nth-child(6n+4),
+  #game #farm .farm-plots .farm-plot:nth-child(6n+5),
+  #game #farm .farm-plots .farm-plot:nth-child(6n+6) { transform:translate(0,-42px); margin-bottom:-42px; }
+  #game #farm .farm-plots .farm-plot:nth-child(4n+3),
+  #game #farm .farm-plots .farm-plot:nth-child(4n+4) { transform:translate(0,-42px); }
+}
