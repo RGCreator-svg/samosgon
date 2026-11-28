@@ -231,3 +231,79 @@
 }
 #game #farm .farm-scene > :not(.loc-sign) { display:none !important; }
 #game #farm .farm-scene .loc-sign { z-index:1; }
+
+
+/* REV 10.10 — depth, framing and small-screen polish for the orchard and workshop. */
+#game .location-panel .location-scene {
+  min-height:220px;
+  border-color:#a58a5b;
+  box-shadow:inset 0 -48px 58px #17231866,0 8px 22px #0003;
+}
+#game .orchard-scene {
+  background:linear-gradient(180deg,#9bb6a9,#d4c99d 68%,#61794b);
+}
+#game .orchard-scene::before {
+  content:"";
+  position:absolute;
+  inset:0;
+  z-index:4;
+  pointer-events:none;
+  background:linear-gradient(90deg,#1b2b1d44,transparent 18% 82%,#1b2b1d33),linear-gradient(0deg,#17251944,transparent 42%);
+}
+#game .orchard-scene .orchard-tree {
+  filter:drop-shadow(0 10px 7px #26351f66);
+  transform-origin:50% 100%;
+}
+#game .orchard-scene .orchard-tree i {
+  box-shadow:inset -12px -12px 0 #263d2c55, inset 7px 7px 0 #d5d18a22,0 5px 12px #25341e44;
+}
+#game .orchard-scene .orchard-path {
+  filter:drop-shadow(0 3px 3px #25331d66);
+}
+#game .barn-scene {
+  background:linear-gradient(180deg,#9caa9b 0%,#c2b58e 58%,#69543b 100%);
+}
+#game .barn-scene::before {
+  content:"";
+  position:absolute;
+  left:0;right:0;bottom:0;height:34%;
+  z-index:4;
+  pointer-events:none;
+  background:linear-gradient(0deg,#30261966,transparent);
+}
+#game .barn-scene .barn-wall {
+  background:repeating-linear-gradient(90deg,#765338 0 12px,#8c6545 13px 17px,#62462f 18px 20px);
+  box-shadow:inset 0 0 35px #241b14aa, inset 0 12px 0 #d5b17a22,10px 13px 25px #0006;
+}
+#game .barn-scene .barn-roof {
+  background:repeating-linear-gradient(165deg,#44362b 0 9px,#594331 10px 13px,#76583e 14px 20px);
+}
+#game .barn-scene .barn-still {
+  filter:drop-shadow(0 7px 6px #21170f99);
+}
+#game .location-scene .loc-sign {
+  max-width:min(82%,360px);
+  border-color:#d8bd83aa;
+  box-shadow:0 7px 20px #0006;
+}
+#game .location-heading { align-items:flex-end; }
+#game .location-heading .section-kicker { color:#b9a477; letter-spacing:.14em; }
+#game .location-panel>p { line-height:1.55; }
+#game .location-panel .action-requirements {
+  margin:-5px 0 12px;
+  color:#b9ad96;
+  font-size:.82rem;
+  line-height:1.45;
+}
+@media(max-width:560px) {
+  #game .location-panel { padding:10px; }
+  #game .location-panel .location-scene { height:clamp(205px,58vw,270px); min-height:205px; }
+  #game .location-scene .loc-sign { left:9px;bottom:9px;gap:2px;padding:7px 9px; }
+  #game .location-scene .loc-sign strong { font-size:1rem; }
+  #game .location-scene .loc-sign span { font-size:.65rem; }
+  #game .location-heading { margin:13px 2px 7px; }
+  #game .location-tag { font-size:.68rem; padding:5px 8px; }
+}
+@media(prefers-reduced-motion:reduce) {
+  #game .orchard-scene[data-stage="restored"] .orchard-tree { animation:none !important; }
+}
