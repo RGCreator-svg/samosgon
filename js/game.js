@@ -168,9 +168,14 @@ $("#startGame")?.addEventListener("click", () => {
 
 // Каждый запуск начинается с титульного экрана. Сохранение загружается,
 // но игрок сам решает, когда перейти к хозяйству.
-$("#intro")?.classList.remove("hidden");
-$("#game")?.classList.add("hidden");
 const startButton = $("#startGame");
+if (state.gameStarted) {
+  showGame();
+  showTab("home");
+} else {
+  $("#intro")?.classList.remove("hidden");
+  $("#game")?.classList.add("hidden");
+}
 if (startButton && state.gameStarted) startButton.textContent = "Продолжить хозяйство";
 
 // Единый делегированный обработчик работает и для вкладок,
