@@ -122,6 +122,9 @@ export function initGamePresentation(){
     homeHeading.after(objective);
   }
   initSceneInteractions();
+  document.querySelectorAll(".farm-plot").forEach(plot=>plot.addEventListener("click",()=>{
+    document.querySelector("#harvestVegetables")?.click();
+  }));
   document.querySelector("#bottomWarehouse")?.addEventListener("click",()=>{
     const warehouse=document.querySelector(".warehouse-panel");
     if(warehouse){
