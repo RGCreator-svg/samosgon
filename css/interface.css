@@ -927,3 +927,41 @@ body { min-height:100vh; }
   #game #farm .farm-plots .farm-plot:nth-child(4n+3),
   #game #farm .farm-plots .farm-plot:nth-child(4n+4) { transform:translate(0,-42px); }
 }
+
+/* REV 10.31 — correct bed packing: keep three true columns, no half-cell row shifts. */
+#game #farm .farm-plots {
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  column-gap:0!important;
+  row-gap:0!important;
+  padding:0 2%!important;
+  align-items:end;
+  justify-items:stretch;
+  overflow:visible;
+}
+#game #farm .farm-plots .farm-plot {
+  width:112%!important;
+  max-width:none!important;
+  margin:0 0 -34px -6%!important;
+  transform:none!important;
+  justify-self:stretch;
+  position:relative;
+}
+#game #farm .farm-plots .farm-plot:nth-child(n+4) { margin-top:0!important; }
+#game #farm .farm-plots .farm-plot:hover,
+#game #farm .farm-plots .farm-plot:focus-visible { z-index:3; }
+#game #farm .farm-plots .farm-yard-animal {
+  grid-column:1/-1;
+  transform:none!important;
+  margin:0 5% 0 0!important;
+}
+@media(max-width:600px) {
+  #game #farm .farm-plots {
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    padding:0 2%!important;
+  }
+  #game #farm .farm-plots .farm-plot {
+    width:108%!important;
+    margin:0 0 -24px -4%!important;
+  }
+}
