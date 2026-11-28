@@ -110,7 +110,16 @@ export function initGamePresentation(){
   initSceneInteractions();
   document.querySelector("#bottomWarehouse")?.addEventListener("click",()=>{
     const warehouse=document.querySelector(".warehouse-panel");
-    if(warehouse){warehouse.open=!warehouse.open;warehouse.scrollIntoView({block:"nearest",behavior:"smooth"});}
+    if(warehouse){
+      const opening=!warehouse.open;
+      warehouse.open=opening;
+      if(opening){
+        document.querySelector("#sharedPurchaseCart")?.classList.remove("is-open");
+        document.querySelector(".cart-overlay-scrim")?.classList.remove("is-visible");
+        document.querySelector("#cartToggle")?.setAttribute("aria-expanded","false");
+      }
+      warehouse.scrollIntoView({block:"nearest",behavior:"smooth"});
+    }
   });
   document.querySelector("#bottomMarket")?.addEventListener("click",()=>openTab("market"));
 }
