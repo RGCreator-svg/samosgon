@@ -210,6 +210,9 @@ function renderMaterialCart(state) {
   state.purchaseCart ??= [];
   const totals = cartTotals(state);
   const entries = Object.entries(state.materialCart).filter(([id, qty]) => PARTS.some(part => part.id === id) && Number(qty) > 0);
+  const cartCount = entries.reduce((sum, [, qty]) => sum + Number(qty || 0), 0) + totals.purchases.filter(item => item.kind !== "homesteadRepair").reduce((sum, item) => sum + Number(item.quantity || 0), 0);
+  const countBadge = $("#cartToggleCount");
+  if(countBadge) countBadge.textContent = String(cartCount);
   if (!entries.length && !totals.purchases.length) {
     root.append(element("p", "economy-empty", "Корзина пока пуста. Добавляйте товары и улучшения из разных вкладок."));
     return;
@@ -394,8 +397,29 @@ export function initEconomy(state, { render, notify }) {
   if (!$("#sharedPurchaseCart")) {
     const cartSection = element("section", "panel shared-purchase-cart");
     cartSection.id = "sharedPurchaseCart";
-    cartSection.append(element("h2", "", "🛒 Единая корзина закупок"), element("p", "economy-detail", "Здесь собраны только материалы и комплектующие для заказов, ремонта и улучшений. Работа оплачивается отдельно после получения материалов, в момент выполнения ремонта."));
+    const cartHeading = element("div", "cart-panel-heading");
+    cartHeading.append(element("h2", "", "🛒 Корзина закупок"));
+    const closeCart = element("button", "cart-panel-close", "✕");
+    closeCart.type = "button";
+    closeCart.setAttribute("aria-label", "Закрыть корзину");
+    cartHeading.append(closeCart);
+    cartSection.append(cartHeading, element("p", "economy-detail", "Материалы и комплектующие для заказов, ремонта и улучшений. Работа оплачивается отдельно при выполнении ремонта."));
     const cartRoot = element("div", "material-cart"); cartRoot.id = "materialCart"; cartSection.append(cartRoot);
+    const scrim = element("button", "cart-overlay-scrim");
+    scrim.type = "button";
+    scrim.setAttribute("aria-label", "Закрыть корзину");
+    scrim.setAttribute("tabindex", "-1");
+    game.append(scrim);
+    const closeCartPanel = () => {
+      cartSection.classList.remove("is-open");
+      scrim.classList.remove("is-visible");
+      $("#cartToggle")?.setAttribute("aria-expanded", "false");
+    };
+    closeCart.addEventListener("click", closeCartPanel);
+    scrim.addEventListener("click", closeCartPanel);
+    document.addEventListener("keydown", event => {
+      if(event.key === "Escape" && cartSection.classList.contains("is-open")) closeCartPanel();
+    });
     const eventPanel = $("#notifications")?.closest(".event-console");
     if (eventPanel?.parentElement === game) game.insertBefore(cartSection, eventPanel); else game.append(cartSection);
     cartSection.classList.add("cart-overlay-panel");
@@ -408,10 +432,17 @@ export function initEconomy(state, { render, notify }) {
       toggle.setAttribute("aria-expanded", "false");
       const image = document.createElement("img");
       image.src = "assets/images/ui/icon_cart.svg"; image.alt = "";
-      toggle.append(image);
+      const count = element("span", "cart-toggle-count", "0");
+      count.id = "cartToggleCount";
+      toggle.append(image, count);
       devToggle.insertAdjacentElement("afterend", toggle);
       toggle.addEventListener("click", () => {
         const open = cartSection.classList.toggle("is-open");
+        scrim.classList.toggle("is-visible", open);
+        if(open) {
+          document.querySelector(".warehouse-panel")?.removeAttribute("open");
+          closeCart.focus();
+        }
         toggle.setAttribute("aria-expanded", String(open));
       });
     }
@@ -554,6 +585,7 @@ export function initEconomy(state, { render, notify }) {
         notify("Корзина оплачена. Заказы оформлены.");
       }
       $("#sharedPurchaseCart")?.classList.remove("is-open");
+      document.querySelector(".cart-overlay-scrim")?.classList.remove("is-visible");
       $("#cartToggle")?.setAttribute("aria-expanded", "false");
     }
 
