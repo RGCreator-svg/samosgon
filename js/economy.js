@@ -452,6 +452,9 @@ export function initEconomy(state, { render, notify }) {
     const tab = element("button", "", "🏗️ Стройка");
     tab.dataset.tab = "construction";
     nav.append(tab);
+    const supplyTab = element("button", "", "🧰 Снабжение");
+    supplyTab.dataset.tab = "economy";
+    nav.append(supplyTab);
 
     const section = element("section", "tab-content panel hidden");
     section.id = "construction";
