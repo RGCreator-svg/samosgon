@@ -22,6 +22,7 @@ import { initProcessCenter, renderProcessCenter } from "./processcenter.js";
 import { initProductionPlant, renderProductionPlant, advanceProductionPlantDay } from "./productionplant.js";
 import { initCellar, renderCellar, ageBarrelsOneDay } from "./cellar.js";
 import { initGamePresentation } from "./gamePresentation.js";
+import { renderCurrentTasks } from "./tasks.js";
 
 let state = loadGame();
 state.farmPlots ??= ["needs_water","needs_weed","needs_fertilize"];
@@ -174,6 +175,7 @@ function render() {
   renderProductionPlant(state);
   renderCellar(state);
   renderAdvisor(state);
+  renderCurrentTasks(state);
   save();
 }
 
