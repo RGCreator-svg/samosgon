@@ -564,6 +564,10 @@ function renderHousePartProgress(){
 function queueHomesteadRepair(action) {
   const config=HOMESTEAD_REPAIRS[action];
   if(!config||repairIsComplete(action))return;
+  state.parts ??= {};
+  state.skills ??= [];
+  state.deliveries ??= [];
+  state.materialCart ??= {};
   const missing=getRepairMissing(config.parts);
   if(Object.keys(missing).length){
     const added={};
@@ -645,9 +649,12 @@ $("#repairHouse")?.addEventListener("click", () => {
   queueHomesteadRepair("house");
 });
 
-$("#home")?.addEventListener("click", (event) => {
+// Делегируем клики на document: карточки ремонта могут перемещаться
+// между панелями при инициализации экономики, поэтому #home не всегда их предок.
+document.addEventListener("click", (event) => {
   const button=event.target.closest("[data-house-part]");
-  if(!button)return;
+  if(!button || button.dataset.repairHandled==="true")return;
+  button.dataset.repairHandled="true";
   queueHomesteadRepair("house_"+button.dataset.housePart);
 });
 
