@@ -626,3 +626,77 @@ body { min-height:100vh; }
   outline:2px dashed #f5d78d !important;
   outline-offset:4px;
 }
+
+
+/* REV 10.16 — remove decorative UI fills; keep colors inside the game artwork. */
+#game .topbar,
+#game .player-profile,
+#game .player-avatar,
+#game .player-profile-info,
+#game .homestead-resource-bar,
+#game .hud-chip,
+#game .xp-panel,
+#game .navigation,
+#game .nav-group,
+#game .nav-category-toggle,
+#game .nav-dropdown,
+#game .nav-dropdown-item,
+#game .tab-content,
+#game .panel,
+#game .market-item,
+#game .skill-card,
+#game .contract-card,
+#game .production-line,
+#game .production-queue-item,
+#game .story-entry,
+#game .prototype-task,
+#game .prototype-bottom,
+#game .prototype-bottom .panel-mini,
+#game .game-footer-dock,
+#game .location-panel,
+#game .location-scene,
+#game .warehouse-panel,
+#game .event-console,
+#game .notification,
+#game .cart-overlay-panel,
+#game .cart-panel-heading,
+#game button,
+#game input,
+#game select,
+#game textarea {
+  background:transparent !important;
+  background-image:none !important;
+  box-shadow:none !important;
+}
+#game .nav-dropdown {
+  backdrop-filter:blur(8px);
+}
+#game .nav-dropdown-item:hover,
+#game .nav-dropdown-item.active,
+#game button:hover:not(:disabled),
+#game button.active {
+  background:transparent !important;
+  box-shadow:none !important;
+  transform:none;
+}
+#game .hud-chip,
+#game .xp-panel,
+#game .panel,
+#game .market-item,
+#game .skill-card,
+#game .contract-card,
+#game .production-line,
+#game .production-queue-item,
+#game .story-entry,
+#game .location-panel,
+#game .prototype-bottom,
+#game .game-footer-dock,
+#game .event-console {
+  border:0 !important;
+}
+#game .event-console > summary::before,
+#game .event-console .event-count,
+#game .cart-toggle-count {
+  background:transparent !important;
+  box-shadow:none !important;
+}
