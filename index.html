@@ -5,8 +5,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Самогон · REV 10.7 — Новая жизнь</title>
-  <link rel="stylesheet" href="css/style.css?v=10.14">
-  <link rel="stylesheet" href="css/interface.css?v=10.35">
+  <link rel="stylesheet" href="css/style.css?v=10.15">
+  <link rel="stylesheet" href="css/interface.css?v=10.36">
 </head>
 <body>
   <section id="intro" class="intro">
@@ -130,6 +130,7 @@
         <div class="homestead-house-png" id="houseArt" aria-hidden="true"><span class="house-png-part house-png-floor"></span><span class="house-png-part house-png-wall"></span><span class="house-png-part house-png-roof"></span><span class="house-png-part house-png-stove"></span></div>
         <div class="homestead-path"></div>
         <div class="homestead-fence"></div>
+        <div class="guard-dog-post" id="guardDogPost" data-active="false" aria-label="Пост охранной собаки"><img class="guard-doghouse-art" src="assets/images/home/guard-doghouse.png" alt="Деревянная собачья будка" draggable="false"><span class="guard-dog-art" role="img" aria-label="Собака на охране"></span><span class="guard-dog-bubble" aria-hidden="true">Гав!</span></div>
         <div class="scene-caption"><span>ВАШЕ НАСЛЕДСТВО</span><strong>Дом, сад и новая история</strong><small id="sceneSeasonCaption">Усадьба просыпается</small></div>
 </div>
       <div class="location-animals" aria-label="Животные на усадьбе">
@@ -141,6 +142,7 @@
         <span class="homestead-status"><i></i> Требует заботы</span>
       </div>
       <p id="homeDescription"></p>
+      <section class="guard-dog-card" aria-labelledby="guardDogTitle"><div><h3 id="guardDogTitle">🐕 Охрана усадьбы</h3><p id="guardDogStatus">Участок пока без охраны. Собака будет отгонять мышей от запасов.</p></div><button id="guardDogAction" type="button">Построить будку · 120 монет</button></section>
       <p class="house-condition-label">Состояние дома: <b id="houseValue"></b>%</p>
       <div id="houseProgress" class="house-progress" role="progressbar" aria-label="Состояние дома" aria-valuemin="0" aria-valuemax="100" aria-valuenow="20"><span></span></div>
       <div class="house-parts-grid" id="housePartsGrid" aria-label="Отдельные этапы ремонта дома"><article class="house-part-card" data-house-part-card="roof"><span class="house-part-art house-part-art-roof" aria-hidden="true"></span><div><h3>Крыша</h3><p id="housePartValue-roof">25%</p><small>Пиломатериалы ×2 · Крепёж ×1 · Краска ×1</small><button type="button" data-house-part="roof">Починить крышу</button></div></article><article class="house-part-card" data-house-part-card="walls"><span class="house-part-art house-part-art-wall" aria-hidden="true"></span><div><h3>Стены и окна</h3><p id="housePartValue-walls">25%</p><small>Пиломатериалы ×2 · Крепёж ×2 · Краска ×1</small><button type="button" data-house-part="walls">Укрепить стены</button></div></article><article class="house-part-card" data-house-part-card="windows"><span class="house-part-art house-part-art-window" aria-hidden="true"></span><div><h3>Окна</h3><p id="housePartValue-windows">25%</p><small>Пиломатериалы ×1 · Крепёж ×1 · Краска ×1</small><button type="button" data-house-part="windows">Вставить окна</button></div></article><article class="house-part-card" data-house-part-card="floor"><span class="house-part-art house-part-art-floor" aria-hidden="true"></span><div><h3>Пол</h3><p id="housePartValue-floor">25%</p><small>Пиломатериалы ×2 · Крепёж ×1</small><button type="button" data-house-part="floor">Настелить пол</button></div></article><article class="house-part-card" data-house-part-card="heating"><span class="house-part-art house-part-art-heating" aria-hidden="true"></span><div><h3>Отопление</h3><p id="housePartValue-heating">25%</p><small>Металл ×1 · Инструменты ×1 · Крепёж ×1</small><button type="button" data-house-part="heating">Установить печь</button></div></article></div>
