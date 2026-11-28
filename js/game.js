@@ -40,7 +40,15 @@ state.orders.completed ??= 0;
 state.orders.failed ??= 0;
 
 const $ = (selector) => document.querySelector(selector);
-const $$ = (selector) => document.querySelectorAll(selector);
+const $ = (selector) => document.querySelectorAll(selector);
+
+const HOMESTEAD_REPAIRS = {
+  house: { name:"Ремонт дома", button:"#repairHouse", baseCost:30, discountedCost:20, parts:{ timber:1, fasteners:1, paint:1 }, progress:20, xp:5 },
+  barn: { name:"Ремонт сарая", button:"#repairBarn", baseCost:30, discountedCost:20, parts:{ timber:2, fasteners:1, paint:1 }, progress:25, xp:5 },
+  still: { name:"Ремонт аппарата", button:"#repairStill", baseCost:50, discountedCost:35, parts:{ metal:1, fasteners:1, tools:1 }, progress:30, xp:8 },
+  garden: { name:"Расчистка огорода", button:"#repairGarden", baseCost:20, discountedCost:15, parts:{ timber:1, fasteners:1 }, progress:30, xp:0 },
+  orchard: { name:"Восстановление сада", button:"#restoreOrchard", baseCost:40, discountedCost:30, parts:{ timber:2, fasteners:1, tools:1 }, progress:0, xp:20 }
+};
 
 function save() {
   saveGame(state);
@@ -277,13 +285,7 @@ $("#harvestVegetables")?.addEventListener("click", () => {
 });
 
 // Единые требования для ремонта и восстановления построек.
-const HOMESTEAD_REPAIRS = {
-  house: { name:"Ремонт дома", button:"#repairHouse", baseCost:30, discountedCost:20, parts:{ timber:1, fasteners:1, paint:1 }, progress:20, xp:5 },
-  barn: { name:"Ремонт сарая", button:"#repairBarn", baseCost:30, discountedCost:20, parts:{ timber:2, fasteners:1, paint:1 }, progress:25, xp:5 },
-  still: { name:"Ремонт аппарата", button:"#repairStill", baseCost:50, discountedCost:35, parts:{ metal:1, fasteners:1, tools:1 }, progress:30, xp:8 },
-  garden: { name:"Расчистка огорода", button:"#repairGarden", baseCost:20, discountedCost:15, parts:{ timber:1, fasteners:1 }, progress:30, xp:0 },
-  orchard: { name:"Восстановление сада", button:"#restoreOrchard", baseCost:40, discountedCost:30, parts:{ timber:2, fasteners:1, tools:1 }, progress:0, xp:20 }
-};
+
 function repairCost(config) {
   return state.skills.includes("handyman") ? config.discountedCost : config.baseCost;
 }
