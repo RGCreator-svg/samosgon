@@ -3446,3 +3446,56 @@ body { margin:0; font-family:"Segoe UI", "Comic Sans MS", sans-serif; background
   #game #home .house-repair-details { padding:10px 11px; font-size:12px; }
   #game #home .house-repair-details .repair-work-cost { font-size:14px; }
 }
+
+
+/* Mobile navigation and keyboard accessibility improvements. */
+#game .navigation {
+  scrollbar-width: thin;
+  overscroll-behavior-x: contain;
+}
+#game .navigation button[data-tab]:focus-visible,
+#game .prototype-side .side-btn:focus-visible,
+#game button:focus-visible,
+#game a:focus-visible,
+#game input:focus-visible,
+#game select:focus-visible,
+#game textarea:focus-visible {
+  outline: 3px solid #e8bd68;
+  outline-offset: 3px;
+  position: relative;
+  z-index: 5;
+}
+@media(max-width:560px) {
+  #game .navigation {
+    display:flex;
+    flex-wrap:nowrap;
+    overflow-x:auto;
+    overflow-y:hidden;
+    gap:6px;
+    padding:5px 4px 9px;
+    -webkit-overflow-scrolling:touch;
+    scroll-snap-type:x proximity;
+  }
+  #game .navigation button[data-tab] {
+    flex:0 0 auto;
+    min-width:max-content;
+    min-height:44px;
+    padding:8px 11px;
+    font-size:11px;
+    white-space:nowrap;
+    scroll-snap-align:start;
+  }
+  #game .navigation::-webkit-scrollbar { height:4px; }
+  #game .navigation::-webkit-scrollbar-thumb {
+    border-radius:99px;
+    background:rgba(238,213,164,.55);
+  }
+}
+@media(prefers-reduced-motion:reduce) {
+  #game *, #game *::before, #game *::after {
+    scroll-behavior:auto !important;
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+  }
+}
