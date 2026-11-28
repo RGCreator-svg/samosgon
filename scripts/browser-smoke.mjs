@@ -112,7 +112,7 @@ try{
     if(!await page.locator("#sharedPurchaseCart").evaluate(el=>el.classList.contains("is-open"))) await cartToggle.click();
     await page.locator("#materialCart [data-economy-action='pay']").click();
     assert.equal(await progress.innerText(),beforeProgress,"Paying for materials must not perform the repair");
-    assert.match(await page.locator("#notifications").innerText(),/доставк/i,"Cart payment did not start a delivery");
+    assert.match(await page.locator("#notifications").textContent(),/доставк/i,"Cart payment did not start a delivery");
     const deliveryDays={timber:1,fasteners:1,paint:1,metal:2,tools:2};
     const maxDeliveryDays=partIds.reduce((max,id)=>Math.max(max,deliveryDays[id]||1),0);
     for(let day=0;day<maxDeliveryDays;day++) await page.locator("#advanceDayShortcut").click();
