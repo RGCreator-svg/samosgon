@@ -179,6 +179,12 @@ $("#game")?.addEventListener("click", (event) => {
   showTab(button.dataset.tab);
 });
 
+// Основные разделы переключаются непосредственно кнопками навигации.
+// Это сохраняет работу вкладок даже если вложенные панели перехватили всплытие клика.
+$all(".navigation [data-tab]").forEach(button => {
+  button.addEventListener("click", () => showTab(button.dataset.tab));
+});
+
 // Опыт и уровень
 function earnExperience(amount) {
   const oldLevel = state.level;
