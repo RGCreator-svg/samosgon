@@ -452,3 +452,10 @@ body { min-height:100vh; }
   #game .prototype-bottom .panel-mini { flex-basis:100%; }
   #game .game-footer-dock > .pumpkin-console-anchor { flex-basis:72px !important; width:72px !important; }
 }
+
+
+/* REV 10.12 — keep the warehouse shortcut reachable above the cart backdrop. */
+#game .prototype-bottom #bottomWarehouse {
+  position:relative !important;
+  z-index:59 !important;
+}
