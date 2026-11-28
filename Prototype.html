@@ -530,7 +530,7 @@ function finishProd(){
   S.prod = null;
   render();
 }
-setInterval(()=>{updateGardenGrowth();render();if($('#modalOverlay').classList.contains('show')&&$('#modalBody').innerHTML.includes('Мои грядки'))showTabModal('garden');}, 1000);
+setInterval(()=>{updateGardenGrowth();render();}, 1000);
 
 // ================== КЛИКИ ПО СЦЕНЕ ==================
 function clickable(el, handler){
@@ -630,8 +630,8 @@ function showTabModal(name){
   body.innerHTML = h;
   $('#modalOverlay').classList.add('show');
 }
-const NAMES = { apples:'Яблоки', tomatoes:'Помидоры', greens:'Зелень', mash:'Брага', raw:'Спирт-сырец', brandy:'Бренди' };
-const ICONS = { apples:'🍎', tomatoes:'🍅', greens:'🥬', mash:'🥫', raw:'🧴', brandy:'🥃' };
+const NAMES = { apples:'Яблоки', tomatoes:'Помидоры', greens:'Зелень', carrots:'Морковь', cucumbers:'Огурцы', cabbage:'Капуста', potatoes:'Картофель', beets:'Свёкла', peppers:'Перец', pumpkins:'Тыква', radishes:'Редис', mash:'Брага', raw:'Спирт-сырец', brandy:'Бренди' };
+const ICONS = { apples:'🍎', tomatoes:'🍅', greens:'🥬', carrots:'🥕', cucumbers:'🥒', cabbage:'🥬', potatoes:'🥔', beets:'🫜', peppers:'🫑', pumpkins:'🎃', radishes:'🔴', mash:'🥫', raw:'🧴', brandy:'🥃' };
 
 // ================== ДЕЙСТВИЯ ==================
 window.sleep = () => { S.energy = Math.min(100, S.energy + 20); toast('💤 Выспались! +20 энергии'); closeModal(); render(); };
