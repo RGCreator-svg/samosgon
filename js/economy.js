@@ -111,6 +111,7 @@ function ensureState(state) {
   state.parts ??= {};
   for (const part of PARTS) state.parts[part.id] ??= 0;
   state.deliveries ??= [];
+  state.pendingPurchaseBatches ??= [];
 }
 
 function element(tag, className, text) {
@@ -156,6 +157,27 @@ function cartTotals(state) {
   const goodsCost = purchases.reduce((sum, item) => sum + item.cost * item.quantity, 0);
   const partsCost = Object.entries(state.materialCart || {}).reduce((sum, [id, qty]) => sum + (PARTS.find(part => part.id === id)?.price || 0) * qty, 0);
   return { purchases, parts, inventory, incoming, money: goodsCost + partsCost };
+}
+
+function settlePendingPurchaseBatches(state, notify = () => {}) {
+  state.pendingPurchaseBatches ??= [];
+  const waiting = [];
+  for (const batch of state.pendingPurchaseBatches) {
+    const ready = Object.entries(batch.parts || {}).every(([id, qty]) =>
+      (Number(batch.reservedParts?.[id]) || 0) + (Number(state.parts[id]) || 0) >= Number(qty)
+    );
+    if (!ready) {
+      waiting.push(batch);
+      continue;
+    }
+    Object.entries(batch.parts || {}).forEach(([id, qty]) => {
+      const remaining = Math.max(0, Number(qty) - (Number(batch.reservedParts?.[id]) || 0));
+      state.parts[id] = Math.max(0, (Number(state.parts[id]) || 0) - remaining);
+    });
+    (batch.purchases || []).forEach(item => CART_HANDLERS.get(item.kind)?.(state, item));
+    notify("Все материалы для отложенного заказа получены. Заказ выполнен.");
+  }
+  state.pendingPurchaseBatches = waiting;
 }
 export function queuePart(state, id, quantity = 1) {
   if (!PARTS.some(part => part.id === id)) return;
@@ -487,14 +509,50 @@ export function initEconomy(state, { render, notify }) {
         renderEconomy(state); return;
       }
       state.money -= totals.money;
-      Object.entries(totals.parts).forEach(([partId, qty]) => { state.parts[partId] = (Number(state.parts[partId]) || 0) - qty; });
       Object.entries(totals.inventory).forEach(([itemId, qty]) => { removeInventory(state, itemId, qty); });
-      Object.entries(state.materialCart || {}).forEach(([partId, qty]) => { state.parts[partId] = (Number(state.parts[partId]) || 0) + qty; });
       const purchases = [...totals.purchases];
+      const materialOrders = Object.entries(state.materialCart || {}).filter(([partId, qty]) =>
+        PARTS.some(part => part.id === partId) && Number(qty) > 0
+      );
+      // Складские материалы резервируются под покупки; недостающие отправляются доставкой.
+      const reservedParts = {};
+      Object.entries(totals.parts).forEach(([partId, qty]) => {
+        const reserved = Math.min(Number(state.parts[partId]) || 0, qty);
+        if (reserved > 0) {
+          state.parts[partId] = (Number(state.parts[partId]) || 0) - reserved;
+          reservedParts[partId] = reserved;
+        }
+      });
+      materialOrders.forEach(([partId, quantity]) => {
+        const part = PARTS.find(entry => entry.id === partId);
+        if (!part) return;
+        state.deliveries.push({
+          id: "delivery_" + Date.now() + "_" + Math.random().toString(16).slice(2),
+          partId, name: part.name, quantity: Number(quantity),
+          arrivalDay: state.day + part.delivery, notified: false
+        });
+      });
+      const purchasesNeedingParts = purchases.filter(item => item.parts && Object.keys(item.parts).length);
+      const immediatePurchases = purchases.filter(item => !item.parts || !Object.keys(item.parts).length);
+      if (purchasesNeedingParts.length) {
+        state.pendingPurchaseBatches ??= [];
+        state.pendingPurchaseBatches.push({
+          purchases: purchasesNeedingParts,
+          parts: { ...totals.parts },
+          reservedParts
+        });
+      }
       state.materialCart = {};
       state.purchaseCart = [];
-      purchases.forEach(item => CART_HANDLERS.get(item.kind)?.(state, item));
-      notify("Общая корзина оплачена. Все покупки проведены одним платежом.");
+      immediatePurchases.forEach(item => CART_HANDLERS.get(item.kind)?.(state, item));
+      settlePendingPurchaseBatches(state, notify);
+      if (materialOrders.length) {
+        const days = materialOrders.map(([id]) => PARTS.find(part => part.id === id)?.delivery || 1);
+        const maxDays = Math.max(...days);
+        notify("Корзина оплачена. Материалы отправлены: доставка займёт до " + maxDays + " игровых дн. После прибытия заберите их со склада доставки.");
+      } else {
+        notify("Корзина оплачена. Заказы оформлены.");
+      }
       $("#sharedPurchaseCart")?.classList.remove("is-open");
       $("#cartToggle")?.setAttribute("aria-expanded", "false");
     }
@@ -514,6 +572,7 @@ export function initEconomy(state, { render, notify }) {
       state.deliveries = state.deliveries.filter(item => !(item.partId === id && item.arrivalDay <= state.day));
       const part = PARTS.find(item => item.id === id);
       notify(`Получено всё доставленное: ${part?.name || id} × ${quantity}.`);
+      settlePendingPurchaseBatches(state, notify);
     }
 
     if (action === "collect") {
@@ -522,6 +581,7 @@ export function initEconomy(state, { render, notify }) {
       state.parts[delivery.partId] = (state.parts[delivery.partId] || 0) + delivery.quantity;
       state.deliveries = state.deliveries.filter(item => item.id !== id);
       notify(`Получена посылка: ${delivery.name} × ${delivery.quantity}.`);
+      settlePendingPurchaseBatches(state, notify);
     }
 
     render();
