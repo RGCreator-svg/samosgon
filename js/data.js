@@ -120,6 +120,12 @@ export const ITEMS = [
   ,{id:"herbal_spice_tincture",name:"Лесная пряность",emoji:"🌿",price:198,description:"Авторская смесь мятной и можжевеловой настоек."}
   ,{id:"meadow_reserve_tincture",name:"Луговой резерв",emoji:"🌼",price:206,description:"Цветочно-фруктовый купаж травяных настоек."}
 
+  ,{ id: "tomato", name: "Помидоры", emoji: "🍅", price: 13, description: "Сочные помидоры с собственной грядки." }
+  ,{ id: "cucumber", name: "Огурцы", emoji: "🥒", price: 12, description: "Хрустящие огурцы для летнего стола." }
+  ,{ id: "beet", name: "Свёкла", emoji: "🫜", price: 14, description: "Корнеплод для борща и рынка." }
+  ,{ id: "pepper", name: "Перец", emoji: "🫑", price: 18, description: "Яркий сладкий перец собственного урожая." }
+  ,{ id: "pumpkin", name: "Тыква", emoji: "🎃", price: 20, description: "Крупная тыква — урожай на славу." }
+  ,{ id: "radish", name: "Редис", emoji: "🔴", price: 10, description: "Быстрый весенний корнеплод." }
 ];
 
 export const SKILL_BRANCHES = [
