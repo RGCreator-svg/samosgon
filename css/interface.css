@@ -1036,3 +1036,28 @@ body { min-height:100vh; }
   #game #farm #farmPlots.farm-plots > .farm-plot:nth-child(7),
   #game #farm #farmPlots.farm-plots > .farm-plot:nth-child(8) { transform:translateX(50%)!important; }
 }
+
+
+/* Save feedback: visible, compact and readable in the resource HUD. */
+#game .save-status {
+  display:inline-flex;
+  align-items:center;
+  gap:4px;
+  flex:0 0 auto;
+  padding:5px 8px;
+  border:1px solid #87936a;
+  border-radius:999px;
+  color:#e7f0d7;
+  background:#35452d;
+  font-size:10px;
+  font-weight:800;
+  white-space:nowrap;
+}
+#game .save-status[data-status="error"] {
+  color:#fff0df;
+  border-color:#c77a45;
+  background:#713d28;
+}
+@media(max-width:560px) {
+  #game .save-status { padding:4px 6px; font-size:9px; }
+}
