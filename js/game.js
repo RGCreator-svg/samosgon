@@ -165,7 +165,7 @@ setInterval(()=>{
 function renderGuardDog(){
   const post=$("#guardDogPost"),button=$("#guardDogAction"),status=$("#guardDogStatus");
   if(post)post.dataset.active=state.guardDog?"true":"false";
-  if(button){button.disabled=Boolean(state.guardDog);button.textContent=state.guardDog?"✓ Собака охраняет дом":"Построить будку · 120 монет";}
+  if(button){button.disabled=Boolean(state.guardDog);button.textContent=state.guardDog?"✓ Будка построена · Барс охраняет дом":"🐕 Построить будку и нанять собаку · 120 монет";}
   if(status)status.textContent=state.guardDog?"Барс на посту! Ночью он сторожит двор и отгоняет мышей от запасов.":"Участок пока без охраны. Собака будет отгонять мышей от запасов.";
 }
 function render() {
