@@ -3629,3 +3629,44 @@ body { margin:0; font-family:"Segoe UI", "Comic Sans MS", sans-serif; background
   #game .house-parts-grid { grid-template-columns:1fr; }
   #game .house-part-card { padding:8px; }
 }
+
+/* Барс: оригинальные PNG-спрайты будки и четырёх кадров собаки. */
+#game .guard-dog-post {
+  position:absolute; z-index:8; right:5%; bottom:7%; width:clamp(112px,20%,190px);
+  height:clamp(82px,18%,138px); pointer-events:none; opacity:0;
+  transform:translateY(12px); transition:opacity .35s ease,transform .35s ease;
+}
+#game .guard-dog-post[data-active="true"] { opacity:1; transform:translateY(0); }
+#game .guard-doghouse-art {
+  position:absolute; right:0; bottom:0; width:70%; height:auto; object-fit:contain;
+  filter:drop-shadow(2px 4px 3px #1c261d66);
+}
+#game .guard-dog-art {
+  position:absolute; left:0; bottom:0; width:72%; height:auto; aspect-ratio:256/80;
+  background:url("../assets/images/home/guard-dog-walk.png") 0 0/400% 100% no-repeat;
+  image-rendering:pixelated; animation:guard-dog-patrol 1.05s steps(4) infinite;
+  filter:drop-shadow(2px 3px 2px #1c261d66);
+}
+#game .guard-dog-bubble {
+  position:absolute; left:2%; top:0; padding:3px 8px; border-radius:12px;
+  background:#fff8df; color:#563b24; font-size:11px; font-weight:800;
+  opacity:0; animation:guard-dog-bark 5s ease-in-out infinite;
+}
+#game .guard-dog-post[data-active="false"] { display:none; }
+#game .guard-dog-card {
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+  margin:12px 0 18px; padding:13px 15px; border:1px solid #b18b5d;
+  border-radius:12px; background:linear-gradient(135deg,#fff8e9,#efe1c5);
+}
+#game .guard-dog-card h3 { margin:0 0 4px; color:#60452b; font-size:16px; }
+#game .guard-dog-card p { margin:0; color:#695a45; font-size:13px; }
+#game .guard-dog-card button { flex:0 0 auto; min-height:40px; }
+@keyframes guard-dog-patrol { to { background-position:400% 0; } }
+@keyframes guard-dog-bark { 0%,72%,100% {opacity:0;transform:translateY(3px)} 78%,87% {opacity:1;transform:translateY(0)} }
+@media(max-width:600px) {
+  #game .guard-dog-post { right:2%; bottom:5%; width:30%; height:24%; }
+  #game .guard-dog-card { align-items:flex-start; flex-direction:column; }
+}
+@media(prefers-reduced-motion:reduce) {
+  #game .guard-dog-art,#game .guard-dog-bubble { animation:none; }
+}
