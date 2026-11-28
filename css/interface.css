@@ -194,3 +194,17 @@
 
 /* Keep the bottom shortcut dock above the cart scrim so it remains usable. */
 #game .prototype-bottom { position:relative; z-index:60; }
+
+/* Generated storybook artwork for the homestead hero scene. */
+#game #home .homestead-scene {
+  background-image:
+    linear-gradient(90deg,rgba(17,27,19,.12),rgba(17,27,19,.02)),
+    url("../assets/images/homestead.webp");
+  background-position:center 48%;
+  background-size:cover;
+  background-repeat:no-repeat;
+}
+#game #home .homestead-scene > :not(.scene-caption) { display:none !important; }
+@media(max-width:560px) {
+  #game #home .homestead-scene { min-height:220px; background-position:center; }
+}
