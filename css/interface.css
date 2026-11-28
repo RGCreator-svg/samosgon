@@ -549,3 +549,80 @@ body { min-height:100vh; }
 }
 #game #home .homestead-scene > *,
 #game #farm .farm-scene > * { display:revert; }
+
+
+/* REV 10.15 — frameless, illustration-first interaction. */
+#game *,
+#game *::before,
+#game *::after {
+  border-color:transparent !important;
+}
+#game * {
+  outline-color:transparent;
+}
+#game .panel,
+#game .market-item,
+#game .skill-card,
+#game .contract-card,
+#game .production-line,
+#game .production-queue-item,
+#game .story-entry,
+#game .topbar,
+#game .navigation,
+#game .nav-group,
+#game .nav-dropdown,
+#game .prototype-bottom,
+#game .game-footer-dock,
+#game .location-panel,
+#game .location-scene,
+#game .warehouse-panel,
+#game .event-console,
+#game .hud-chip,
+#game .xp-panel,
+#game button,
+#game input,
+#game select,
+#game textarea {
+  border:0 !important;
+  outline:0 !important;
+}
+#game .navigation .nav-category-toggle {
+  background:transparent !important;
+  box-shadow:none !important;
+  border-radius:0 !important;
+  min-height:72px;
+}
+#game .navigation .nav-category-toggle:hover,
+#game .navigation .nav-category-toggle[aria-expanded="true"] {
+  background:transparent !important;
+  box-shadow:none !important;
+  transform:none;
+}
+#game .nav-category-icon {
+  display:block;
+  font-size:34px;
+  line-height:1.15;
+  filter:drop-shadow(0 2px 2px #0006);
+}
+#game .nav-dropdown {
+  border:0 !important;
+  outline:0 !important;
+}
+#game .navigation .nav-dropdown .nav-dropdown-item.active {
+  box-shadow:none !important;
+  color:#f6d98e;
+  text-decoration:underline;
+  text-underline-offset:4px;
+}
+#homestead-scene .clickable {
+  cursor:pointer;
+  pointer-events:all;
+  transition:filter .15s ease;
+}
+#homestead-scene .clickable:hover {
+  filter:brightness(1.12) drop-shadow(0 2px 3px #17231866);
+}
+#homestead-scene .clickable:focus-visible {
+  outline:2px dashed #f5d78d !important;
+  outline-offset:4px;
+}
