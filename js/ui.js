@@ -608,6 +608,13 @@ export function renderSkills(state) {
 
 export function renderWorld(state) {
   setText("#houseValue", state.house);
+  const houseProgress = $("#houseProgress");
+  if (houseProgress) {
+    const housePercent = Math.max(0, Math.min(100, Number(state.house) || 0));
+    houseProgress.setAttribute("aria-valuenow", String(housePercent));
+    const fill = houseProgress.querySelector("span");
+    if (fill) fill.style.width = housePercent + "%";
+  }
   setText("#barnValue", state.barn);
   setText("#stillValue", state.still);
   setText("#gardenValue", state.garden);
