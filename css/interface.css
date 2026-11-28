@@ -459,3 +459,91 @@ body { min-height:100vh; }
   position:relative !important;
   z-index:59 !important;
 }
+
+
+/* REV 10.13 — calm readable interface, five compact icon menus, no card cages. */
+#intro.hidden { display:none !important; visibility:hidden !important; pointer-events:none !important; }
+#game .navigation {
+  position:relative !important; display:grid !important;
+  grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px;
+  width:100% !important; margin:4px 0 18px !important; padding:0 !important;
+  border:0 !important; border-radius:0 !important; background:transparent !important;
+  box-shadow:none !important; overflow:visible !important;
+}
+#game .navigation .nav-group {
+  position:relative; display:block !important; min-width:0;
+  padding:0 !important; border:0 !important; border-radius:0 !important;
+  background:transparent !important;
+}
+#game .navigation .nav-category-toggle {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  gap:4px; width:100%; min-height:82px; margin:0; padding:10px 6px;
+  border:0 !important; border-radius:13px; color:#f5eddb;
+  background:linear-gradient(160deg,#394a35,#263529) !important;
+  box-shadow:0 3px 9px #0003 !important; text-align:center;
+}
+#game .navigation .nav-category-toggle:hover,
+#game .navigation .nav-category-toggle[aria-expanded="true"] {
+  background:linear-gradient(160deg,#526744,#354a35) !important;
+  transform:translateY(-1px);
+}
+#game .nav-category-icon { font-size:27px; line-height:1.1; }
+#game .nav-category-label { font:600 12px/1.2 system-ui,sans-serif; letter-spacing:.02em; }
+#game .nav-category-chevron { color:#d5c18f; font-size:13px; line-height:1; }
+#game .nav-dropdown {
+  position:absolute; z-index:40; top:calc(100% + 7px); left:0; right:0;
+  display:grid; gap:3px; min-width:160px; padding:6px;
+  border:0 !important; border-radius:11px; background:#202a20;
+  box-shadow:0 12px 28px #0009;
+}
+#game .nav-dropdown[hidden] { display:none !important; }
+#game .navigation .nav-dropdown .nav-dropdown-item {
+  display:flex; width:100%; min-height:38px; align-items:center;
+  margin:0; padding:8px 11px; border:0 !important; border-radius:7px;
+  color:#f1ead9; background:transparent !important; text-align:left;
+  font:500 13px/1.25 system-ui,sans-serif; box-shadow:none !important;
+}
+#game .navigation .nav-dropdown .nav-dropdown-item:hover,
+#game .navigation .nav-dropdown .nav-dropdown-item.active {
+  color:#fff5d8; background:#46583b !important;
+}
+#game .navigation .nav-dropdown .nav-dropdown-item.active { box-shadow:inset 3px 0 #d9b66f !important; }
+#game .market-grid { gap:16px; }
+#game .market-item, #game .skill-card {
+  padding:15px 16px; border:0 !important; border-radius:10px;
+  background:linear-gradient(145deg,#343b2e,#293127) !important;
+  box-shadow:0 3px 10px #0002 !important; color:#f0eadb;
+}
+#game .market-item h3, #game .skill-card h3 {
+  color:#f4d99e !important; font-size:1.05rem; line-height:1.35;
+}
+#game .market-item p, #game .market-item span, #game .market-item small,
+#game .market-item label, #game .skill-card p, #game .skill-card span,
+#game .skill-card small { color:#e0e3d5 !important; line-height:1.5; }
+#game .market-item strong, #game .market-item b { color:#fff0c8 !important; }
+#game .market-item button { color:#fff7e7; }
+#game .panel, #game .production-line, #game .contract-card,
+#game .production-queue-item, #game .story-entry {
+  border-color:transparent !important; box-shadow:0 3px 12px #0002;
+}
+#game .game-footer-dock {
+  border:0 !important; border-radius:12px;
+  background:linear-gradient(135deg,#202c22,#29382a) !important;
+  box-shadow:none !important;
+}
+#game .event-console { display:block !important; max-height:none !important; overflow:visible !important; }
+#game .event-console > summary { cursor:pointer; color:#f0e5c9; }
+#game .event-console[open] #notifications { max-height:320px; overflow:auto; }
+@media(max-width:760px) {
+  #game .navigation { grid-template-columns:repeat(5,minmax(0,1fr)); gap:4px; }
+  #game .navigation .nav-category-toggle { min-height:70px; padding:7px 2px; }
+  #game .nav-category-icon { font-size:22px; }
+  #game .nav-category-label { font-size:10px; }
+  #game .nav-dropdown { min-width:145px; }
+}
+@media(max-width:420px) {
+  #game .navigation { grid-template-columns:repeat(5,minmax(0,1fr)); }
+  #game .navigation .nav-category-toggle { min-height:64px; }
+  #game .nav-category-icon { font-size:20px; }
+  #game .nav-category-label { font-size:9px; }
+}
