@@ -8,7 +8,7 @@ import { renderAll, renderAdvisor, reactGrishkaToEvent } from "./ui.js";
 import { initOrders, advanceOrdersDay } from "./orders.js";
 import { initDevTools } from "./dev.js";
 import { startNewDay } from "./events.js";
-import { initEconomy, renderEconomy, advanceDeliveries, addInventory, removeInventory, queuePurchase, queuePart, registerCartHandler, PARTS } from "./economy.js?v=10.8";
+import { initEconomy, renderEconomy, advanceDeliveries, addInventory, removeInventory, queuePurchase, queuePart, registerCartHandler, PARTS } from "./economy.js";
 import { initEquipment, renderEquipment } from "./equipment.js";
 import { initExpansion, renderExpansion, advanceExpansionDay } from "./expansion.js";
 import { initFeaturePack, renderFeaturePack, advanceFeaturePackDay, getMarketMultiplier } from "./featurepack.js";
@@ -20,7 +20,7 @@ import { initResearchLab, renderResearchLab, advanceResearchLabDay } from "./res
 import { initProcessCenter, renderProcessCenter } from "./processcenter.js";
 import { initProductionPlant, renderProductionPlant, advanceProductionPlantDay } from "./productionplant.js";
 import { initCellar, renderCellar, ageBarrelsOneDay } from "./cellar.js";
-import { initGamePresentation } from "./gamePresentation.js?v=10.8";
+import { initGamePresentation } from "./gamePresentation.js";
 
 let state = loadGame();
 state.farmPlots ??= ["needs_water","needs_weed","needs_fertilize"];
