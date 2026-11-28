@@ -50,6 +50,8 @@ try{
   for(const label of ["Достижения","Задания","Цели"]) assert.ok(navigationText.includes(label),`Journal shortcut ${label} is missing from grouped navigation`);
   assert.equal(await page.locator(".navigation .nav-group").count(),5,"Navigation should contain five meaningful groups");
   assert.ok(await page.locator(".player-profile").isVisible(),"Player avatar/profile HUD is missing");
+  assert.equal(await page.locator(".prototype-task").count(),1,"There should be only one homestead objective");
+  assert.equal(await page.locator(".prototype-task").evaluate(el=>el.parentElement.id),"home","Homestead objective should live inside the home section, not float over the scene");
   assert.ok(await page.locator(".player-profile #xpBar").count()===1,"XP progress must be shown inside player profile");
   assert.ok(await page.locator("#wellDevelopmentAction").isVisible(),"Well development task is missing");
   assert.ok(await page.locator("#advanceDayShortcut").isVisible(),"Visible day-advance control is missing");
