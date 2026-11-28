@@ -159,7 +159,7 @@ function cartTotals(state) {
   return { purchases, parts, inventory, incoming, money: goodsCost + partsCost };
 }
 
-function settlePendingPurchaseBatches(state, notify = () => {}) {
+export function settlePendingPurchaseBatches(state, notify = () => {}) {
   state.pendingPurchaseBatches ??= [];
   const waiting = [];
   for (const batch of state.pendingPurchaseBatches) {
