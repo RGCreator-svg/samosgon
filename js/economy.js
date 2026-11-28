@@ -484,8 +484,8 @@ export function initEconomy(state, { render, notify }) {
       for (const selector of selectors) {
         const node = $(selector);
         if (!node) continue;
-        group.append(node);
         const detail = node.nextElementSibling;
+        group.append(node);
         if (detail && (detail.matches(".action-requirements") || detail.id === "houseRepairDetails")) group.append(detail);
         moved = true;
       }
@@ -497,8 +497,6 @@ export function initEconomy(state, { render, notify }) {
     if (water) {
       repairs.append(element("h4", "construction-repair-heading", "💧 Водоснабжение"), water);
     }
-    const buildings = $("#buildingCards");
-    buildings?.closest("section")?.querySelector("h3")?.remove();
   }
 
   
