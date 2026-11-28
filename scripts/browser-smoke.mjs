@@ -48,6 +48,7 @@ try{
     return {width:image.naturalWidth,height:image.naturalHeight};
   });
   assert.ok(homesteadImage.width>=250&&homesteadImage.height>=160,"Generated homestead artwork failed to load");
+  assert.ok(await page.locator("#home .homestead-scene").isVisible(),"Generated homestead artwork is hidden");
   const heroBackground=await page.locator("#home .homestead-scene").evaluate(el=>getComputedStyle(el).backgroundImage);
   assert.match(heroBackground,/homestead\.webp/,"Generated homestead artwork is not used by the home scene");
   assert.equal(await page.locator(".pumpkin-mascot").count(),1,"There must be exactly one interactive pumpkin mascot");
