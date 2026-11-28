@@ -147,10 +147,11 @@ try{
   await page.locator("#pumpkinMascot").click();
   assert.notEqual(await bubble.textContent(),before,"Pumpkin mascot click did not update its speech bubble");
 
-  await page.setViewportSize({width:390,height:844});
-  await page.waitForTimeout(200);
+  await page.locator('.navigation [data-tab="home"]').click();
   const desktopContentWidth=await page.locator("#home").evaluate(el=>el.getBoundingClientRect().width);
   assert.ok(desktopContentWidth>700,"Main content did not expand after removing permanent side panels");
+  await page.setViewportSize({width:390,height:844});
+  await page.waitForTimeout(200);
   assert.ok(await page.locator("#homestead-scene").isVisible(),"Farm scene disappeared on mobile viewport");
   const widths=await page.evaluate(()=>({body:document.body.scrollWidth,viewport:innerWidth}));
   assert.ok(widths.body<=widths.viewport+2,"Horizontal page overflow on mobile");
