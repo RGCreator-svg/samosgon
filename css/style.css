@@ -3544,3 +3544,30 @@ body { margin:0; font-family:"Segoe UI", "Comic Sans MS", sans-serif; background
   #game .prototype-task.home-objective { top:auto; right:auto; width:100%; padding:9px 10px; }
   #game .prototype-task.home-objective .task-row { font-size:11px; }
 }
+
+/* REV 10.5 — используем освобождённое боковыми панелями пространство. */
+#game .tab-content:not(.hidden) {
+  left:50%;
+  top:165px;
+  transform:translateX(-50%);
+  width:min(940px,calc(100vw - 48px));
+  max-height:calc(100vh - 300px);
+}
+@media(max-width:900px) {
+  #game .tab-content:not(.hidden) {
+    left:50%;
+    top:175px;
+    transform:translateX(-50%);
+    width:calc(100vw - 24px);
+    max-height:calc(100vh - 275px);
+  }
+}
+@media(max-width:560px) {
+  #game .tab-content:not(.hidden) {
+    left:50%;
+    top:225px;
+    transform:translateX(-50%);
+    width:calc(100vw - 16px);
+    max-height:calc(100vh - 315px);
+  }
+}
