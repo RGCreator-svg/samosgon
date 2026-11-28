@@ -54,7 +54,20 @@ const HOMESTEAD_REPAIRS = {
 };
 
 function save() {
-  saveGame(state);
+  const saved = saveGame(state);
+  const indicator = $("#saveStatus");
+  if (indicator) {
+    if (saved) {
+      const time = new Date().toLocaleTimeString("ru-RU", { hour: "2-digit", minute: "2-digit" });
+      indicator.textContent = "✓ Сохранено";
+      indicator.dataset.status = "saved";
+      indicator.title = "Последнее сохранение: " + time;
+    } else {
+      indicator.textContent = "⚠ Ошибка сохранения";
+      indicator.dataset.status = "error";
+      indicator.title = "Браузер не смог записать сохранение. Проверьте свободное место и настройки приватности.";
+    }
+  }
 }
 
 function notify(message) {
@@ -716,3 +729,7 @@ render();
 
 setInterval(save, 15000);
 window.addEventListener("beforeunload", save);
+window.addEventListener("pagehide", save);
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden") save();
+});
