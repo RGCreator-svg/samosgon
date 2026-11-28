@@ -700,3 +700,7 @@ body { min-height:100vh; }
   background:transparent !important;
   box-shadow:none !important;
 }
+
+
+/* REV 10.17 — remove the large decorative homestead backdrop; keep individual object sprites. */
+#homestead-scene { display:none !important; }
