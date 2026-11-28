@@ -193,7 +193,7 @@
 @media(max-width:560px){#game .shared-purchase-cart.cart-overlay-panel{bottom:calc(88px + env(safe-area-inset-bottom));max-height:72dvh}}
 
 /* Keep the bottom shortcut dock above the cart scrim so it remains usable. */
-#game .prototype-bottom { position:relative; z-index:60; }
+#game .prototype-bottom { z-index:60; }
 
 /* Generated storybook artwork for the homestead hero scene. */
 #game #home .homestead-scene {
