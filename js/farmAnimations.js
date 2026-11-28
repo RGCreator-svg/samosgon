@@ -8,12 +8,12 @@ async function loadAtlas(jsonPath, imagePath) {
     const response = await fetch(jsonPath);
     if (!response.ok) throw new Error("Не удалось загрузить описание атласа: " + jsonPath);
     const raw = await response.text();
-    const data = JSON.parse(raw.replace(/^\\uFEFF/, ""));
+    const data = JSON.parse(raw.replace(/^\uFEFF/, ""));
     const image = new Image();
-    image.src = imagePath;
     await new Promise((resolve, reject) => {
       image.onload = resolve;
       image.onerror = () => reject(new Error("Не удалось загрузить атлас: " + imagePath));
+      image.src = imagePath;
     });
     return { data, image };
   })();
