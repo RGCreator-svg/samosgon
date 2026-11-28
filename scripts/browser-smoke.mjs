@@ -51,6 +51,7 @@ try{
   assert.ok(await page.locator(".player-profile").isVisible(),"Player avatar/profile HUD is missing");
   assert.ok(await page.locator(".player-profile #xpBar").count()===1,"XP progress must be shown inside player profile");
   assert.ok(await page.locator("#wellDevelopmentAction").isVisible(),"Well development task is missing");
+  assert.ok(await page.locator("#advanceDayShortcut").isVisible(),"Visible day-advance control is missing");
   const wellText=(await page.locator("#wellDevelopmentStatus").innerText())+" "+(await page.locator("#wellDevelopmentDetails").innerText());
   assert.match(wellText,/пиломатериалы|инструмент|Водоснабжение полностью/i,"Well development status or requirements are not displayed");
   await page.locator('.prototype-bottom [data-tab="productionHub"]').click();
@@ -83,7 +84,7 @@ try{
     assert.match(await page.locator("#notifications").innerText(),/доставк/i,"Cart payment did not start a delivery");
     const deliveryDays={timber:1,fasteners:1,paint:1,metal:2,tools:2};
     const maxDeliveryDays=partIds.reduce((max,id)=>Math.max(max,deliveryDays[id]||1),0);
-    for(let day=0;day<maxDeliveryDays;day++) await page.locator("#sleepButton").click();
+    for(let day=0;day<maxDeliveryDays;day++) await page.locator("#advanceDayShortcut").click();
     await page.locator('.navigation [data-tab="economy"]').click();
     for(const id of partIds){
       const collect=page.locator(`#partsDeliveries [data-economy-action="collectAll:${id}"]`);
