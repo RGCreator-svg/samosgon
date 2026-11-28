@@ -58,6 +58,21 @@ const GRISHKA_ADVICE = [
     text: "Кошелёк опять похудел? Не трать последнее на блестящие железки — сначала продай урожай."
   },
   {
+    id: "orders-ready",
+    when: state => (state.orders?.active || []).some(order => Number(state.inventory?.[order.itemId]) >= Number(order.quantity) && Number(state.day) <= Number(order.deadline)),
+    text: "Соседский заказ уже можно сдать. Загляни на доску объявлений и забери оплату с опытом — товар как раз в наличии."
+  },
+  {
+    id: "orders-deadline",
+    when: state => (state.orders?.active || []).some(order => Number(order.deadline) - Number(state.day) <= 1),
+    text: "У заказа поджимает срок. Проверь доску: просрочка бьёт по репутации, а соседям ждать некогда."
+  },
+  {
+    id: "water-development",
+    when: state => Number(state.waterSystem?.level || 0) < 3 && Number(state.day) >= 2,
+    text: "Вода сама к грядкам не побежит. На главной усадьбе посмотри следующий этап водоснабжения и проверь, каких деталей не хватает."
+  },
+  {
     id: "ready-braga",
     when: state => Boolean(state.production?.ready),
     text: "Эй, мастер! Бочка уже своё отработала. Забирай брагу, пока она не решила стать уксусом."
@@ -306,9 +321,9 @@ export function renderAdvisor(state) {
   if (advisor) {
     advisor.classList.remove("mood-worried", "mood-happy", "mood-thinking", "mood-neutral", "reaction-pop");
 
-    const worried = ["low-energy", "low-hunger", "cold", "poor", "repair-still", "repair-barn", "repair-house", "garden", "full-warehouse"];
+    const worried = ["low-energy", "low-hunger", "cold", "poor", "orders-deadline", "repair-still", "repair-barn", "repair-house", "garden", "full-warehouse"];
     const happy = ["orchard-restored", "automation", "equipment", "first-skills"];
-    const thinking = ["ready-braga", "fermenting", "unspent-points", "orchard"];
+    const thinking = ["ready-braga", "fermenting", "unspent-points", "orchard", "water-development"];
 
     const mood = reaction
       ? `mood-${reaction.mood}`
