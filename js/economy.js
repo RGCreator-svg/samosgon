@@ -448,24 +448,57 @@ export function initEconomy(state, { render, notify }) {
     }
   }
 
-  if (!$("#economy")) {
+  if (!$("#construction")) {
     const tab = element("button", "", "🏗️ Стройка");
-    tab.dataset.tab = "economy";
+    tab.dataset.tab = "construction";
     nav.append(tab);
 
     const section = element("section", "tab-content panel hidden");
-    section.id = "economy";
+    section.id = "construction";
     section.innerHTML = `
-      <h2>🏗️ Строительство и снабжение</h2>
-      <p>Хозяйство растёт. Теперь даже гвозди требуют финансового планирования.</p>
-      <h3>Постройки</h3><div id="buildingCards" class="economy-grid"></div>
-      
+      <h2>🏗️ Стройка и развитие усадьбы</h2>
+      <p>Все ремонты, новые сооружения и улучшения собраны здесь.</p>
+      <h3>Улучшение построек</h3><div id="buildingCards" class="economy-grid"></div>
+      <h3>Ремонт и восстановление</h3><div id="constructionRepairs" class="construction-repairs"></div>`;
+    const supply = element("section", "tab-content panel hidden");
+    supply.id = "economy";
+    supply.innerHTML = `
+      <h2>🧰 Снабжение и комплектующие</h2>
+      <p>Заказывайте материалы и забирайте доставленные детали.</p>
       <h3>Магазин «СельхозТехСнаб»</h3><div id="partsCatalog" class="economy-grid"></div>
       <h3>Мои комплектующие</h3><div id="partsStock" class="parts-stock"></div>
       <h3>Доставка</h3><div id="partsDeliveries" class="parts-stock"></div>`;
     const notifications = $("#notifications")?.closest(".panel");
-    if (notifications?.parentElement === game) game.insertBefore(section, notifications);
-    else game.append(section);
+    if (notifications?.parentElement === game) {
+      game.insertBefore(section, notifications);
+      game.insertBefore(supply, notifications);
+    } else {
+      game.append(section, supply);
+    }
+
+    const repairs = $("#constructionRepairs");
+    const addRepair = (heading, selectors) => {
+      const title = element("h4", "construction-repair-heading", heading);
+      const group = element("div", "construction-repair-group");
+      let moved = false;
+      for (const selector of selectors) {
+        const node = $(selector);
+        if (!node) continue;
+        group.append(node);
+        const detail = node.nextElementSibling;
+        if (detail && (detail.matches(".action-requirements") || detail.id === "houseRepairDetails")) group.append(detail);
+        moved = true;
+      }
+      if (moved) repairs.append(title, group);
+    };
+    addRepair("🏠 Дом и мастерская", ["#repairHouse", "#repairBarn", "#repairStill"]);
+    addRepair("🌱 Земельные участки", ["#repairGarden", "#restoreOrchard"]);
+    const water = $(".well-development-card");
+    if (water) {
+      repairs.append(element("h4", "construction-repair-heading", "💧 Водоснабжение"), water);
+    }
+    const buildings = $("#buildingCards");
+    buildings?.closest("section")?.querySelector("h3")?.remove();
   }
 
   
