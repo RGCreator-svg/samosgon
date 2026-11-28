@@ -24,6 +24,7 @@ import { initGamePresentation } from "./gamePresentation.js";
 
 let state = loadGame();
 state.farmPlots ??= ["needs_water","needs_weed","needs_fertilize"];
+state.farmPlotCooldowns ??= {};
 
 // Миграция сохранений: старые партии не теряют прогресс.
 state.reputation ??= 0;
@@ -72,17 +73,33 @@ function notify(message) {
   if (eventCount) eventCount.textContent = String(container.children.length);
 }
 
+const FARM_ACTION_DELAY_MS = 10000;
+function farmCooldownRemaining(index) {
+  return Math.max(0,(Number(state.farmPlotCooldowns?.[index])||0)-Date.now());
+}
 function renderFarmPlots() {
   const plots=Array.isArray(state.farmPlots)?state.farmPlots:[];
   const stages={empty:{label:"Посадить семена",icon:""},needs_water:{label:"Полить грядку",icon:"need_water"},needs_weed:{label:"Прополоть грядку",icon:"need_weed"},needs_fertilize:{label:"Удобрить грядку",icon:"need_fertilize"},ready:{label:"Собрать урожай",icon:"need_take"}};
   document.querySelectorAll(".farm-plot").forEach((plot,index)=>{
-    const stage=stages[plots[index]]?plots[index]:"empty",info=stages[stage];
-    plot.dataset.stage=stage;plot.setAttribute("aria-label","Грядка "+(index+1)+": "+info.label);plot.title=info.label;
+    const stage=stages[plots[index]]?plots[index]:"empty",info=stages[stage],remaining=farmCooldownRemaining(index);
+    plot.dataset.stage=stage;plot.dataset.cooldown=remaining>0?"true":"false";
+    plot.setAttribute("aria-label","Грядка "+(index+1)+": "+info.label+(remaining>0?". Ожидание "+Math.ceil(remaining/1000)+" сек.":""));plot.title=info.label;
     const crop=plot.querySelector(".farm-plot-crop"),action=plot.querySelector(".farm-plot-action");
     if(crop){crop.hidden=stage==="empty";crop.alt=stage==="ready"?"Созревший урожай":"Растущие овощи";}
     if(action){action.hidden=!info.icon;if(info.icon)action.src="assets/images/farm/"+info.icon+".png";}
+    let timer=plot.querySelector(".farm-plot-timer");
+    if(!timer){timer=document.createElement("span");timer.className="farm-plot-timer";timer.setAttribute("aria-live","off");plot.append(timer);}
+    timer.hidden=remaining<=0;timer.textContent=remaining>0?Math.ceil(remaining/1000)+" с":"";
+    plot.disabled=remaining>0;
   });
 }
+setInterval(()=>{
+  document.querySelectorAll(".farm-plot").forEach((plot,index)=>{
+    const remaining=farmCooldownRemaining(index),timer=plot.querySelector(".farm-plot-timer");
+    if(timer){timer.hidden=remaining<=0;timer.textContent=remaining>0?Math.ceil(remaining/1000)+" с":"";}
+    plot.disabled=remaining>0;plot.dataset.cooldown=remaining>0?"true":"false";
+  });
+},250);
 
 function render() {
   state.waterSystem ??= { level: 0 };
@@ -295,7 +312,7 @@ function harvestVegetables(plotIndex=null) {
     +addInventory(state,"carrot",Math.max(1,Math.round((1+(bonus?1:0))*seasonYield)))
     +addInventory(state,"cabbage",Math.max(1,Math.round(seasonYield)));
   state.energy-=5;earnExperience(10);
-  if(harvested>0&&Number.isInteger(plotIndex))state.farmPlots[plotIndex]="empty";
+  if(harvested>0&&Number.isInteger(plotIndex)){state.farmPlots[plotIndex]="empty";state.farmPlotCooldowns[plotIndex]=Date.now()+FARM_ACTION_DELAY_MS;}
   notify(harvested>0?`Урожай собран: ${harvested} единиц. Земля пока не требует долю.`:"Склад забит под завязку. Сначала продайте или используйте запасы.");
   render();return harvested>0;
 }
@@ -303,15 +320,17 @@ $("#harvestVegetables")?.addEventListener("click",()=>harvestVegetables());
 document.querySelectorAll(".farm-plot").forEach((plot,index)=>plot.addEventListener("click",()=>{
   const stages=["empty","needs_water","needs_weed","needs_fertilize","ready"];
   const current=stages.includes(state.farmPlots[index])?state.farmPlots[index]:"empty";
+  if(farmCooldownRemaining(index)>0)return;
   if(current==="ready"){const harvested=harvestVegetables(index);if(harvested)plot.classList.add("is-harvesting");return;}
   if(current!=="empty"&&state.energy<1){notify("Нет сил ухаживать за грядкой. Отдохните до следующего дня.");return;}
-  if(current==="empty"){state.farmPlots[index]="needs_water";notify("Грядка "+(index+1)+": семена посажены. Теперь нужен полив.");}
+  if(current==="empty"){state.farmPlots[index]="needs_water";state.farmPlotCooldowns[index]=Date.now()+FARM_ACTION_DELAY_MS;notify("Грядка "+(index+1)+": семена посажены. Следующее действие через 10 секунд.");}
   else{
     state.energy-=1;
     const next={needs_water:"needs_weed",needs_weed:"needs_fertilize",needs_fertilize:"ready"}[current];
     state.farmPlots[index]=next;
+    state.farmPlotCooldowns[index]=Date.now()+FARM_ACTION_DELAY_MS;
     const messages={needs_weed:"Грядка полита. Теперь пора убрать сорняки.",needs_fertilize:"Сорняки убраны. Осталось подкормить растения.",ready:"Растения удобрены — урожай созрел!"};
-    notify("Грядка "+(index+1)+": "+messages[next]);
+    notify("Грядка "+(index+1)+": "+messages[next]+" Следующее действие через 10 секунд.");
   }
   plot.classList.remove("is-changing");void plot.offsetWidth;plot.classList.add("is-changing");render();
 }));
