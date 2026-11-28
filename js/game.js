@@ -23,6 +23,7 @@ import { initCellar, renderCellar, ageBarrelsOneDay } from "./cellar.js";
 import { initGamePresentation } from "./gamePresentation.js";
 
 let state = loadGame();
+state.farmPlots ??= ["needs_water","needs_weed","needs_fertilize"];
 
 // Миграция сохранений: старые партии не теряют прогресс.
 state.reputation ??= 0;
@@ -71,9 +72,22 @@ function notify(message) {
   if (eventCount) eventCount.textContent = String(container.children.length);
 }
 
+function renderFarmPlots() {
+  const plots=Array.isArray(state.farmPlots)?state.farmPlots:[];
+  const stages={empty:{label:"Посадить семена",icon:""},needs_water:{label:"Полить грядку",icon:"need_water"},needs_weed:{label:"Прополоть грядку",icon:"need_weed"},needs_fertilize:{label:"Удобрить грядку",icon:"need_fertilize"},ready:{label:"Собрать урожай",icon:"need_take"}};
+  document.querySelectorAll(".farm-plot").forEach((plot,index)=>{
+    const stage=stages[plots[index]]?plots[index]:"empty",info=stages[stage];
+    plot.dataset.stage=stage;plot.setAttribute("aria-label","Грядка "+(index+1)+": "+info.label);plot.title=info.label;
+    const crop=plot.querySelector(".farm-plot-crop"),action=plot.querySelector(".farm-plot-action");
+    if(crop){crop.hidden=stage==="empty";crop.alt=stage==="ready"?"Созревший урожай":"Растущие овощи";}
+    if(action){action.hidden=!info.icon;if(info.icon)action.src="assets/images/farm/"+info.icon+".png";}
+  });
+}
+
 function render() {
   state.waterSystem ??= { level: 0 };
   renderAll(state);
+  renderFarmPlots();
   renderHouseRepairDetails();
   renderAllRepairButtons();
   renderWaterDevelopment();
@@ -270,32 +284,37 @@ $("#marketItems")?.addEventListener("click", (event) => {
   render();
 });
 
-// Сбор овощей
-$("#harvestVegetables")?.addEventListener("click", () => {
-  if (state.energy < 5) {
-    notify("Нет сил. Даже картошка сегодня выглядит энергичнее вас.");
-    return;
+// Сбор овощей: общая кнопка и отдельные созревшие грядки используют одну механику.
+function harvestVegetables(plotIndex=null) {
+  if (state.energy < 5) { notify("Нет сил. Даже картошка сегодня выглядит энергичнее вас."); return false; }
+  if (state.garden < 20) { notify("Сначала приведите огород в порядок."); return false; }
+  const bonus=state.skills.includes("green_thumb")?2:0;
+  const harvestBonus=state.skills.includes("big_harvest")?2:0;
+  const seasonYield=getWorldYieldMultiplier(state,"vegetable");
+  const harvested=addInventory(state,"potato",Math.max(1,Math.round((2+bonus+harvestBonus)*seasonYield)))
+    +addInventory(state,"carrot",Math.max(1,Math.round((1+(bonus?1:0))*seasonYield)))
+    +addInventory(state,"cabbage",Math.max(1,Math.round(seasonYield)));
+  state.energy-=5;earnExperience(10);
+  if(harvested>0&&Number.isInteger(plotIndex))state.farmPlots[plotIndex]="empty";
+  notify(harvested>0?`Урожай собран: ${harvested} единиц. Земля пока не требует долю.`:"Склад забит под завязку. Сначала продайте или используйте запасы.");
+  render();return harvested>0;
+}
+$("#harvestVegetables")?.addEventListener("click",()=>harvestVegetables());
+document.querySelectorAll(".farm-plot").forEach((plot,index)=>plot.addEventListener("click",()=>{
+  const stages=["empty","needs_water","needs_weed","needs_fertilize","ready"];
+  const current=stages.includes(state.farmPlots[index])?state.farmPlots[index]:"empty";
+  if(current==="ready"){const harvested=harvestVegetables(index);if(harvested)plot.classList.add("is-harvesting");return;}
+  if(current!=="empty"&&state.energy<1){notify("Нет сил ухаживать за грядкой. Отдохните до следующего дня.");return;}
+  if(current==="empty"){state.farmPlots[index]="needs_water";notify("Грядка "+(index+1)+": семена посажены. Теперь нужен полив.");}
+  else{
+    state.energy-=1;
+    const next={needs_water:"needs_weed",needs_weed:"needs_fertilize",needs_fertilize:"ready"}[current];
+    state.farmPlots[index]=next;
+    const messages={needs_weed:"Грядка полита. Теперь пора убрать сорняки.",needs_fertilize:"Сорняки убраны. Осталось подкормить растения.",ready:"Растения удобрены — урожай созрел!"};
+    notify("Грядка "+(index+1)+": "+messages[next]);
   }
-
-  if (state.garden < 20) {
-    notify("Сначала приведите огород в порядок.");
-    return;
-  }
-
-  const bonus = state.skills.includes("green_thumb") ? 2 : 0;
-  const harvestBonus = state.skills.includes("big_harvest") ? 2 : 0;
-
-  const seasonYield = getWorldYieldMultiplier(state, "vegetable");
-  const harvested = addInventory(state, "potato", Math.max(1, Math.round((2 + bonus + harvestBonus) * seasonYield)))
-    + addInventory(state, "carrot", Math.max(1, Math.round((1 + (bonus ? 1 : 0)) * seasonYield)))
-    + addInventory(state, "cabbage", Math.max(1, Math.round(seasonYield)));
-
-  state.energy -= 5;
-  earnExperience(10);
-
-  notify(harvested > 0 ? `Урожай собран: ${harvested} единиц. Земля пока не требует долю.` : "Склад забит под завязку. Сначала продайте или используйте запасы.");
-  render();
-});
+  plot.classList.remove("is-changing");void plot.offsetWidth;plot.classList.add("is-changing");render();
+}));
 
 // Единые требования для ремонта и восстановления построек.
 
