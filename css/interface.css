@@ -1061,3 +1061,31 @@ body { min-height:100vh; }
 @media(max-width:560px) {
   #game .save-status { padding:4px 6px; font-size:9px; }
 }
+
+
+/* Live story objectives and quest log. */
+#game .prototype-task .task-row { align-items:flex-start; gap:9px; }
+#game .prototype-task .task-current-copy { display:flex; flex:1; min-width:0; flex-direction:column; gap:4px; color:#5c3a1e; line-height:1.35; }
+#game .prototype-task .task-current-copy strong { font-size:12px; }
+#game .prototype-task .task-current-copy small { color:#705a3d; font-size:10px; }
+#game .task-progress, #game .story-quest-track { height:7px; overflow:hidden; border-radius:99px; background:#d8c59d; }
+#game .task-progress span, #game .story-quest-track span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#78984c,#c5a34f); transition:width .2s ease; }
+#game .prototype-task .task-progress-label { color:#72501f; font-size:10px; font-weight:800; }
+#game .prototype-task .task-action { width:100%; margin-top:8px; padding:6px 8px; border:1px solid #8a5a2e; border-radius:7px; background:#6b431f; color:#fff; font-size:10px; font-weight:800; cursor:pointer; }
+#game .prototype-task .task-action:hover { filter:brightness(1.12); }
+#game .story-quest-title { margin:18px 0 8px; color:#e4cc97; }
+#game .story-quest-summary { color:#d9c18b; font-size:13px; margin:8px 0 12px; }
+#game .story-quest-list { display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:10px; margin:10px 0 18px; }
+#game .story-quest { padding:12px; border:1px solid #65583c; border-radius:10px; background:#292d24; }
+#game .story-quest.is-current { border-color:#c5a34f; box-shadow:inset 3px 0 #c5a34f; }
+#game .story-quest.is-done { border-color:#668653; background:#293529; }
+#game .story-quest.is-locked { opacity:.68; }
+#game .story-quest-head { display:flex; align-items:center; gap:7px; color:#e8d7ad; font-size:13px; }
+#game .story-quest-icon { font-size:19px; }
+#game .story-quest-status { margin-left:auto; color:#cdbb8e; font-size:10px; white-space:nowrap; }
+#game .story-quest p { min-height:34px; margin:7px 0; color:#c0b9a8; font-size:12px; }
+#game .story-quest-track { height:6px; background:#171b16; }
+#game .story-quest-footer { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:8px; }
+#game .story-quest-footer small { color:#d9c18b; font-size:10px; }
+#game .story-quest-footer button { padding:5px 8px; border:1px solid #8b7850; border-radius:6px; background:#46553a; color:#fff; font-size:10px; cursor:pointer; }
+@media(max-width:560px) { #game .prototype-task .task-current-copy strong { font-size:10px; } #game .prototype-task .task-current-copy small { font-size:9px; } #game .prototype-task .task-action { font-size:9px; } #game .story-quest-list { grid-template-columns:1fr; } }
