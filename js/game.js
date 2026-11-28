@@ -8,7 +8,7 @@ import { renderAll, renderAdvisor, reactGrishkaToEvent } from "./ui.js";
 import { initOrders, advanceOrdersDay } from "./orders.js";
 import { initDevTools } from "./dev.js";
 import { startNewDay } from "./events.js";
-import { initEconomy, renderEconomy, advanceDeliveries, addInventory, removeInventory, queuePurchase, registerCartHandler, PARTS } from "./economy.js";
+import { initEconomy, renderEconomy, advanceDeliveries, addInventory, removeInventory, queuePurchase, queuePart, registerCartHandler, PARTS } from "./economy.js";
 import { initEquipment, renderEquipment } from "./equipment.js";
 import { initExpansion, renderExpansion, advanceExpansionDay } from "./expansion.js";
 import { initFeaturePack, renderFeaturePack, advanceFeaturePackDay, getMarketMultiplier } from "./featurepack.js";
@@ -65,6 +65,7 @@ function render() {
   state.waterSystem ??= { level: 0 };
   renderAll(state);
   renderHouseRepairDetails();
+  renderAllRepairButtons();
   renderWaterDevelopment();
   renderGrandmaNotes(state, notify, render);
   renderEconomy(state);
@@ -201,26 +202,14 @@ initProcessCenter(state, { render, notify, earnExperience });
 initProductionPlant(state, { render, notify, earnExperience });
 initCellar(state, { render, notify });
 initGamePresentation();
-registerCartHandler("homesteadRepair",(current,item)=>{
-  const action=item.payload.action;
-  if(action==="house"){current.house=Math.min(100,current.house+20*item.quantity);earnExperience(5*item.quantity);}
-  if(action==="barn"){current.barn=Math.min(100,current.barn+25*item.quantity);earnExperience(5*item.quantity);}
-  if(action==="still"){current.still=Math.min(100,current.still+30*item.quantity);earnExperience(8*item.quantity);}
-  if(action==="garden")current.garden=Math.min(100,current.garden+30*item.quantity);
-  if(action==="orchard"&&!current.orchardRestored){current.orchardRestored=true;current.trees=current.skills.includes("orchard_lore")?5:3;earnExperience(20);}
-  if(action==="basicBatch"&&!current.production.active&&!current.production.ready){current.energy=Math.max(0,current.energy-10);current.production.active=true;current.production.ready=false;current.production.daysLeft=current.skills.includes("patient_master")?1:2;}
-  if(["house","barn","still","garden","orchard"].includes(action)) {
-    discoverRepairStory(current,action,notify);
-    // Сад расчищается одной крупной операцией, поэтому за неё открываются
-    // несколько связанных страниц из садовой части бабушкиного архива.
-    if(action==="orchard") {
-      discoverRepairStory(current,action,notify);
-      discoverRepairStory(current,action,notify);
-    } else if(item.quantity>1 && Math.random()<0.22) {
-      discoverRepairStory(current,action,notify);
-    }
-  }
+registerCartHandler("basicBatch",(current,item)=>{
+  if(current.production.active||current.production.ready)return;
+  current.energy=Math.max(0,current.energy-10);
+  current.production.active=true;
+  current.production.ready=false;
+  current.production.daysLeft=current.skills.includes("patient_master")?1:2;
 });
+
 
 // Журнал остаётся внутри .game-footer-dock рядом с тыквой.
  // Не переносить его в #game: это разрывает общий flex-контейнер и ломает расположение.
@@ -282,59 +271,151 @@ $("#harvestVegetables")?.addEventListener("click", () => {
   render();
 });
 
-// Показываем стоимость работы, материалы и влияние навыка прямо на экране дома.
+// Единые требования для ремонта и восстановления построек.
+const HOMESTEAD_REPAIRS = {
+  house: { name:"Ремонт дома", button:"#repairHouse", baseCost:30, discountedCost:20, parts:{ timber:1, fasteners:1, paint:1 }, progress:20, xp:5 },
+  barn: { name:"Ремонт сарая", button:"#repairBarn", baseCost:30, discountedCost:20, parts:{ timber:2, fasteners:1, paint:1 }, progress:25, xp:5 },
+  still: { name:"Ремонт аппарата", button:"#repairStill", baseCost:50, discountedCost:35, parts:{ metal:1, fasteners:1, tools:1 }, progress:30, xp:8 },
+  garden: { name:"Расчистка огорода", button:"#repairGarden", baseCost:20, discountedCost:15, parts:{ timber:1, fasteners:1 }, progress:30, xp:0 },
+  orchard: { name:"Восстановление сада", button:"#restoreOrchard", baseCost:40, discountedCost:30, parts:{ timber:2, fasteners:1, tools:1 }, progress:0, xp:20 }
+};
+function repairCost(config) {
+  return state.skills.includes("handyman") ? config.discountedCost : config.baseCost;
+}
+function repairIsComplete(action) {
+  if(action==="orchard")return Boolean(state.orchardRestored);
+  return Number(state[action])>=100;
+}
+function pendingPartQuantity(partId) {
+  const inCart=Number(state.materialCart?.[partId])||0;
+  const inDelivery=(state.deliveries||[]).filter(item=>item.partId===partId)
+    .reduce((sum,item)=>sum+(Number(item.quantity)||0),0);
+  return inCart+inDelivery;
+}
+function getRepairMissing(parts) {
+  return Object.entries(parts).reduce((missing,[id,required])=>{
+    const amount=Math.max(0,Number(required)-(Number(state.parts?.[id])||0));
+    if(amount)missing[id]=amount;
+    return missing;
+  },{});
+}
+function renderRepairButton(action) {
+  const config=HOMESTEAD_REPAIRS[action];
+  const button=$(config.button);
+  if(!button)return;
+  const complete=repairIsComplete(action);
+  const cost=repairCost(config);
+  const missing=getRepairMissing(config.parts);
+  const notYetOrdered=Object.entries(missing).reduce((out,[id,qty])=>{
+    const remaining=Math.max(0,qty-pendingPartQuantity(id));
+    if(remaining)out[id]=remaining;
+    return out;
+  },{});
+  const allPending=Object.keys(missing).length>0&&Object.keys(notYetOrdered).length===0;
+  if(complete){button.textContent="✓ Готово";button.disabled=true;return;}
+  if(!Object.keys(missing).length){
+    button.textContent=`🔨 Выполнить работу — ${cost} монет`;
+    button.disabled=Number(state.money)<cost;
+    return;
+  }
+  if(allPending){
+    button.textContent="⏳ Материалы заказаны — ждите доставку";
+    button.disabled=true;
+  }else{
+    button.textContent="🛒 Добавить недостающие материалы в корзину";
+    button.disabled=false;
+  }
+}
 function renderHouseRepairDetails() {
+  renderRepairButton("house");
   const details=$("#houseRepairDetails");
-  const button=$("#repairHouse");
-  if(!details||!button)return;
-  const hasSkill=state.skills.includes("handyman");
-  const cost=hasSkill?20:30;
-  button.textContent=state.house>=100?"✓ Дом полностью отремонтирован":`🔨 Отремонтировать дом — ${cost} монет`;
-  button.disabled=state.house>=100;
+  if(!details)return;
+  const config=HOMESTEAD_REPAIRS.house;
+  const cost=repairCost(config);
   details.replaceChildren();
   const work=document.createElement("p");
   work.className="repair-work-cost";
   work.textContent=`Работа: ${cost} монет`;
   const materials=document.createElement("p");
-  materials.innerHTML="<strong>Материалы:</strong> Пиломатериалы × 1, Крепёж и гвозди × 1, Краска × 1";
+  materials.innerHTML="<strong>Материалы:</strong>";
+  const list=document.createElement("ul");
+  for(const [id,qty] of Object.entries(config.parts)){
+    const part=PARTS.find(item=>item.id===id);
+    const stock=Number(state.parts?.[id])||0;
+    const line=document.createElement("li");
+    line.textContent=`${part?.name||id} × ${qty} (на складе: ${stock})`;
+    list.append(line);
+  }
+  const status=document.createElement("p");
+  const missing=getRepairMissing(config.parts);
+  if(!Object.keys(missing).length)status.textContent="Все материалы на складе. Ремонт можно выполнить.";
+  else {
+    const pending=Object.entries(missing).reduce((sum,[id,qty])=>sum+Math.min(qty,pendingPartQuantity(id)),0);
+    status.textContent=pending
+      ? "Часть материалов уже заказана или ожидает получения. Заберите доставку, когда она прибудет."
+      : "Материалов не хватает. Добавьте недостающее в корзину и оплатите заказ — ремонт начнётся только после получения доставки и отдельного нажатия кнопки ремонта.";
+  }
   const skill=document.createElement("p");
+  const hasSkill=state.skills.includes("handyman");
   skill.className=hasSkill?"repair-skill learned":"repair-skill";
-  skill.textContent=hasSkill?"Навык «Руки из плеч» изучен: стоимость работы снижена до 20 монет.":"Навык «Руки из плеч» не изучен: доступен как улучшение для снижения стоимости ремонта до 20 монет.";
-  details.append(work,materials,skill);
+  skill.textContent=hasSkill?"Навык «Руки из плеч» изучен: стоимость работы снижена до 20 монет.":"Навык «Руки из плеч» не изучен: доступен как улучшение для снижения стоимости работы до 20 монет.";
+  details.append(work,materials,list,status,skill);
+}
+function renderAllRepairButtons(){
+  Object.keys(HOMESTEAD_REPAIRS).forEach(renderRepairButton);
 }
 
-// Работа оплачивается сразу, а в общую корзину попадают только нужные материалы.
-function queueHomesteadRepair(action, name, cost, parts) {
-  const key = "repair:" + action + ":" + (action === "orchard" ? "restore" : state[action]);
-  state.purchaseCart ??= [];
-  if (state.purchaseCart.some(item => item.key === key)) {
-    notify("Этот ремонт уже ожидает материалы в корзине.");
+// Если материалов не хватает — в корзину попадает только недостающее.
+// Работа и материалы со склада списываются исключительно в момент ремонта.
+function queueHomesteadRepair(action) {
+  const config=HOMESTEAD_REPAIRS[action];
+  if(!config||repairIsComplete(action))return;
+  const missing=getRepairMissing(config.parts);
+  if(Object.keys(missing).length){
+    const added={};
+    Object.entries(missing).forEach(([id,qty])=>{
+      const amount=Math.max(0,qty-pendingPartQuantity(id));
+      if(amount){queuePart(state,id,amount);added[id]=amount;}
+    });
+    const summary=Object.entries(added).map(([id,qty])=>(PARTS.find(part=>part.id===id)?.name||id)+" × "+qty).join(", ");
+    notify(summary
+      ? `${config.name}: добавлены недостающие материалы в корзину (${summary}). Работа пока не оплачивается.`
+      : `${config.name}: материалы уже заказаны. Дождитесь доставки и заберите их на склад.`);
+    render();
     return;
   }
-  if ((Number(state.money) || 0) < cost) {
-    notify(`Для работы нужно ${cost} монет. Сейчас денег не хватает.`);
+  const cost=repairCost(config);
+  if(Number(state.money)<cost){
+    notify(`Для работы «${config.name}» нужно ${cost} монет. Материалы не списаны.`);
     return;
   }
-  state.money -= cost;
-  queuePurchase(state, { key, kind:"homesteadRepair", name, cost:0, parts, payload:{ action } });
-  const materialNames=Object.fromEntries(PARTS.map(part=>[part.id,part.name]));
-  const materialSummary=Object.entries(parts).map(([id,qty])=>(materialNames[id]||id)+" × "+qty).join(", ");
-  const skillSummary=state.skills.includes("handyman")?"Навык «Руки из плеч» изучен: действует скидка на работу.":"Навык «Руки из плеч» не изучен: доступен как улучшение для снижения стоимости ремонта.";
-  notify(`${name}. Работа: ${cost} монет. Материалы: ${materialSummary}. ${skillSummary} Материалы добавлены в корзину, работа оплачена отдельно.`);
+  Object.entries(config.parts).forEach(([id,qty])=>{state.parts[id]-=qty;});
+  state.money-=cost;
+  if(action==="house"){state.house=Math.min(100,state.house+config.progress);earnExperience(config.xp);}
+  if(action==="barn"){state.barn=Math.min(100,state.barn+config.progress);earnExperience(config.xp);}
+  if(action==="still"){state.still=Math.min(100,state.still+config.progress);earnExperience(config.xp);}
+  if(action==="garden"){state.garden=Math.min(100,state.garden+config.progress);}
+  if(action==="orchard"){state.orchardRestored=true;state.trees=state.skills.includes("orchard_lore")?5:3;earnExperience(config.xp);}
+  if(["house","barn","still","garden","orchard"].includes(action)){
+    discoverRepairStory(state,action,notify);
+    if(action==="orchard"){
+      discoverRepairStory(state,action,notify);
+      discoverRepairStory(state,action,notify);
+    }
+  }
+  notify(`${config.name} выполнен. Работа: ${cost} монет; материалы списаны со склада.`);
   render();
 }
 
 // Расчистка огорода: инструменты, доски и крепёж.
 $("#repairGarden")?.addEventListener("click", () => {
-  const cost=state.skills.includes("handyman")?15:20;
-  queueHomesteadRepair("garden", "Расчистка огорода", cost, { timber:1, fasteners:1 });
+  queueHomesteadRepair("garden");
 });
 
 // Восстановление сада: инструменты, доски и крепёж.
 $("#restoreOrchard")?.addEventListener("click", () => {
   if(state.orchardRestored)return;
-  const cost=state.skills.includes("handyman")?30:40;
-  queueHomesteadRepair("orchard", "Восстановление сада", cost, { timber:2, fasteners:1, tools:1 });
+  queueHomesteadRepair("orchard");
 });
 
 // Сбор фруктов
@@ -365,22 +446,19 @@ $("#harvestFruit")?.addEventListener("click", () => {
 // Ремонт дома: доски, гвозди и краска.
 $("#repairHouse")?.addEventListener("click", () => {
   if(state.house>=100)return;
-  const cost=state.skills.includes("handyman")?20:30;
-  queueHomesteadRepair("house", "Ремонт дома", cost, { timber:1, fasteners:1, paint:1 });
+  queueHomesteadRepair("house");
 });
 
 // Ремонт сарая: доски, гвозди и краска.
 $("#repairBarn")?.addEventListener("click", () => {
   if(state.barn>=100)return;
-  const cost=state.skills.includes("handyman")?20:30;
-  queueHomesteadRepair("barn", "Ремонт сарая", cost, { timber:2, fasteners:1, paint:1 });
+  queueHomesteadRepair("barn");
 });
 
 // Ремонт аппарата: металлические заготовки, крепёж и инструменты.
 $("#repairStill")?.addEventListener("click", () => {
   if(state.still>=100)return;
-  const cost=state.skills.includes("handyman")?35:50;
-  queueHomesteadRepair("still", "Ремонт аппарата", cost, { metal:1, fasteners:1, tools:1 });
+  queueHomesteadRepair("still");
 });
 
 // Запуск базовой партии браги через общую корзину.
@@ -388,7 +466,7 @@ $("#startBatch")?.addEventListener("click", () => {
   if(!state.skills.includes("ferment")){notify("Нужно изучить навык «Основы брожения».");return;}
   if(state.production.active||state.production.ready){notify("Сначала разберитесь с текущей партией.");return;}
   if(state.energy<10){notify("Вы слишком устали.");return;}
-  queuePurchase(state,{key:"basic-batch",kind:"homesteadRepair",name:"Запуск базовой партии браги",cost:10,payload:{action:"basicBatch"}});
+  queuePurchase(state,{key:"basic-batch",kind:"basicBatch",name:"Запуск базовой партии браги",cost:10,payload:{action:"basicBatch"}});
   notify("Запуск браги добавлен в общую корзину.");render();
 });
 
