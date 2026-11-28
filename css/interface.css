@@ -1003,3 +1003,18 @@ body { min-height:100vh; }
   #game #farm #farmPlots.farm-plots { grid-template-columns:repeat(2,minmax(0,1fr))!important; padding:0 3%!important; }
   #game #farm #farmPlots.farm-plots > .farm-plot { width:114%!important; margin:0 0 -34px -7%!important; }
 }
+
+/* REV 10.33 — stagger only rows 2 and 4 half a bed to the right. */
+#game #farm #farmPlots.farm-plots > .farm-plot:nth-child(n+4):nth-child(-n+6),
+#game #farm #farmPlots.farm-plots > .farm-plot:nth-child(n+10):nth-child(-n+12) {
+  transform:translateX(50%)!important;
+}
+@media(max-width:600px) {
+  /* On the two-column mobile layout, shift the corresponding even rows. */
+  #game #farm #farmPlots.farm-plots > .farm-plot:nth-child(3),
+  #game #farm #farmPlots.farm-plots > .farm-plot:nth-child(4),
+  #game #farm #farmPlots.farm-plots > .farm-plot:nth-child(7),
+  #game #farm #farmPlots.farm-plots > .farm-plot:nth-child(8) {
+    transform:translateX(50%)!important;
+  }
+}
