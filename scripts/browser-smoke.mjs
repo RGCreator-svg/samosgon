@@ -35,7 +35,7 @@ try{
   assert.ok(await page.locator("#intro").isVisible(),"Title screen must remain visible until player continues");
   assert.match(await page.locator("#intro").innerText(),/После череды неудач/,"Opening story text is missing");
   await page.locator("#startGame").click();
-  await page.locator("#homestead-scene").waitFor({state:"visible"});
+  await page.locator("#homestead-scene").waitFor({state:"hidden"});
   assert.deepEqual(errors,[],"Browser errors occurred during initial game render: "+errors.join(" | "));
   assert.ok(await page.locator(".game-footer-dock").isVisible(),"Bottom HUD dock is missing");
   const dock=await page.locator(".game-footer-dock").boundingBox();
@@ -46,16 +46,10 @@ try{
   assert.equal(await page.locator("#eventConsole").evaluate(el=>el.open),true,"Event log summary did not expand the event history");
   await page.locator("#eventConsole > summary").click();
   assert.ok(await page.locator(".xp-panel").boundingBox().then(box=>box.height<45),"XP display is not compact");
-  assert.ok(await page.locator("#homestead-scene").count()===1,"Prototype SVG scene is missing");
-  const homesteadImage=await page.evaluate(async()=>{
-    const image=new Image(); image.src="assets/images/homestead.webp";
-    await new Promise((resolve,reject)=>{image.onload=resolve;image.onerror=reject;});
-    return {width:image.naturalWidth,height:image.naturalHeight};
-  });
-  assert.ok(homesteadImage.width>=250&&homesteadImage.height>=160,"Generated homestead artwork failed to load");
-  assert.ok(await page.locator("#home .homestead-scene").isVisible(),"Generated homestead artwork is hidden");
-  const heroBackground=await page.locator("#home .homestead-scene").evaluate(el=>getComputedStyle(el).backgroundImage);
-  assert.match(heroBackground,/homestead\.webp/,"Generated homestead artwork is not used by the home scene");
+  assert.ok(await page.locator("#homestead-scene").count()===1,"Legacy SVG scene element is missing");
+  assert.equal(await page.locator("#homestead-scene").isVisible(),false,"Large decorative SVG background should remain hidden");
+  assert.ok(await page.locator("#home .homestead-scene").isVisible(),"Home section scene container is hidden");
+  assert.equal(await page.locator("#home .homestead-scene").evaluate(el=>getComputedStyle(el).backgroundImage),"none","Home scene must not use a stretched raster background");
   assert.equal(await page.locator(".pumpkin-mascot").count(),1,"There must be exactly one interactive pumpkin mascot");
   assert.equal(await page.locator("#scene-pumpkin").isVisible(),false,"Decorative duplicate pumpkin should be hidden");
   const pumpkin=page.locator(".pumpkin-mascot img");
