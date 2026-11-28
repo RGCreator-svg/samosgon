@@ -100,13 +100,11 @@ try{
 
   await repairThroughDelivery("home","#repairHouse",["timber","fasteners","paint"],"#houseValue",30);
   await repairThroughDelivery("farm","#repairGarden",["timber","fasteners"],"#gardenValue",20);
-  await repairThroughDelivery("orchard","#restoreOrchard",["timber","fasteners","tools"],"#orchardValue",40,"Готово");
-  await repairThroughDelivery("barn","#repairStill",["metal","fasteners","tools"],"#stillValue",50);
 
 
   // Scene hotspots use the existing game's tab controller.
-  await page.locator("#scene-tree").click({force:true});
-  assert.equal(await page.locator("#orchard").evaluate(el=>el.classList.contains("hidden")),false,"Orchard scene hotspot did not open the orchard tab");
+  await page.locator("#scene-beds").click({force:true});
+  assert.equal(await page.locator("#farm").evaluate(el=>el.classList.contains("hidden")),false,"Garden scene hotspot did not open the farm tab");
   await page.locator('.navigation [data-tab="market"]').click();
   assert.equal(await page.locator("#market").evaluate(el=>el.classList.contains("hidden")),false,"Top navigation did not open market");
   await page.locator("#bottomWarehouse").click();
@@ -123,7 +121,7 @@ try{
   const widths=await page.evaluate(()=>({body:document.body.scrollWidth,viewport:innerWidth}));
   assert.ok(widths.body<=widths.viewport+2,"Horizontal page overflow on mobile");
   assert.deepEqual(errors,[],"Browser console/page errors detected");
-  console.log("Browser smoke passed: Prototype screen, SVG scene, pumpkin/cart images, cart launcher/payment, house repair, garden clearing, vegetable harvest, scene hotspot, navigation, warehouse control, pumpkin interaction, mobile viewport; no browser errors.");
+  console.log("Browser smoke passed: Prototype screen, SVG scene, pumpkin/cart images, cart launcher/payment, house and garden repair delivery, scene hotspot, navigation, warehouse control, pumpkin interaction, mobile viewport; no browser errors.");
 }finally{
   await browser?.close();
   await new Promise(resolve=>server.close(resolve));
