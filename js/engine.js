@@ -132,7 +132,7 @@ export function saveGame(state) {
   try {
     state.schemaVersion = SAVE_SCHEMA_VERSION;
     const snapshot = JSON.stringify(state);
-    if (snapshot === lastSavedSnapshot) return false;
+    if (snapshot === lastSavedSnapshot) return true;
     localStorage.setItem(SAVE_KEY, snapshot);
     lastSavedSnapshot = snapshot;
     return true;
