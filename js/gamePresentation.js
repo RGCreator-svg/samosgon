@@ -7,7 +7,7 @@ const GROUPS = [
 ];
 const LABELS = {
   home:"🏠 Дом",farm:"🥕 Огород",orchard:"🍎 Сад",barn:"🛠 Сарай",
-  market:"🧺 Рынок",skills:"🌳 Умения",notebook:"📖 Записки",
+  market:"🧺 Рынок",economy:"💰 Финансы",skills:"🌳 Умения",notebook:"📖 Записки",
   productionHub:"📋 Диспетчер",productionPlant:"🏭 Цех",featurePack:"⚗️ Винокурня",
   viticulture:"🍇 Винодельня",cellar:"🪵 Погреб",researchLab:"🧪 Лаборатория",
   processCenter:"🧰 Техцентр"
