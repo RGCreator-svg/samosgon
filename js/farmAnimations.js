@@ -1,4 +1,4 @@
-const ROOT = "../assets/vendor/sdxFarmGuiGame/assets/";
+const ROOT = new URL("../assets/vendor/sdxFarmGuiGame/assets/", import.meta.url).href;
 const atlasCache = new Map();
 
 async function loadAtlas(jsonPath, imagePath) {
