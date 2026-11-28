@@ -1,0 +1,196 @@
+/* Interface layer: consolidated navigation, home layout, event console and cart overlays. */
+/* REV 10.3 — одна компактная навигация вместо верхнего меню и боковых ярлыков. */
+#game .navigation {
+  position:relative;
+  top:auto;
+  display:flex;
+  align-items:stretch;
+  flex-wrap:nowrap;
+  gap:8px;
+  overflow-x:auto;
+  overscroll-behavior-x:contain;
+  scrollbar-width:thin;
+  padding:8px;
+  margin:10px 0 16px;
+  background:linear-gradient(180deg,#30382b,#22291f);
+  border:1px solid #6f7651;
+  border-radius:13px;
+}
+#game .navigation .nav-group {
+  display:flex;
+  align-items:center;
+  flex:0 0 auto;
+  gap:5px;
+  padding:0 7px;
+  border-right:1px solid #66704b;
+}
+#game .navigation .nav-group:last-child { border-right:0; }
+#game .navigation .nav-group-title {
+  align-self:center;
+  color:#c8b98f;
+  font-size:9px;
+  font-weight:800;
+  letter-spacing:.08em;
+  writing-mode:vertical-rl;
+  transform:rotate(180deg);
+  opacity:.8;
+}
+#game .navigation button[data-tab] {
+  flex:0 0 auto;
+  min-width:0;
+  min-height:36px;
+  padding:7px 10px;
+  margin:0;
+  white-space:nowrap;
+  font-size:12px;
+  border-width:1px;
+  border-radius:9px;
+}
+#game .prototype-side { display:none !important; }
+#game .prototype-task { width:190px; padding:10px; }
+#game .prototype-task h4 { margin-bottom:5px; font-size:12px; }
+#game .prototype-task .task-row { font-size:11px; }
+#game .prototype-task .task-icon { font-size:23px; }
+#game .prototype-bottom { gap:8px; }
+#game .prototype-bottom .panel-mini { min-width:132px; }
+@media(max-width:900px) {
+  #game .navigation { margin:7px 0 12px; }
+  #game .navigation .nav-group { gap:4px; padding:0 5px; }
+  #game .navigation .nav-group-title { font-size:8px; }
+  #game .navigation button[data-tab] { min-height:34px; padding:6px 8px; font-size:11px; }
+  #game .prototype-task { top:165px; right:7px; width:145px; }
+}
+@media(max-width:560px) {
+  #game .navigation { width:100%; max-width:100%; }
+  #game .navigation .nav-group-title { display:none; }
+  #game .navigation .nav-group { padding:0 4px; }
+  #game .navigation button[data-tab] { min-height:36px; padding:7px 9px; font-size:11px; }
+  #game .prototype-task { top:175px; right:5px; width:118px; }
+  #game .prototype-bottom .panel-mini { min-width:0; }
+}
+
+/* REV 10.4 — цель усадьбы становится частью домашнего экрана, а не плавающим баннером. */
+#game .prototype-task.home-objective {
+  position:relative;
+  inset:auto;
+  z-index:1;
+  width:100%;
+  max-width:620px;
+  margin:12px 0 16px;
+  padding:10px 13px;
+  border:1px solid #9a794e;
+  border-left:4px solid #84965b;
+  border-radius:11px;
+  background:linear-gradient(110deg,#fdf3d7,#f3e4bd);
+  box-shadow:0 2px 6px #0002;
+}
+#game .prototype-task.home-objective h4 { margin:0 0 4px; font-size:12px; }
+#game .prototype-task.home-objective .task-row { font-size:12px; }
+#game .prototype-task.home-objective .task-icon { font-size:22px; }
+#game .prototype-task.home-objective small { color:#6b5b43; }
+@media(max-width:900px) {
+  #game .prototype-task.home-objective { top:auto; right:auto; width:100%; }
+}
+@media(max-width:560px) {
+  #game .prototype-task.home-objective { top:auto; right:auto; width:100%; padding:9px 10px; }
+  #game .prototype-task.home-objective .task-row { font-size:11px; }
+}
+
+/* REV 10.5 — используем освобождённое боковыми панелями пространство. */
+#game .tab-content:not(.hidden) {
+  left:50%;
+  top:165px;
+  transform:translateX(-50%);
+  width:min(940px,calc(100vw - 48px));
+  max-height:calc(100vh - 300px);
+}
+@media(max-width:900px) {
+  #game .tab-content:not(.hidden) {
+    left:50%;
+    top:175px;
+    transform:translateX(-50%);
+    width:calc(100vw - 24px);
+    max-height:calc(100vh - 275px);
+  }
+}
+@media(max-width:560px) {
+  #game .tab-content:not(.hidden) {
+    left:50%;
+    top:225px;
+    transform:translateX(-50%);
+    width:calc(100vw - 16px);
+    max-height:calc(100vh - 315px);
+  }
+}
+
+/* REV 10.6 — журнал событий сворачивается, не занимая место постоянно. */
+#game .event-console {
+  min-width:0;
+  max-height:190px;
+  overflow:hidden;
+  padding:0;
+}
+#game .event-console > summary {
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  min-height:38px;
+  padding:8px 12px;
+  cursor:pointer;
+  list-style:none;
+  color:#e7d4a9;
+  font-size:12px;
+  font-weight:700;
+  user-select:none;
+}
+#game .event-console > summary::-webkit-details-marker { display:none; }
+#game .event-console > summary::before {
+  content:"＋";
+  display:inline-grid;
+  place-items:center;
+  width:18px;
+  height:18px;
+  border-radius:50%;
+  background:#586344;
+  color:#fff;
+  font-size:13px;
+}
+#game .event-console[open] > summary::before { content:"−"; }
+#game .event-console > summary > span:first-child { flex:1; }
+#game .event-console .event-count {
+  min-width:21px;
+  padding:1px 6px;
+  border-radius:10px;
+  background:#8b7041;
+  color:#fff6df;
+  text-align:center;
+  font-size:10px;
+  font-variant-numeric:tabular-nums;
+}
+#game .event-console #notifications {
+  max-height:130px;
+  overflow:auto;
+  padding:4px 12px 10px;
+}
+#game .event-console:not([open]) #notifications { display:none; }
+@media(max-width:560px) {
+  #game .event-console { max-height:150px; }
+  #game .event-console > summary { min-height:32px; padding:5px 8px; font-size:10px; }
+  #game .event-console #notifications { max-height:105px; padding:3px 8px 7px; }
+}
+
+/* REV 10.7 — корзина как единая выдвижная панель с явным закрытием. */
+#game .cart-overlay-scrim{display:none;position:fixed;inset:0;z-index:58;border:0;border-radius:0;background:#10150fcc;cursor:default}
+#game .cart-overlay-scrim.is-visible{display:block}
+#game .shared-purchase-cart.cart-overlay-panel{position:fixed;z-index:59;top:clamp(72px,10vh,110px);right:clamp(12px,3vw,34px);width:min(430px,calc(100vw - 24px));max-height:calc(100dvh - 130px);padding:16px;border:1px solid #a68b59;border-radius:16px;box-shadow:0 18px 55px #0009}
+#game .cart-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+#game .cart-panel-heading h2{margin:0;font-size:18px}
+#game .cart-panel-close{flex:0 0 34px;width:34px;height:34px;padding:0;border:1px solid #8e7750;border-radius:9px;background:#51432e;color:#fff1cf;font-size:17px;cursor:pointer}
+#game .cart-image-toggle{position:relative;overflow:visible}
+#game .cart-toggle-count{position:absolute;top:-7px;right:-7px;display:grid;place-items:center;min-width:19px;height:19px;padding:0 5px;border:2px solid #382516;border-radius:12px;background:#a83e2d;color:white;font-size:10px;font-weight:800;line-height:1}
+@media(max-width:700px){#game .shared-purchase-cart.cart-overlay-panel{top:auto;right:8px;bottom:calc(96px + env(safe-area-inset-bottom));left:8px;width:auto;max-height:min(70dvh,620px);padding:13px;border-radius:16px 16px 12px 12px}}
+@media(max-width:560px){#game .shared-purchase-cart.cart-overlay-panel{bottom:calc(88px + env(safe-area-inset-bottom));max-height:72dvh}}
+
+/* Keep the bottom shortcut dock above the cart scrim so it remains usable. */
+#game .prototype-bottom { position:relative; z-index:60; }
