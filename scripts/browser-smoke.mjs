@@ -138,7 +138,7 @@ try{
   await page.locator("#scene-beds").click({force:true});
   assert.equal(await page.locator("#farm").evaluate(el=>el.classList.contains("hidden")),false,"Garden scene hotspot did not open the farm tab");
   assert.ok(await page.locator("#farm .farm-scene").isVisible(),"Generated garden artwork is hidden");
-  assert.match(await page.locator("#farm .farm-scene").evaluate(el=>getComputedStyle(el).backgroundImage),/homestead\\.webp/,"Generated garden artwork is not connected");
+  assert.match(await page.locator("#farm .farm-scene").evaluate(el=>getComputedStyle(el).backgroundImage),/homestead\.webp/,"Generated garden artwork is not connected");
   await page.locator('.navigation [data-tab="market"]').click();
   assert.equal(await page.locator("#market").evaluate(el=>el.classList.contains("hidden")),false,"Top navigation did not open market");
   await page.locator("#bottomWarehouse").click();
