@@ -516,7 +516,9 @@ function renderHouseRepairDetails() {
   work.className="repair-work-cost";
   work.textContent=`Работа: ${cost} монет`;
   const materials=document.createElement("p");
-  materials.innerHTML="<strong>Материалы:</strong>";
+  const materialsTitle=document.createElement("strong");
+  materialsTitle.textContent="Материалы:";
+  materials.append(materialsTitle);
   const list=document.createElement("ul");
   for(const [id,qty] of Object.entries(config.parts)){
     const part=PARTS.find(item=>item.id===id);
@@ -535,7 +537,7 @@ function renderHouseRepairDetails() {
     status.textContent=inCart
       ? "Недостающие материалы находятся в корзине. Оплатите заказ, затем дождитесь доставки."
       : arrived
-        ? "Доставка прибыла. Заберите материалы в разделе «Стройка и снабжение»."
+        ? "Доставка прибыла. Откройте «Снабжение» → «Доставка» и нажмите «Забрать детали на склад»."
         : inTransit
           ? "Материалы оплачены и находятся в пути. Ремонт станет доступен после получения."
           : "Материалов не хватает. Добавьте недостающее в корзину и оплатите заказ — ремонт начнётся только после получения доставки и отдельного нажатия кнопки ремонта.";
