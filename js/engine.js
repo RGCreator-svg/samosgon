@@ -2,6 +2,7 @@
 import { GAME_CONFIG } from "./data.js";
 
 const SAVE_KEY = "samosgon_2_save";
+const BACKUP_SAVE_KEY = "samosgon_2_save_backup";
 const SAVE_SCHEMA_VERSION = 1;
 let lastSavedSnapshot = null;
 
@@ -108,24 +109,44 @@ function migrateSave(parsed) {
   return state;
 }
 
-export function loadGame() {
-  try {
-    const saved = localStorage.getItem(SAVE_KEY);
-    if (!saved) {
-      const fresh = createInitialState();
-      lastSavedSnapshot = null;
-      return fresh;
-    }
-    const parsed = JSON.parse(saved);
-    if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) throw new Error("Некорректный формат сохранения");
-    const state = migrateSave(parsed);
-    lastSavedSnapshot = JSON.stringify(state);
-    return state;
-  } catch (error) {
-    console.error("Не удалось загрузить сохранение:", error);
-    lastSavedSnapshot = null;
-    return createInitialState();
+function parseSaveSnapshot(snapshot) {
+  const parsed = JSON.parse(snapshot);
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+    throw new Error("Некорректный формат сохранения");
   }
+  return migrateSave(parsed);
+}
+
+export function loadGame() {
+  const primary = localStorage.getItem(SAVE_KEY);
+  const backup = localStorage.getItem(BACKUP_SAVE_KEY);
+
+  if (primary) {
+    try {
+      const state = parseSaveSnapshot(primary);
+      lastSavedSnapshot = JSON.stringify(state);
+      return state;
+    } catch (error) {
+      console.error("Основное сохранение повреждено, пробуем резервную копию:", error);
+    }
+  }
+
+  if (backup) {
+    try {
+      const state = parseSaveSnapshot(backup);
+      const recovered = JSON.stringify(state);
+      // Восстанавливаем основной слот из проверенной резервной копии.
+      localStorage.setItem(SAVE_KEY, recovered);
+      lastSavedSnapshot = recovered;
+      console.warn("Игра восстановлена из резервной копии сохранения.");
+      return state;
+    } catch (error) {
+      console.error("Не удалось прочитать резервную копию:", error);
+    }
+  }
+
+  lastSavedSnapshot = null;
+  return createInitialState();
 }
 
 export function saveGame(state) {
@@ -133,6 +154,12 @@ export function saveGame(state) {
     state.schemaVersion = SAVE_SCHEMA_VERSION;
     const snapshot = JSON.stringify(state);
     if (snapshot === lastSavedSnapshot) return true;
+
+    const previous = localStorage.getItem(SAVE_KEY);
+    if (previous) {
+      // Сначала сохраняем предыдущую рабочую версию, затем обновляем основной слот.
+      localStorage.setItem(BACKUP_SAVE_KEY, previous);
+    }
     localStorage.setItem(SAVE_KEY, snapshot);
     lastSavedSnapshot = snapshot;
     return true;
