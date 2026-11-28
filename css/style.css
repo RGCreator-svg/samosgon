@@ -3499,3 +3499,85 @@ body { margin:0; font-family:"Segoe UI", "Comic Sans MS", sans-serif; background
     transition-duration:.01ms !important;
   }
 }
+
+
+/* Дом: CSS-иллюстрация меняется по этапам реального ремонта. */
+#game .homestead-house {
+  background:linear-gradient(90deg,#654832,#8a6748 48%,#674832);
+  border-color:#4b3829;
+  transition:background .35s ease, border-color .35s ease, filter .35s ease;
+}
+#game .homestead-house .roof {
+  background:repeating-linear-gradient(165deg,#46372e 0 8px,#594435 9px 13px,#73563e 14px 19px);
+  transition:background .35s ease,filter .35s ease;
+}
+#game .homestead-house .window { transition:background .35s ease,box-shadow .35s ease; }
+#game .homestead-house .wall-crack {
+  position:absolute; z-index:2; top:12%; width:18px; height:38%;
+  opacity:.9; background:linear-gradient(115deg,transparent 0 38%,#382b22 39% 45%,transparent 46% 58%,#382b22 59% 64%,transparent 65%);
+}
+#game .homestead-house .crack-left { left:34%; }
+#game .homestead-house .crack-right { right:31%; transform:scaleY(.7) rotate(12deg); }
+#game .homestead-house .roof-patch {
+  position:absolute; z-index:3; left:12%; top:-30%; width:23%; height:20%;
+  transform:rotate(-8deg); background:#796044; border:2px solid #44362b;
+  opacity:1; transition:opacity .35s ease;
+}
+#game .homestead-scene[data-house-stage="ruined"] .homestead-house {
+  filter:saturate(.62) brightness(.78);
+  background:linear-gradient(90deg,#514238,#76604c 48%,#514238);
+  border-color:#44362e;
+}
+#game .homestead-scene[data-house-stage="ruined"] .homestead-house .roof {
+  background:repeating-linear-gradient(165deg,#302b28 0 7px,#554234 8px 11px,#332c27 12px 17px);
+  clip-path:polygon(50% 0,100% 100%,0 100%);
+}
+#game .homestead-scene[data-house-stage="ruined"] .homestead-house .window-left {
+  background:linear-gradient(135deg,#35413c,#667064);
+  box-shadow:inset 0 0 0 3px #4a392b;
+}
+#game .homestead-scene[data-house-stage="ruined"] .homestead-house .window-right {
+  background:linear-gradient(135deg,#4c5148,#76715b);
+  box-shadow:inset 0 0 0 3px #4a392b;
+}
+#game .homestead-scene[data-house-stage="ruined"] .homestead-house .wall-crack { opacity:1; }
+#game .homestead-scene[data-house-stage="repairing"] .homestead-house {
+  filter:saturate(.82);
+  background:linear-gradient(90deg,#73543b,#a07a54 48%,#73543b);
+}
+#game .homestead-scene[data-house-stage="repairing"] .homestead-house .roof-patch { opacity:.9; }
+#game .homestead-scene[data-house-stage="repairing"] .homestead-house .wall-crack { opacity:.45; }
+#game .homestead-scene[data-house-stage="restored"] .homestead-house,
+#game .homestead-scene[data-house-stage="complete"] .homestead-house {
+  filter:none;
+  background:linear-gradient(90deg,#9a7048,#c2935e 48%,#9a7048);
+  border-color:#68482f;
+  box-shadow:10px 13px 22px #26332177, inset 0 0 0 2px #d5b17a55;
+}
+#game .homestead-scene[data-house-stage="restored"] .homestead-house .roof,
+#game .homestead-scene[data-house-stage="complete"] .homestead-house .roof {
+  background:repeating-linear-gradient(165deg,#694a35 0 8px,#886143 9px 13px,#5b402e 14px 19px);
+}
+#game .homestead-scene[data-house-stage="restored"] .homestead-house .wall-crack,
+#game .homestead-scene[data-house-stage="complete"] .homestead-house .wall-crack,
+#game .homestead-scene[data-house-stage="restored"] .homestead-house .roof-patch,
+#game .homestead-scene[data-house-stage="complete"] .homestead-house .roof-patch { opacity:0; }
+#game .homestead-scene[data-house-stage="restored"] .homestead-house .window,
+#game .homestead-scene[data-house-stage="complete"] .homestead-house .window {
+  background:linear-gradient(135deg,#fff0b0,#e6b96b);
+  box-shadow:inset 0 0 0 3px #f7e6b5,0 0 12px #f6d78b55;
+}
+#game .homestead-scene[data-house-stage="complete"] .homestead-house .chimney {
+  background:#a35f48;
+  box-shadow:0 -4px 0 #694333;
+}
+#game .homestead-status[data-stage="complete"] { border-color:#7d9a65; color:#d5e6bd; }
+#game .homestead-status[data-stage="complete"] i { background:#91c36c; box-shadow:0 0 9px #91c36c; }
+#game .homestead-status[data-stage="repairing"] i { background:#e2b45e; }
+#game .homestead-status[data-stage="restored"] i { background:#a8bd70; }
+#game .home-panel .house-condition-label { margin:12px 0 5px; color:#d1c8b3; }
+#game .house-progress { height:10px; overflow:hidden; border:1px solid #66583d; border-radius:99px; background:#24271f; }
+#game .house-progress span { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#927449,#c5a45f,#91a66a); transition:width .35s ease; }
+@media(prefers-reduced-motion:reduce) {
+ #game .homestead-house, #game .homestead-house *, #game .house-progress span { transition:none !important; }
+}
