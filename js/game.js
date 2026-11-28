@@ -515,14 +515,15 @@ $("#collectBatch")?.addEventListener("click", () => {
 // Сон и переход к следующему дню. Защищаем переход от двойного клика
 // и откатываем состояние, если один из дневных модулей выбросил ошибку.
 let sleepInProgress = false;
-$("#sleepButton")?.addEventListener("click", (event) => {
+function advanceDayFromControl(event) {
   event.preventDefault();
   if (sleepInProgress) return;
-
-  const sleepButton = $("#sleepButton");
+  const trigger = event.currentTarget;
   const snapshot = JSON.stringify(state);
   sleepInProgress = true;
-  if (sleepButton) sleepButton.disabled = true;
+  $("#sleepButton") && ($("#sleepButton").disabled = true);
+  $("#advanceDayShortcut") && ($("#advanceDayShortcut").disabled = true);
+  if (trigger) trigger.disabled = true;
 
   try {
     advanceGameDay(state, {
@@ -544,17 +545,18 @@ $("#sleepButton")?.addEventListener("click", (event) => {
   } catch (error) {
     console.error("Не удалось завершить игровой день:", error);
     const restored = JSON.parse(snapshot);
-    // Не заменяем объект state: игровые модули хранят ссылку на него.
     Object.keys(state).forEach(key => delete state[key]);
     Object.assign(state, restored);
     render();
     notify("Не получилось завершить день: изменения отменены. Попробуйте ещё раз.");
   } finally {
     sleepInProgress = false;
-    const button = $("#sleepButton");
-    if (button) button.disabled = false;
+    if ($("#sleepButton")) $("#sleepButton").disabled = false;
+    if ($("#advanceDayShortcut")) $("#advanceDayShortcut").disabled = false;
   }
-});
+}
+$("#sleepButton")?.addEventListener("click", advanceDayFromControl);
+$("#advanceDayShortcut")?.addEventListener("click", advanceDayFromControl);
 
 // Изучение навыков — кнопки создаются в ui.js
 $("#skillTree")?.addEventListener("click", (event) => {
