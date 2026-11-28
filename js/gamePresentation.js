@@ -1,8 +1,9 @@
 const GROUPS = [
-  { title: "Усадьба", tabs: ["home", "farm", "orchard", "barn"] },
-  { title: "Хозяйство", tabs: ["market", "skills", "notebook"] },
-  { title: "Производство", tabs: ["productionHub", "productionPlant", "featurePack", "viticulture", "cellar"] },
-  { title: "Развитие", tabs: ["researchLab", "processCenter"] }
+  { title: "УСАДЬБА", tabs: ["home", "farm", "orchard", "barn"] },
+  { title: "ТОРГОВЛЯ", tabs: ["market", "economy"] },
+  { title: "ПРОИЗВОДСТВО", tabs: ["productionHub", "productionPlant", "featurePack", "viticulture", "cellar"] },
+  { title: "РАЗВИТИЕ", tabs: ["skills", "researchLab", "processCenter"] },
+  { title: "ЖУРНАЛ", tabs: ["notebook", "milestones", "orders", "goals"] }
 ];
 const LABELS = {
   home:"🏠 Дом",farm:"🥕 Огород",orchard:"🍎 Сад",barn:"🛠 Сарай",
@@ -13,6 +14,15 @@ const LABELS = {
 };
 
 function arrangeNavigation(nav) {
+  const side=document.querySelector(".prototype-side");
+  if(side){
+    for(const button of side.querySelectorAll("button[data-tab]")){
+      button.classList.remove("side-btn");
+      button.querySelector(".big")?.remove();
+      nav.append(button);
+    }
+    side.remove();
+  }
   const buttons=[...nav.querySelectorAll(":scope > button[data-tab]")];
   const byId=new Map(buttons.map(button=>[button.dataset.tab,button]));
   const fragment=document.createDocumentFragment();
@@ -97,5 +107,4 @@ export function initGamePresentation(){
     if(warehouse){warehouse.open=!warehouse.open;warehouse.scrollIntoView({block:"nearest",behavior:"smooth"});}
   });
   document.querySelector("#bottomMarket")?.addEventListener("click",()=>openTab("market"));
-  document.querySelector(".prototype-bottom [data-tab=\"productionHub\"]")?.addEventListener("click",()=>openTab("productionHub"));
 }
