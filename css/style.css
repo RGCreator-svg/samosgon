@@ -3628,3 +3628,15 @@ body { margin:0; font-family:"Segoe UI", "Comic Sans MS", sans-serif; background
   #game .event-console > summary { min-height:32px; padding:5px 8px; font-size:10px; }
   #game .event-console #notifications { max-height:105px; padding:3px 8px 7px; }
 }
+
+/* REV 10.7 — корзина как единая выдвижная панель с явным закрытием. */
+#game .cart-overlay-scrim{display:none;position:fixed;inset:0;z-index:58;border:0;border-radius:0;background:#10150fcc;cursor:default}
+#game .cart-overlay-scrim.is-visible{display:block}
+#game .shared-purchase-cart.cart-overlay-panel{position:fixed;z-index:59;top:clamp(72px,10vh,110px);right:clamp(12px,3vw,34px);width:min(430px,calc(100vw - 24px));max-height:calc(100dvh - 130px);padding:16px;border:1px solid #a68b59;border-radius:16px;box-shadow:0 18px 55px #0009}
+#game .cart-panel-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+#game .cart-panel-heading h2{margin:0;font-size:18px}
+#game .cart-panel-close{flex:0 0 34px;width:34px;height:34px;padding:0;border:1px solid #8e7750;border-radius:9px;background:#51432e;color:#fff1cf;font-size:17px;cursor:pointer}
+#game .cart-image-toggle{position:relative;overflow:visible}
+#game .cart-toggle-count{position:absolute;top:-7px;right:-7px;display:grid;place-items:center;min-width:19px;height:19px;padding:0 5px;border:2px solid #382516;border-radius:12px;background:#a83e2d;color:white;font-size:10px;font-weight:800;line-height:1}
+@media(max-width:700px){#game .shared-purchase-cart.cart-overlay-panel{top:auto;right:8px;bottom:calc(96px + env(safe-area-inset-bottom));left:8px;width:auto;max-height:min(70dvh,620px);padding:13px;border-radius:16px 16px 12px 12px}}
+@media(max-width:560px){#game .shared-purchase-cart.cart-overlay-panel{bottom:calc(88px + env(safe-area-inset-bottom));max-height:72dvh}}
