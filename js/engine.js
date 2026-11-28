@@ -31,8 +31,9 @@ export function createInitialState() {
 
     inventory: { ...GAME_CONFIG.startingInventory, spirit: 0, aged_spirit: 0 },
     buildings: { warehouse: 0, workshop: 0, production: 0, laboratory: 0 },
-    parts: { timber: 0, metal: 0, fasteners: 0, tools: 0, pump: 0, controller: 0 },
+    parts: { timber: 0, metal: 0, fasteners: 0, paint: 0, tools: 0, pump: 0, controller: 0 },
     deliveries: [],
+    pendingPurchaseBatches: [],
     equipmentTier: 0,
     automationTier: 0,
     advancedProduction: { lines: [], queue: [], nextId: 1 },
@@ -61,6 +62,7 @@ function migrateSave(parsed) {
     buildings: { ...initial.buildings, ...(parsed.buildings || {}) },
     parts: { ...initial.parts, ...(parsed.parts || {}) },
     deliveries: Array.isArray(parsed.deliveries) ? parsed.deliveries : [],
+    pendingPurchaseBatches: Array.isArray(parsed.pendingPurchaseBatches) ? parsed.pendingPurchaseBatches : [],
     equipmentTier: Math.max(0, Number(parsed.equipmentTier) || 0),
     automationTier: Math.max(0, Number(parsed.automationTier) || 0),
     advancedProduction: {
