@@ -23,6 +23,11 @@ try{
   browser=await chromium.launch({headless:true});
   const page=await browser.newPage({viewport:{width:1440,height:960}});
   const errors=[];
+  async function clickNavTab(id) {
+    const group=page.locator(`.navigation .nav-group:has([data-tab="${id}"])`);
+    await group.locator(".nav-category-toggle").click();
+    await group.locator(`[data-tab="${id}"]`).click();
+  }
   page.on("pageerror",error=>errors.push(error.message));
   page.on("console",message=>{if(message.type()==="error")errors.push(message.text());});
   await page.goto("http://127.0.0.1:4173/",{waitUntil:"networkidle",timeout:45000});
@@ -71,10 +76,10 @@ try{
   assert.ok(await page.locator("#advanceDayShortcut").isVisible(),"Visible day-advance control is missing");
   const wellText=(await page.locator("#wellDevelopmentStatus").innerText())+" "+(await page.locator("#wellDevelopmentDetails").innerText());
   assert.match(wellText,/пиломатериалы|инструмент|Водоснабжение полностью/i,"Well development status or requirements are not displayed");
-  await page.locator('.navigation [data-tab="productionHub"]').click();
+  await clickNavTab("productionHub");
   assert.equal(await page.locator("#productionHub").evaluate(el=>el.classList.contains("hidden")),false,"Production shortcut did not open the production dispatcher");
   assert.ok(await page.locator("#productionHub").innerText().then(text=>text.includes("Главное дело — самогоноварение")),"Production dispatcher did not render");
-  await page.locator('.navigation [data-tab="home"]').click();
+  await clickNavTab("home");
   const cartToggle=page.locator("#cartToggle");
   await cartToggle.waitFor({state:"visible"});
   assert.ok(await cartToggle.locator("img").evaluate(img=>img.complete&&img.naturalWidth>0),"Cart illustration failed to load");
@@ -102,7 +107,7 @@ try{
   await page.locator("#devForm .dev-apply").click();
 
   async function repairThroughDelivery(tabId, buttonSelector, partIds, progressSelector, laborCost, completeLabel) {
-    await page.locator(`.navigation [data-tab="${tabId}"]`).click();
+    await clickNavTab(tabId);
     const progress=page.locator(progressSelector);
     const beforeProgress=await progress.innerText();
     const beforeMoney=Number((await page.locator("#money").innerText()).replace(/[^0-9-]/g,""));
@@ -117,7 +122,7 @@ try{
     const deliveryDays={timber:1,fasteners:1,paint:1,metal:2,tools:2};
     const maxDeliveryDays=partIds.reduce((max,id)=>Math.max(max,deliveryDays[id]||1),0);
     for(let day=0;day<maxDeliveryDays;day++) await page.locator("#advanceDayShortcut").click();
-    await page.locator('.navigation [data-tab="economy"]').click();
+    await clickNavTab("economy");
     for(const id of partIds){
       const collect=page.locator(`#partsDeliveries [data-economy-action="collectAll:${id}"]`);
       if(await collect.count()) await collect.click();
@@ -139,7 +144,7 @@ try{
   assert.equal(await page.locator("#farm").evaluate(el=>el.classList.contains("hidden")),false,"Garden scene hotspot did not open the farm tab");
   assert.ok(await page.locator("#farm .farm-scene").isVisible(),"Generated garden artwork is hidden");
   assert.match(await page.locator("#farm .farm-scene").evaluate(el=>getComputedStyle(el).backgroundImage),/homestead\.webp/,"Generated garden artwork is not connected");
-  await page.locator('.navigation [data-tab="market"]').click();
+  await clickNavTab("market");
   assert.equal(await page.locator("#market").evaluate(el=>el.classList.contains("hidden")),false,"Top navigation did not open market");
   await page.locator("#bottomWarehouse").click();
   assert.equal(await page.locator(".warehouse-panel").getAttribute("open"),"","Bottom warehouse control did not expand storage");
