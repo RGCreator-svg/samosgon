@@ -25,6 +25,8 @@ import { initGamePresentation } from "./gamePresentation.js";
 import { renderCurrentTasks } from "./tasks.js";
 
 let state = loadGame();
+// Старые сохранения получают поэтапное состояние деталей дома без потери общего прогресса.
+state.houseParts ??= { roof: Number(state.house)||0, walls: Number(state.house)||0, windows: Number(state.house)||0, floor: Number(state.house)||0, heating: Number(state.house)||0 };
 state.farmPlots ??= ["needs_water","needs_weed","needs_fertilize"];
 state.farmPlotCooldowns ??= {};
 
@@ -51,7 +53,12 @@ const HOMESTEAD_REPAIRS = {
   barn: { name:"Ремонт сарая", button:"#repairBarn", baseCost:30, discountedCost:20, parts:{ timber:2, fasteners:1, paint:1 }, progress:25, xp:5 },
   still: { name:"Ремонт аппарата", button:"#repairStill", baseCost:50, discountedCost:35, parts:{ metal:1, fasteners:1, tools:1 }, progress:30, xp:8 },
   garden: { name:"Расчистка огорода", button:"#repairGarden", baseCost:20, discountedCost:15, parts:{ timber:1, fasteners:1 }, progress:30, xp:0 },
-  orchard: { name:"Восстановление сада", button:"#restoreOrchard", baseCost:40, discountedCost:30, parts:{ timber:2, fasteners:1, tools:1 }, progress:0, xp:20 }
+  orchard: { name:"Восстановление сада", button:"#restoreOrchard", baseCost:40, discountedCost:30, parts:{ timber:2, fasteners:1, tools:1 }, progress:0, xp:20 },
+  house_roof: { name:"Ремонт крыши", button:'[data-house-part="roof"]', baseCost:30, discountedCost:20, parts:{ timber:2, fasteners:1, paint:1 }, progress:25, xp:3 },
+  house_walls: { name:"Укрепление стен", button:'[data-house-part="walls"]', baseCost:35, discountedCost:25, parts:{ timber:2, fasteners:2, paint:1 }, progress:25, xp:4 },
+  house_windows: { name:"Установка окон", button:'[data-house-part="windows"]', baseCost:25, discountedCost:18, parts:{ timber:1, fasteners:1, paint:1 }, progress:25, xp:3 },
+  house_floor: { name:"Ремонт пола", button:'[data-house-part="floor"]', baseCost:25, discountedCost:18, parts:{ timber:2, fasteners:1 }, progress:25, xp:3 },
+  house_heating: { name:"Установка отопления", button:'[data-house-part="heating"]', baseCost:40, discountedCost:30, parts:{ metal:1, fasteners:1, tools:1 }, progress:25, xp:5 }
 };
 
 function save() {
@@ -428,6 +435,7 @@ function repairCost(config) {
 }
 function repairIsComplete(action) {
   if(action==="orchard")return Boolean(state.orchardRestored);
+  if(action.startsWith("house_"))return Number(state.houseParts?.[action.slice(6)])>=100;
   return Number(state[action])>=100;
 }
 function pendingPartBreakdown(partId) {
@@ -522,6 +530,15 @@ function renderHouseRepairDetails() {
 }
 function renderAllRepairButtons(){
   Object.keys(HOMESTEAD_REPAIRS).forEach(renderRepairButton);
+  renderHousePartProgress();
+}
+function renderHousePartProgress(){
+  const parts=state.houseParts||{};
+  for(const id of ["roof","walls","windows","floor","heating"]){
+    const value=Math.max(0,Math.min(100,Number(parts[id])||0));
+    const label=$("#housePartValue-"+id);if(label)label.textContent=value+"%";
+    const card=$(`[data-house-part-card="${id}"]`);if(card)card.dataset.stage=value>=100?"complete":value>0?"repairing":"damaged";
+  }
 }
 
 // Если материалов не хватает — в корзину попадает только недостающее.
@@ -551,11 +568,17 @@ function queueHomesteadRepair(action) {
   Object.entries(config.parts).forEach(([id,qty])=>{state.parts[id]-=qty;});
   state.money-=cost;
   if(action==="house"){state.house=Math.min(100,state.house+config.progress);earnExperience(config.xp);}
+  if(action.startsWith("house_")){
+    const part=action.slice(6);state.houseParts??={roof:state.house,walls:state.house,windows:state.house,floor:state.house,heating:state.house};
+    state.houseParts[part]=Math.min(100,(Number(state.houseParts[part])||0)+config.progress);
+    state.house=Math.round(["roof","walls","windows","floor","heating"].reduce((sum,id)=>sum+Math.max(0,Math.min(100,Number(state.houseParts[id])||0)),0)/5);
+    earnExperience(config.xp);
+  }
   if(action==="barn"){state.barn=Math.min(100,state.barn+config.progress);earnExperience(config.xp);}
   if(action==="still"){state.still=Math.min(100,state.still+config.progress);earnExperience(config.xp);}
   if(action==="garden"){state.garden=Math.min(100,state.garden+config.progress);}
   if(action==="orchard"){state.orchardRestored=true;state.trees=state.skills.includes("orchard_lore")?5:3;earnExperience(config.xp);}
-  if(["house","barn","still","garden","orchard"].includes(action)){
+  if(["house","barn","still","garden","orchard"].includes(action)||action.startsWith("house_")){
     discoverRepairStory(state,action,notify);
   }
   notify(`${config.name} выполнен. Работа: ${cost} монет; материалы списаны со склада.`);
@@ -602,6 +625,12 @@ $("#harvestFruit")?.addEventListener("click", () => {
 $("#repairHouse")?.addEventListener("click", () => {
   if(state.house>=100)return;
   queueHomesteadRepair("house");
+});
+
+$("#home")?.addEventListener("click", (event) => {
+  const button=event.target.closest("[data-house-part]");
+  if(!button)return;
+  queueHomesteadRepair("house_"+button.dataset.housePart);
 });
 
 // Ремонт сарая: доски, гвозди и краска.
