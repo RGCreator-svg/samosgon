@@ -138,7 +138,7 @@ try{
   assert.equal(await page.locator("#farm").evaluate(el=>el.classList.contains("hidden")),false,"Garden scene hotspot did not open the farm tab");
   assert.equal(await page.locator("#farm .farm-scene").isVisible(),false,"Legacy full-scene garden artwork should stay hidden");
   assert.equal(await page.locator("#farm .farm-scene").evaluate(el=>getComputedStyle(el).backgroundImage),"none","Garden scene must not use a stretched raster background");
-  const farmSprites=await page.locator(".farm-plot img, .farm-yard-animal").evaluateAll(images=>images.every(img=>img.complete&&img.naturalWidth>0));
+  const farmSprites=await page.locator(".farm-plot img, .farm-yard-animal").evaluateAll(nodes=>nodes.every(node=>node.tagName==="CANVAS"?node.width>0:node.complete&&node.naturalWidth>0));
   assert.ok(farmSprites,"Imported farm PNG sprites failed to load");
   const firstPlot=page.locator(".farm-plot").first();
   assert.equal(await firstPlot.getAttribute("data-stage"),"needs_water","Saved farm plot stage was not rendered");
