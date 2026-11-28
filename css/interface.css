@@ -730,3 +730,21 @@ body { min-height:100vh; }
 /* REV 10.20 — leave the bottom shortcut dock outside the cart scrim. */
 #game .cart-overlay-scrim { bottom:160px !important; }
 @media(max-width:700px) { #game .cart-overlay-scrim { bottom:160px !important; } }
+
+/* REV 10.22 — visible crop stages and gentle living-animal motion. */
+#game .farm-plot-crop { transform-origin:50% 100%; animation:farm-crop-idle 2.8s ease-in-out infinite; }
+#game .farm-plot[data-stage="empty"] .farm-plot-crop { display:none !important; }
+#game .farm-plot[data-stage="needs_water"] .farm-plot-crop { transform:scale(.62); filter:saturate(.75); }
+#game .farm-plot[data-stage="needs_weed"] .farm-plot-crop { transform:scale(.78); }
+#game .farm-plot[data-stage="needs_fertilize"] .farm-plot-crop { transform:scale(.9); }
+#game .farm-plot[data-stage="ready"] .farm-plot-crop { transform:scale(1.06); filter:saturate(1.18) brightness(1.05); }
+#game .farm-plot-action { animation:farm-action-pulse 1.8s ease-in-out infinite; }
+#game .farm-plot.is-changing .farm-plot-crop { animation:farm-sprout .58s cubic-bezier(.2,.8,.25,1); }
+#game .farm-yard-animal { transform-origin:50% 100%; animation:farm-animal-idle 2.4s ease-in-out infinite; }
+#game .farm-yard-animal:hover { animation:farm-animal-hop .55s ease-in-out; }
+@keyframes farm-crop-idle { 0%,100% { translate:0 0; } 50% { translate:0 -3px; } }
+@keyframes farm-sprout { 0% { transform:translateY(12px) scale(.35); opacity:.25; } 70% { transform:translateY(-3px) scale(1.08); opacity:1; } 100% { transform:translateY(0) scale(1); opacity:1; } }
+@keyframes farm-action-pulse { 0%,100% { transform:translateY(0) scale(1); } 50% { transform:translateY(-4px) scale(1.08); } }
+@keyframes farm-animal-idle { 0%,100% { transform:translateY(0) rotate(-1deg); } 35% { transform:translateY(-5px) rotate(1deg); } 70% { transform:translateY(-1px) rotate(0); } }
+@keyframes farm-animal-hop { 0%,100% { transform:translateY(0) rotate(0); } 45% { transform:translateY(-13px) rotate(-7deg); } }
+@media(prefers-reduced-motion:reduce) { #game .farm-plot-crop,#game .farm-plot-action,#game .farm-yard-animal { animation:none !important; } }
