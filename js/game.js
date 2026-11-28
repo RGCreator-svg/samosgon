@@ -282,22 +282,30 @@ if (startButton && state.gameStarted) startButton.textContent = "Продолж�
  // которые подключаются динамически отдельными игровыми модулями.
 // Строительство будки: делегированный обработчик не зависит от перемещения карточки интерфейсом.
 document.addEventListener("click",(event)=>{
-  const button=event.target.closest("#guardDogAction");
+  const target=event.target instanceof Element ? event.target : event.target?.parentElement;
+  const button=target?.closest("#guardDogAction");
   if(!button)return;
   event.preventDefault();
   if(state.guardDog){notify("Барс уже на посту. Будка построена, повторная покупка не требуется.");return;}
   const cost=120,materials={timber:2,fasteners:1};
   state.parts ??= {};
+  state.inventory ??= {};
   const balance=Number(state.money)||0;
   if(balance<cost){notify("Не хватает монет: для найма Барса нужно 120, сейчас у вас "+balance+". Материалы пока не списываются.");return;}
-  const missing=Object.entries(materials).filter(([id,n])=>(Number(state.parts[id])||0)<n);
+  const stockFor=(id)=>(Number(state.parts[id])||0)+(Number(state.inventory[id])||0);
+  const missing=Object.entries(materials).filter(([id,n])=>stockFor(id)<n);
   if(missing.length){
-    const details=missing.map(([id,n])=>(PARTS.find(p=>p.id===id)?.name||id)+" — нужно "+n+", на складе "+(Number(state.parts[id])||0));
-    notify("Будку пока нельзя построить. Получите на склад усадьбы: "+details.join("; ")+". Откройте «Снабжение» → «Доставки» и нажмите «ЗАБРАТЬ ДЕТАЛИ НА СКЛАД».");
+    const details=missing.map(([id,n])=>(PARTS.find(p=>p.id===id)?.name||id)+" — нужно "+n+", на складе "+stockFor(id));
+    notify("Будку пока нельзя построить. Не хватает: "+details.join("; ")+". Проверьте раздел «Снабжение» и общий склад усадьбы.");
     return;
   }
   state.money=balance-cost;
-  Object.entries(materials).forEach(([id,n])=>{state.parts[id]=(Number(state.parts[id])||0)-n;});
+  Object.entries(materials).forEach(([id,required])=>{
+    const fromParts=Math.min(required,Number(state.parts[id])||0);
+    state.parts[id]=(Number(state.parts[id])||0)-fromParts;
+    const fromInventory=required-fromParts;
+    if(fromInventory>0)state.inventory[id]=Math.max(0,(Number(state.inventory[id])||0)-fromInventory);
+  });
   state.guardDog=true;
   earnExperience(12);
   notify("Будка построена! 120 монет и материалы списаны со склада. Барс занял пост и теперь охраняет усадьбу.");
