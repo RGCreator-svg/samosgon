@@ -1089,3 +1089,21 @@ body { min-height:100vh; }
 #game .story-quest-footer small { color:#d9c18b; font-size:10px; }
 #game .story-quest-footer button { padding:5px 8px; border:1px solid #8b7850; border-radius:6px; background:#46553a; color:#fff; font-size:10px; cursor:pointer; }
 @media(max-width:560px) { #game .prototype-task .task-current-copy strong { font-size:10px; } #game .prototype-task .task-current-copy small { font-size:9px; } #game .prototype-task .task-action { font-size:9px; } #game .story-quest-list { grid-template-columns:1fr; } }
+
+/* Живые посадки: лёгкое движение PNG-овощей на грядках. */
+#game .farm-plot-crop { transform-origin:50% 88%; will-change:transform; }
+#game .farm-plot[data-stage="needs_water"] .farm-plot-crop { animation:crop-thirst 2.8s ease-in-out infinite; }
+#game .farm-plot[data-stage="needs_weed"] .farm-plot-crop { animation:crop-sway 3.4s ease-in-out infinite; }
+#game .farm-plot[data-stage="needs_fertilize"] .farm-plot-crop { animation:crop-grow 2.6s ease-in-out infinite; }
+#game .farm-plot[data-stage="ready"] .farm-plot-crop { animation:crop-harvest 1.8s ease-in-out infinite; }
+#game .farm-plot[data-crop-type="tomato"] .farm-plot-crop { animation-name:crop-tomato; animation-duration:2.2s; }
+#game .farm-plot[data-crop-type="pumpkin"] .farm-plot-crop { animation-name:crop-pumpkin; animation-duration:3.2s; }
+#game .farm-plot[data-crop-type="carrot"] .farm-plot-crop { animation-name:crop-carrot; animation-duration:2.5s; }
+@keyframes crop-sway { 0%,100%{transform:rotate(-2deg) translateY(0)} 50%{transform:rotate(2deg) translateY(-3px)} }
+@keyframes crop-thirst { 0%,100%{transform:rotate(-1deg) scale(.98)} 50%{transform:rotate(1deg) scale(.96)} }
+@keyframes crop-grow { 0%,100%{transform:scale(.98)} 50%{transform:scale(1.035)} }
+@keyframes crop-harvest { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
+@keyframes crop-tomato { 0%,100%{transform:rotate(-2deg)} 50%{transform:rotate(3deg) translateY(-3px)} }
+@keyframes crop-pumpkin { 0%,100%{transform:scale(1)} 50%{transform:scale(1.04) translateY(-2px)} }
+@keyframes crop-carrot { 0%,100%{transform:rotate(-3deg)} 50%{transform:rotate(3deg)} }
+@media(prefers-reduced-motion:reduce) { #game .farm-plot-crop { animation:none !important; } }
