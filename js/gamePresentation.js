@@ -101,6 +101,12 @@ function initSceneInteractions(){
 export function initGamePresentation(){
   const nav=document.querySelector(".navigation");
   if(nav)arrangeNavigation(nav);
+  const objective=document.querySelector(".prototype-task");
+  const homeHeading=document.querySelector("#home .home-heading");
+  if(objective&&homeHeading){
+    objective.classList.add("home-objective");
+    homeHeading.after(objective);
+  }
   initSceneInteractions();
   document.querySelector("#bottomWarehouse")?.addEventListener("click",()=>{
     const warehouse=document.querySelector(".warehouse-panel");
