@@ -379,7 +379,9 @@ export function renderEconomy(state) {
         row.append(element("b", "", "Прибыло"));
       }
       if (group.arrived > 0) {
-        const button = element("button", "collect-all-button", `Забрать всё (${group.arrived})`);
+        row.append(element("p","delivery-ready-hint","Доставка уже на складе поставщика. Нажмите кнопку ниже, чтобы перенести детали на склад усадьбы — после этого ремонт станет доступен."));
+        const button = element("button", "collect-all-button", `📦 ЗАБРАТЬ ДЕТАЛИ НА СКЛАД · ${group.arrived} шт.`);
+        button.type="button";
         button.dataset.economyAction = `collectAll:${group.partId}`;
         row.append(button);
       }
