@@ -286,11 +286,15 @@ function repairIsComplete(action) {
   if(action==="orchard")return Boolean(state.orchardRestored);
   return Number(state[action])>=100;
 }
-function pendingPartQuantity(partId) {
+function pendingPartBreakdown(partId) {
   const inCart=Number(state.materialCart?.[partId])||0;
-  const inDelivery=(state.deliveries||[]).filter(item=>item.partId===partId)
-    .reduce((sum,item)=>sum+(Number(item.quantity)||0),0);
-  return inCart+inDelivery;
+  const deliveries=(state.deliveries||[]).filter(item=>item.partId===partId);
+  const arrived=deliveries.filter(item=>item.arrivalDay<=state.day).reduce((sum,item)=>sum+(Number(item.quantity)||0),0);
+  const inTransit=deliveries.filter(item=>item.arrivalDay>state.day).reduce((sum,item)=>sum+(Number(item.quantity)||0),0);
+  return {inCart,arrived,inTransit,total:inCart+arrived+inTransit};
+}
+function pendingPartQuantity(partId) {
+  return pendingPartBreakdown(partId).total;
 }
 function getRepairMissing(parts) {
   return Object.entries(parts).reduce((missing,[id,required])=>{
@@ -319,7 +323,12 @@ function renderRepairButton(action) {
     return;
   }
   if(allPending){
-    button.textContent="⏳ Материалы заказаны — ждите доставку";
+    const queued=Object.entries(missing).every(([id,qty])=>pendingPartBreakdown(id).inCart>=qty);
+    const arrived=Object.entries(missing).every(([id,qty])=>pendingPartBreakdown(id).inCart+pendingPartBreakdown(id).arrived>=qty);
+    button.textContent=queued
+      ?"🛒 Материалы в корзине — оплатите заказ"
+      :arrived?"📦 Доставка прибыла — заберите материалы"
+      :"⏳ Материалы в пути — дождитесь доставки";
     button.disabled=true;
   }else{
     button.textContent="🛒 Добавить недостающие материалы в корзину";
@@ -350,10 +359,16 @@ function renderHouseRepairDetails() {
   const missing=getRepairMissing(config.parts);
   if(!Object.keys(missing).length)status.textContent="Все материалы на складе. Ремонт можно выполнить.";
   else {
-    const pending=Object.entries(missing).reduce((sum,[id,qty])=>sum+Math.min(qty,pendingPartQuantity(id)),0);
-    status.textContent=pending
-      ? "Часть материалов уже заказана или ожидает получения. Заберите доставку, когда она прибудет."
-      : "Материалов не хватает. Добавьте недостающее в корзину и оплатите заказ — ремонт начнётся только после получения доставки и отдельного нажатия кнопки ремонта.";
+    const inCart=Object.entries(missing).reduce((sum,[id,qty])=>sum+Math.min(qty,pendingPartBreakdown(id).inCart),0);
+    const arrived=Object.entries(missing).reduce((sum,[id,qty])=>sum+Math.min(qty,pendingPartBreakdown(id).arrived),0);
+    const inTransit=Object.entries(missing).reduce((sum,[id,qty])=>sum+Math.min(qty,pendingPartBreakdown(id).inTransit),0);
+    status.textContent=inCart
+      ? "Недостающие материалы находятся в корзине. Оплатите заказ, затем дождитесь доставки."
+      : arrived
+        ? "Доставка прибыла. Заберите материалы в разделе «Стройка и снабжение»."
+        : inTransit
+          ? "Материалы оплачены и находятся в пути. Ремонт станет доступен после получения."
+          : "Материалов не хватает. Добавьте недостающее в корзину и оплатите заказ — ремонт начнётся только после получения доставки и отдельного нажатия кнопки ремонта.";
   }
   const skill=document.createElement("p");
   const hasSkill=state.skills.includes("handyman");
