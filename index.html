@@ -127,7 +127,7 @@
         <div class="homestead-cloud cloud-two"></div>
         <div class="homestead-tree tree-left"><i></i></div>
         <div class="homestead-tree tree-right"><i></i></div>
-        <div class="homestead-house"><i class="roof"></i><b class="chimney"></b><span class="window window-left"></span><span class="window window-right"></span><em class="door"></em></div>
+        <div class="homestead-house"><i class="roof"></i><b class="chimney"></b><span class="window window-left"></span><span class="window window-right"></span><span class="wall-crack crack-left"></span><span class="wall-crack crack-right"></span><span class="roof-patch"></span><em class="door"></em></div>
         <div class="homestead-path"></div>
         <div class="homestead-fence"></div>
         <div class="scene-caption"><span>ВАШЕ НАСЛЕДСТВО</span><strong>Дом, сад и новая история</strong><small id="sceneSeasonCaption">Усадьба просыпается</small></div>
@@ -141,7 +141,8 @@
         <span class="homestead-status"><i></i> Требует заботы</span>
       </div>
       <p id="homeDescription"></p>
-      <p>Состояние дома: <b id="houseValue"></b>%</p>
+      <p class="house-condition-label">Состояние дома: <b id="houseValue"></b>%</p>
+      <div id="houseProgress" class="house-progress" role="progressbar" aria-label="Состояние дома" aria-valuemin="0" aria-valuemax="100" aria-valuenow="20"><span></span></div>
       <button id="repairHouse">🔨 Отремонтировать дом — 30 монет</button><div id="houseRepairDetails" class="house-repair-details" aria-live="polite"><p class="repair-work-cost">Работа: <strong>30 монет</strong></p><p><strong>Материалы:</strong> Пиломатериалы × 1, Крепёж и гвозди × 1, Краска × 1</p><p><strong>Навык «Руки из плеч»:</strong> не изучен. Доступен как улучшение для снижения стоимости ремонта до 20 монет.</p></div>
     <section class="well-development-card" aria-labelledby="wellDevelopmentTitle">
         <h3 id="wellDevelopmentTitle">💧 Колодец и водоснабжение</h3>
