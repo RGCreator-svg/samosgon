@@ -750,3 +750,13 @@ body { min-height:100vh; }
 @media(prefers-reduced-motion:reduce) { #game .farm-plot-crop,#game .farm-plot-action,#game .farm-yard-animal { animation:none !important; } }
 
 #game .farm-plot img[hidden] { display:none !important; }
+
+/* Additional farm animals: staggered idle movement keeps the herd lively. */
+#game .farm-yard-animal { width:clamp(38px,5vw,58px); margin-left:-5px; }
+#game .farm-yard-animal.animal-2 { animation-delay:-.35s; }
+#game .farm-yard-animal.animal-3 { animation-delay:-.7s; }
+#game .farm-yard-animal.animal-4 { animation-delay:-1.05s; }
+#game .farm-yard-animal.animal-5 { animation-delay:-1.4s; }
+#game .farm-yard-animal.animal-6 { animation-delay:-1.75s; }
+#game .farm-yard-animal.animal-7 { animation-delay:-2.1s; }
+@media(max-width:560px) { #game .farm-yard-animal { width:34px; margin-left:-3px; } }
