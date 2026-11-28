@@ -1,55 +1,69 @@
 const GROUPS = [
-  { title: "УСАДЬБА", tabs: ["home", "farm", "orchard", "barn"] },
-  { title: "ТОРГОВЛЯ", tabs: ["market", "economy"] },
-  { title: "ПРОИЗВОДСТВО", tabs: ["productionHub", "productionPlant", "featurePack", "viticulture", "cellar"] },
-  { title: "РАЗВИТИЕ", tabs: ["skills", "researchLab", "processCenter"] },
-  { title: "ЖУРНАЛ", tabs: ["notebook", "milestones", "orders", "goals"] }
+  { title: "Усадьба", icon: "🏡", tabs: ["home", "farm", "orchard", "barn"] },
+  { title: "Торговля", icon: "🧺", tabs: ["market", "economy"] },
+  { title: "Производство", icon: "⚗️", tabs: ["productionHub", "productionPlant", "featurePack", "viticulture", "cellar"] },
+  { title: "Развитие", icon: "🌱", tabs: ["skills", "researchLab", "processCenter"] },
+  { title: "Журнал", icon: "📜", tabs: ["notebook", "milestones", "orders", "goals"] }
 ];
 const LABELS = {
-  home:"🏠 Дом",farm:"🥕 Огород",orchard:"🍎 Сад",barn:"🛠 Сарай",
-  market:"🧺 Рынок",economy:"💰 Финансы",skills:"🌳 Умения",notebook:"📖 Записки",
-  productionHub:"📋 Диспетчер",productionPlant:"🏭 Цех",featurePack:"⚗️ Винокурня",
-  viticulture:"🍇 Винодельня",cellar:"🪵 Погреб",researchLab:"🧪 Лаборатория",
-  processCenter:"🧰 Техцентр"
+  home:"Дом",farm:"Огород",orchard:"Сад",barn:"Сарай",
+  market:"Рынок",economy:"Финансы",skills:"Умения",notebook:"Записки",
+  productionHub:"Диспетчер",productionPlant:"Цех",featurePack:"Винокурня",
+  viticulture:"Винодельня",cellar:"Погреб",researchLab:"Лаборатория",
+  processCenter:"Техцентр",milestones:"Достижения",orders:"Задания",goals:"Цели"
 };
 
 function arrangeNavigation(nav) {
   const side=document.querySelector(".prototype-side");
   if(side){
-    for(const button of side.querySelectorAll("button[data-tab]")){
-      button.classList.remove("side-btn");
-      button.querySelector(".big")?.remove();
-      nav.append(button);
-    }
+    for(const button of side.querySelectorAll("button[data-tab]")) nav.append(button);
     side.remove();
   }
   const buttons=[...nav.querySelectorAll(":scope > button[data-tab]")];
   const byId=new Map(buttons.map(button=>[button.dataset.tab,button]));
   const fragment=document.createDocumentFragment();
-  for(const groupInfo of GROUPS){
+  for(const info of GROUPS){
     const group=document.createElement("div");
     group.className="nav-group";
-    const title=document.createElement("span");
-    title.className="nav-group-title";
-    title.textContent=groupInfo.title;
-    group.append(title);
-    for(const id of groupInfo.tabs){
+    const toggle=document.createElement("button");
+    toggle.type="button";
+    toggle.className="nav-category-toggle";
+    toggle.setAttribute("aria-expanded","false");
+    toggle.innerHTML='<span class="nav-category-icon" aria-hidden="true">'+info.icon+'</span><span class="nav-category-label">'+info.title+'</span><span class="nav-category-chevron" aria-hidden="true">⌄</span>';
+    const dropdown=document.createElement("div");
+    dropdown.className="nav-dropdown";
+    dropdown.hidden=true;
+    for(const id of info.tabs){
       const button=byId.get(id);
       if(!button)continue;
       button.textContent=LABELS[id]||button.textContent;
-      group.append(button);
+      button.classList.add("nav-dropdown-item");
+      dropdown.append(button);
       byId.delete(id);
     }
-    if(group.children.length>1)fragment.append(group);
+    if(dropdown.children.length){
+      group.append(toggle,dropdown);
+      fragment.append(group);
+      toggle.addEventListener("click",()=>{
+        const opening=dropdown.hidden;
+        nav.querySelectorAll(".nav-dropdown").forEach(menu=>{menu.hidden=true;menu.previousElementSibling?.setAttribute("aria-expanded","false");});
+        dropdown.hidden=!opening;
+        toggle.setAttribute("aria-expanded",String(opening));
+      });
+    }
   }
-  for(const button of byId.values()){
-    const group=document.createElement("div");
-    group.className="nav-group";
-    group.append(button);
-    fragment.append(group);
-  }
+  for(const button of byId.values()) fragment.append(button);
   nav.replaceChildren(fragment);
-  nav.setAttribute("aria-label","Разделы усадьбы");
+  nav.setAttribute("aria-label","Пять основных разделов хозяйства");
+  document.addEventListener("click",event=>{
+    if(nav.contains(event.target))return;
+    nav.querySelectorAll(".nav-dropdown").forEach(menu=>{menu.hidden=true;menu.previousElementSibling?.setAttribute("aria-expanded","false");});
+  });
+  nav.addEventListener("click",event=>{
+    if(event.target.closest(".nav-dropdown-item")){
+      nav.querySelectorAll(".nav-dropdown").forEach(menu=>{menu.hidden=true;menu.previousElementSibling?.setAttribute("aria-expanded","false");});
+    }
+  });
 }
 
 function openTab(id){
