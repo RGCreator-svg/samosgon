@@ -99,7 +99,7 @@ export async function initImportedFarmAnimations() {
       ROOT + "animal/animal_animation.png"
     );
     animals.forEach((original, index) => {
-      const clipName = clips[index % clips.length];
+      const clipName = original.dataset.animationClip || clips[index % clips.length];
       const clip = atlas.data.mc?.[clipName];
       if (!clip) return;
       const canvas = document.createElement("canvas");
