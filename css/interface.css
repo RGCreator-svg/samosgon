@@ -1119,3 +1119,5 @@ body { min-height:100vh; }
 /* Clear purchase instructions for supplies and guard dog. */
 #game .economy-order-hint{margin:.45rem 0 .7rem;color:var(--muted,#667085);font-size:.84rem;line-height:1.45}
 #game .guard-dog-requirements{margin:.55rem 0;color:var(--muted,#667085);font-size:.88rem;line-height:1.5}
+
+#game .guard-dog-materials-button{display:block;width:100%;margin-top:.65rem;min-height:44px;white-space:normal}
