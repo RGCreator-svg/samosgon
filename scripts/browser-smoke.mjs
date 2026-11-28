@@ -142,7 +142,9 @@ try{
   assert.ok(farmSprites,"Imported farm PNG sprites failed to load");
   const firstPlot=page.locator(".farm-plot").first();
   assert.equal(await firstPlot.getAttribute("data-stage"),"needs_water","Saved farm plot stage was not rendered");
-  assert.equal(await page.locator(".farm-yard-animal").evaluate(el=>getComputedStyle(el).animationName),"farm-animal-idle","Farm animal idle animation is missing");
+  assert.equal(await page.locator(".farm-yard-animal").count(),7,"The full imported farm animal group is missing");
+  const animalsAnimated=await page.locator(".farm-yard-animal").evaluateAll(els=>els.every(el=>getComputedStyle(el).animationName==="farm-animal-idle"));
+  assert.ok(animalsAnimated,"One or more farm animals are not animated");
   await firstPlot.click();
   assert.equal(await firstPlot.getAttribute("data-stage"),"needs_weed","Watering did not advance the crop stage");
   await firstPlot.click();
