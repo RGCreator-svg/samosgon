@@ -965,3 +965,41 @@ body { min-height:100vh; }
     margin:0 0 -24px -4%!important;
   }
 }
+
+/* REV 10.32 — stable 3-column garden: modest edge overlap, no row staggering. */
+#game #farm #farmPlots.farm-plots {
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  grid-auto-flow:row!important;
+  column-gap:0!important;
+  row-gap:0!important;
+  width:min(900px,100%)!important;
+  padding:0 3%!important;
+  box-sizing:border-box!important;
+  align-items:end!important;
+  justify-items:stretch!important;
+}
+#game #farm #farmPlots.farm-plots > .farm-plot {
+  display:block!important;
+  position:relative!important;
+  width:116%!important;
+  max-width:none!important;
+  min-width:0!important;
+  margin:0 0 -48px -8%!important;
+  padding:0!important;
+  transform:none!important;
+  justify-self:stretch!important;
+  align-self:end!important;
+}
+#game #farm #farmPlots.farm-plots > .farm-plot:hover,
+#game #farm #farmPlots.farm-plots > .farm-plot:focus-visible { z-index:3; }
+#game #farm #farmPlots.farm-plots > .farm-yard-animal {
+  grid-column:1/-1!important;
+  width:clamp(38px,5vw,58px)!important;
+  margin:0 5% 0 0!important;
+  transform:none!important;
+}
+@media(max-width:600px) {
+  #game #farm #farmPlots.farm-plots { grid-template-columns:repeat(2,minmax(0,1fr))!important; padding:0 3%!important; }
+  #game #farm #farmPlots.farm-plots > .farm-plot { width:114%!important; margin:0 0 -34px -7%!important; }
+}
