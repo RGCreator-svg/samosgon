@@ -64,10 +64,10 @@ try{
   assert.ok(imageLoaded,"Squash.png pumpkin asset failed to load");
   assert.ok(await page.locator(".navigation button[data-tab]").count()>=10,"Top navigation did not include dynamic game sections");
   assert.equal(await page.locator(".prototype-side").count(),0,"Legacy side panel should be consolidated into the main navigation");
-  const navigationText=await page.locator(".navigation").innerText();
+  const navigationText=await page.locator(".navigation").textContent();
   for(const label of ["Достижения","Задания","Цели"]) assert.ok(navigationText.includes(label),`Journal shortcut ${label} is missing from grouped navigation`);
-  const groupTitles=await page.locator(".navigation .nav-group-title").allTextContents();
-  for(const group of ["УСАДЬБА","ТОРГОВЛЯ","ПРОИЗВОДСТВО","РАЗВИТИЕ","ЖУРНАЛ"]) assert.ok(groupTitles.includes(group),`Navigation group ${group} is missing`);
+  const groupTitles=await page.locator(".navigation .nav-category-label").allTextContents();
+  for(const group of ["Усадьба","Торговля","Производство","Развитие","Журнал"]) assert.ok(groupTitles.includes(group),`Navigation group ${group} is missing`);
   assert.ok(await page.locator(".player-profile").isVisible(),"Player avatar/profile HUD is missing");
   assert.equal(await page.locator(".prototype-task").count(),1,"There should be only one homestead objective");
   assert.equal(await page.locator(".prototype-task").evaluate(el=>el.parentElement.id),"home","Homestead objective should live inside the home section, not float over the scene");
