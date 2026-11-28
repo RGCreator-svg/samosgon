@@ -332,6 +332,10 @@
         <div class="homestead-fence"></div>
         <div class="scene-caption"><span>ВАШЕ НАСЛЕДСТВО</span><strong>Дом, сад и новая история</strong><small id="sceneSeasonCaption">Усадьба просыпается</small></div>
 </div>
+      <div class="location-animals" aria-label="Животные на усадьбе">
+        <img class="farm-yard-animal" data-animation-clip="cow_full_front" src="assets/images/farm/farm_animal2.png" alt="Корова" draggable="false">
+        <img class="farm-yard-animal" data-animation-clip="cow_walk_front" src="assets/images/farm/farm_animal6.png" alt="Корова" draggable="false">
+      </div>
       <div class="home-heading">
         <div><span class="section-kicker">ГЛАВНАЯ УСАДЬБА</span><h2>🏚 Бабушкин дом</h2></div>
         <span class="homestead-status"><i></i> Требует заботы</span>
@@ -360,29 +364,30 @@
         <div class="loc-fence"></div>
         <div class="loc-sign"><small>УЧАСТОК № 1</small><strong>Огород</strong><span>Здесь начинается урожай</span></div>
       </div>
+      <div class="farm-seed-picker" id="farmSeedPicker" hidden role="group" aria-label="Выберите, что посадить">
+        <span>Что посадим?</span>
+        <button type="button" data-seed="potato">🥔 Картофель</button>
+        <button type="button" data-seed="carrot">🥕 Морковь</button>
+        <button type="button" data-seed="cabbage">🥬 Капусту</button>
+        <button type="button" class="seed-picker-cancel" data-seed-cancel>Отмена</button>
+      </div>
       <div class="farm-plots" aria-label="Интерактивные грядки">
         <button class="farm-plot" type="button" data-plot-index="0" aria-label="Грядка 1: полить" title="Полить грядку">
           <img class="farm-plot-ground" src="assets/images/farm/land_1.png" alt="" draggable="false">
-          <img class="farm-plot-crop" src="assets/images/farm/DG_1.png" alt="Овощи на грядке" draggable="false">
+          <span class="farm-plot-crop" aria-label="Растение"></span>
           <img class="farm-plot-action" src="assets/images/farm/need_take.png" alt="" draggable="false">
         </button>
         <button class="farm-plot" type="button" data-plot-index="1" aria-label="Грядка 2: прополоть" title="Прополоть грядку">
           <img class="farm-plot-ground" src="assets/images/farm/land_2.png" alt="" draggable="false">
-          <img class="farm-plot-crop" src="assets/images/farm/LB_1.png" alt="Овощи на грядке" draggable="false">
+          <span class="farm-plot-crop" aria-label="Растение"></span>
           <img class="farm-plot-action" src="assets/images/farm/need_take.png" alt="" draggable="false">
         </button>
         <button class="farm-plot" type="button" data-plot-index="2" aria-label="Грядка 3: удобрить" title="Удобрить грядку">
           <img class="farm-plot-ground" src="assets/images/farm/land_1.png" alt="" draggable="false">
-          <img class="farm-plot-crop" src="assets/images/farm/DG_1.png" alt="Овощи на грядке" draggable="false">
+          <span class="farm-plot-crop" aria-label="Растение"></span>
           <img class="farm-plot-action" src="assets/images/farm/need_take.png" alt="" draggable="false">
         </button>
-        <img class="farm-yard-animal animal-1" src="assets/images/farm/farm_animal.png" alt="Животное на огороде" draggable="false">
-        <img class="farm-yard-animal animal-2" src="assets/images/farm/farm_animal2.png" alt="" draggable="false">
-        <img class="farm-yard-animal animal-3" src="assets/images/farm/farm_animal3.png" alt="" draggable="false">
-        <img class="farm-yard-animal animal-4" src="assets/images/farm/farm_animal4.png" alt="" draggable="false">
-        <img class="farm-yard-animal animal-5" src="assets/images/farm/farm_animal5.png" alt="" draggable="false">
-        <img class="farm-yard-animal animal-6" src="assets/images/farm/farm_animal6.png" alt="" draggable="false">
-        <img class="farm-yard-animal animal-7" src="assets/images/farm/farm_animal7.png" alt="" draggable="false">
+        <img class="farm-yard-animal animal-3" data-animation-clip="pig_full_front" src="assets/images/farm/farm_animal3.png" alt="Свинья" draggable="false">
       </div>
       <div class="location-heading"><div><span class="section-kicker">ЗЕМЛЯ И ТРУД</span><h2>🥕 Огород</h2></div><span class="location-tag">🌱 Сезонные посадки</span></div>
       <p>
@@ -403,6 +408,10 @@
         <div class="orchard-tree orchard-four"><i></i><b></b></div>
         <div class="orchard-path"></div><div class="loc-fence"></div>
         <div class="loc-sign"><small>СТАРЫЕ ДЕРЕВЬЯ</small><strong>Бабушкин сад</strong><span>Каждое дерево хранит историю</span></div>
+      </div>
+      <div class="location-animals" aria-label="Птицы в саду">
+        <img class="farm-yard-animal" data-animation-clip="chick_full_front" src="assets/images/farm/farm_animal.png" alt="Курица" draggable="false">
+        <img class="farm-yard-animal" data-animation-clip="chick_walk_front" src="assets/images/farm/farm_animal5.png" alt="Цыплёнок" draggable="false">
       </div>
       <div class="location-heading"><div><span class="section-kicker">ПЛОДОВЫЕ ДЕРЕВЬЯ</span><h2>🍎 Заброшенный сад</h2></div><span class="location-tag">🍏 Яблоки и груши</span></div>
       <p id="orchardDescription"></p>
@@ -429,6 +438,10 @@
       <button id="repairBarn">Починить сарай — 30 монет</button><p class="action-requirements">Навык: «Руки из плеч» снижает цену до 20 монет. Материалы: пиломатериалы ×2, крепёж ×1, краска ×1.</p>
       <button id="repairStill">Починить аппарат — 50 монет</button><p class="action-requirements">Навык: «Руки из плеч» снижает цену до 35 монет. Материалы: металлические заготовки ×1, крепёж ×1, инструменты ×1.</p>
 
+      <div class="location-animals" aria-label="Животные возле сарая">
+        <img class="farm-yard-animal" data-animation-clip="sheep_full_front" src="assets/images/farm/farm_animal4.png" alt="Овца" draggable="false">
+        <img class="farm-yard-animal" data-animation-clip="pig_walk_front" src="assets/images/farm/farm_animal7.png" alt="Поросёнок" draggable="false">
+      </div>
       <div class="production">
         <h3>Брожение</h3>
         <p id="productionStatus">Пока ничего не бродит.</p>
@@ -507,6 +520,6 @@
 
   </div>
 
-  <script type="module" src="js/game.js?v=10.10"></script>
+  <script type="module" src="js/game.js?v=10.11"></script>
 </body>
 </html>
