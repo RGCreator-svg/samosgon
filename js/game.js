@@ -653,8 +653,7 @@ $("#repairHouse")?.addEventListener("click", () => {
 // между панелями при инициализации экономики, поэтому #home не всегда их предок.
 document.addEventListener("click", (event) => {
   const button=event.target.closest("[data-house-part]");
-  if(!button || button.dataset.repairHandled==="true")return;
-  button.dataset.repairHandled="true";
+  if(!button)return;
   queueHomesteadRepair("house_"+button.dataset.housePart);
 });
 
