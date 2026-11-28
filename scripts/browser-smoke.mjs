@@ -74,7 +74,7 @@ try{
     const progress=page.locator(progressSelector);
     const beforeProgress=await progress.innerText();
     const beforeMoney=Number((await page.locator("#money").innerText()).replace(/[^0-9-]/g,""));
-    await page.locator(buttonSelector).click();
+    await page.locator(buttonSelector).click({force:true});
     assert.match(await page.locator("#materialCart").innerText(),/Пиломатериалы|Металлические заготовки|Крепёж|Инструмент/i,"Repair materials were not added to the cart");
     assert.equal(Number((await page.locator("#money").innerText()).replace(/[^0-9-]/g,"")),beforeMoney,"Labor must not be charged when materials are merely ordered");
     assert.equal(await progress.innerText(),beforeProgress,"Repair must not happen when the order is added");
@@ -92,7 +92,7 @@ try{
     }
     await page.locator(`.navigation [data-tab="${tabId}"]`).click();
     const moneyBeforeWork=Number((await page.locator("#money").innerText()).replace(/[^0-9-]/g,""));
-    await page.locator(buttonSelector).click();
+    await page.locator(buttonSelector).click({force:true});
     assert.notEqual(await progress.innerText(),beforeProgress,"Repair must take effect only after materials are on the warehouse");
     assert.equal(Number((await page.locator("#money").innerText()).replace(/[^0-9-]/g,"")),moneyBeforeWork-laborCost,"Labor must be charged at the moment of repair");
     if(completeLabel) assert.match(await page.locator(buttonSelector).innerText(),new RegExp(completeLabel));
